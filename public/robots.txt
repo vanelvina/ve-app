@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /checkout
+Disallow: /thank-you
+Disallow: /account
+
+Sitemap: https://vanelvina.com/sitemap.xml

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "b001",
+    "title": "Wear What Feels Like You",
+    "subtitle": "Discover our new Everyday Comfort Collection — designed for the modern woman who refuses to choose between style and comfort.",
+    "cta": "Shop Now",
+    "ctaLink": "/products",
+    "image": "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=1400&q=85",
+    "imageMobile": "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=800&q=85",
+    "badge": "New Collection",
+    "textColor": "light",
+    "align": "left"
+  },
+  {
+    "id": "b002",
+    "title": "40% Off Bestsellers",
+    "subtitle": "Our most-loved styles, now at incredible prices. Limited time offer — stock up on your favorites before they're gone.",
+    "cta": "Shop Sale",
+    "ctaLink": "/products?badge=bestseller",
+    "image": "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=1400&q=85",
+    "imageMobile": "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=800&q=85",
+    "badge": "Up to 40% Off",
+    "textColor": "dark",
+    "align": "right"
+  },
+  {
+    "id": "b003",
+    "title": "Comfort is Our Promise",
+    "subtitle": "Explore premium innerwear crafted with the finest fabrics — because every woman deserves to feel her absolute best, every single day.",
+    "cta": "Explore Collections",
+    "ctaLink": "/products?category=bras",
+    "image": "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=1400&q=85",
+    "imageMobile": "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=800&q=85",
+    "badge": null,
+    "textColor": "light",
+    "align": "center"
+  }
+]

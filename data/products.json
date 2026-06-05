@@ -1,0 +1,631 @@
+[
+  {
+    "id": "p001",
+    "slug": "everyday-soft-cotton-bra",
+    "name": "Everyday Soft Cotton Bra",
+    "brand": "Van Elvina",
+    "category": "Bras",
+    "subcategory": "T-Shirt Bras",
+    "description": "Experience all-day comfort with our Everyday Soft Cotton Bra. Crafted from ultra-soft pure cotton with a seamless inner lining, this bra provides gentle support without the underwire pressure. Perfect for work, home, or leisure.",
+    "highlights": [
+      "100% pure cotton inner lining",
+      "No-wire soft cup support",
+      "Seamless smooth finish under clothes",
+      "Adjustable straps with non-slip grips",
+      "Hook and eye closure with 3 settings"
+    ],
+    "fabric": "85% Cotton, 10% Nylon, 5% Spandex. Inner: 100% Pure Cotton",
+    "care": [
+      "Machine wash cold with similar colors",
+      "Use mild detergent, avoid bleach",
+      "Do not tumble dry",
+      "Lay flat to dry in shade",
+      "Warm iron if needed"
+    ],
+    "price": 599,
+    "originalPrice": 999,
+    "discount": 40,
+    "rating": 4.5,
+    "reviewCount": 234,
+    "badge": "bestseller",
+    "tags": ["cotton", "wireless", "comfortable", "everyday"],
+    "variants": [
+      {
+        "color": "Ivory White",
+        "colorHex": "#FDF8F5",
+        "sizes": ["30B", "32B", "32C", "34B", "34C", "36B", "36C", "38B"],
+        "images": [
+          "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=600&q=80",
+          "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&q=80",
+          "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=600&q=80"
+        ]
+      },
+      {
+        "color": "Dusty Rose",
+        "colorHex": "#D4748C",
+        "sizes": ["30B", "32B", "32C", "34B", "34C", "36B"],
+        "images": [
+          "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=600&q=80",
+          "https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=600&q=80"
+        ]
+      },
+      {
+        "color": "Midnight Black",
+        "colorHex": "#1a1a1a",
+        "sizes": ["32B", "32C", "34B", "34C", "36B", "36C"],
+        "images": [
+          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80",
+          "https://images.unsplash.com/photo-1612336307429-8a898d10e223?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 42,
+    "sku": "VE-BRA-001",
+    "deliveryDays": 3
+  },
+  {
+    "id": "p002",
+    "slug": "lace-trim-comfort-brief",
+    "name": "Lace Trim Comfort Brief",
+    "brand": "Van Elvina",
+    "category": "Panties",
+    "subcategory": "Briefs",
+    "description": "Elegance meets everyday comfort in our Lace Trim Comfort Brief. Features a delicate floral lace waistband paired with a breathable cotton gusset for all-day freshness.",
+    "highlights": [
+      "Delicate floral lace waistband",
+      "Breathable cotton gusset",
+      "Full coverage back panel",
+      "No-show flat seams",
+      "Elastic-free leg openings"
+    ],
+    "fabric": "70% Nylon, 25% Cotton, 5% Spandex. Gusset: 100% Cotton",
+    "care": [
+      "Hand wash recommended",
+      "Machine wash on delicate cycle in laundry bag",
+      "Use cold water only",
+      "Do not wring or twist",
+      "Dry flat in shade"
+    ],
+    "price": 249,
+    "originalPrice": 399,
+    "discount": 38,
+    "rating": 4.3,
+    "reviewCount": 187,
+    "badge": "new",
+    "tags": ["lace", "cotton", "full-coverage", "daily"],
+    "variants": [
+      {
+        "color": "Blush Pink",
+        "colorHex": "#FADADD",
+        "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
+        "images": [
+          "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80",
+          "https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=600&q=80"
+        ]
+      },
+      {
+        "color": "Ivory",
+        "colorHex": "#FFFFF0",
+        "sizes": ["XS", "S", "M", "L", "XL"],
+        "images": [
+          "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 89,
+    "sku": "VE-PAN-002",
+    "deliveryDays": 2
+  },
+  {
+    "id": "p003",
+    "slug": "seamless-push-up-bra",
+    "name": "Seamless Push-Up Bra",
+    "brand": "Van Elvina",
+    "category": "Bras",
+    "subcategory": "Push-Up Bras",
+    "description": "Achieve a perfectly lifted silhouette with our Seamless Push-Up Bra. Featuring contoured foam cups and multi-position straps, this bra disappears under any outfit while keeping you supported all day.",
+    "highlights": [
+      "Contoured foam cups for natural lift",
+      "Multi-position convertible straps",
+      "Seamless smooth finish",
+      "3-row hook and eye closure",
+      "Underwire support with comfort padding"
+    ],
+    "fabric": "90% Nylon, 10% Spandex. Lining: 100% Polyester",
+    "care": [
+      "Hand wash in lukewarm water",
+      "Use lingerie-specific detergent",
+      "Rinse thoroughly",
+      "Never wring the cups",
+      "Air dry, avoid direct sunlight"
+    ],
+    "price": 899,
+    "originalPrice": 1499,
+    "discount": 40,
+    "rating": 4.7,
+    "reviewCount": 312,
+    "badge": "bestseller",
+    "tags": ["push-up", "seamless", "underwire", "formal"],
+    "variants": [
+      {
+        "color": "Nude Beige",
+        "colorHex": "#D4A96A",
+        "sizes": ["30B", "32B", "32C", "32D", "34B", "34C", "34D", "36B", "36C"],
+        "images": [
+          "https://images.unsplash.com/photo-1571782742080-29e8dcf97f9d?w=600&q=80",
+          "https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=600&q=80"
+        ]
+      },
+      {
+        "color": "Classic Black",
+        "colorHex": "#0D0D0D",
+        "sizes": ["30B", "32B", "32C", "34B", "34C", "34D", "36B"],
+        "images": [
+          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 28,
+    "sku": "VE-BRA-003",
+    "deliveryDays": 3
+  },
+  {
+    "id": "p004",
+    "slug": "bamboo-hipster-panty",
+    "name": "Bamboo Hipster Panty",
+    "brand": "Van Elvina",
+    "category": "Panties",
+    "subcategory": "Hipsters",
+    "description": "Made from sustainably sourced bamboo fabric, our Hipster Panty offers incredible softness with natural antibacterial properties. Mid-rise fit with a wide waistband for all-day comfort.",
+    "highlights": [
+      "Sustainable bamboo fabric",
+      "Natural antibacterial properties",
+      "Mid-rise fit",
+      "Wide comfort waistband",
+      "Eco-friendly manufacturing"
+    ],
+    "fabric": "70% Bamboo Viscose, 25% Organic Cotton, 5% Spandex",
+    "care": [
+      "Machine wash cold",
+      "Use eco-friendly detergent",
+      "Tumble dry on low heat",
+      "Do not bleach",
+      "Iron on low if needed"
+    ],
+    "price": 329,
+    "originalPrice": 499,
+    "discount": 34,
+    "rating": 4.6,
+    "reviewCount": 156,
+    "badge": "new",
+    "tags": ["bamboo", "sustainable", "mid-rise", "eco"],
+    "variants": [
+      {
+        "color": "Sage Green",
+        "colorHex": "#87A878",
+        "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
+        "images": [
+          "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=600&q=80"
+        ]
+      },
+      {
+        "color": "Lavender",
+        "colorHex": "#C9B3D9",
+        "sizes": ["S", "M", "L", "XL"],
+        "images": [
+          "https://images.unsplash.com/photo-1557821552-17105176677c?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 64,
+    "sku": "VE-PAN-004",
+    "deliveryDays": 2
+  },
+  {
+    "id": "p005",
+    "slug": "wireless-sports-bra-active",
+    "name": "Wireless Active Sports Bra",
+    "brand": "Van Elvina",
+    "category": "Activewear",
+    "subcategory": "Sports Bras",
+    "description": "Engineered for movement, our Wireless Active Sports Bra provides medium-impact support with moisture-wicking fabric. Wide racerback straps and a longline cut keep you comfortable during yoga, pilates, or everyday workouts.",
+    "highlights": [
+      "Medium-impact support",
+      "Moisture-wicking quick-dry fabric",
+      "Wide racerback design",
+      "Longline cut for extra coverage",
+      "Removable soft cups"
+    ],
+    "fabric": "82% Polyamide, 18% Elastane. Lining: 88% Polyester, 12% Spandex",
+    "care": [
+      "Machine wash cold in laundry bag",
+      "Wash with similar colors",
+      "Do not use fabric softener",
+      "Lay flat to dry",
+      "Do not iron"
+    ],
+    "price": 749,
+    "originalPrice": 1199,
+    "discount": 38,
+    "rating": 4.4,
+    "reviewCount": 98,
+    "badge": "trending",
+    "tags": ["sports", "active", "wireless", "yoga"],
+    "variants": [
+      {
+        "color": "Coral Sunset",
+        "colorHex": "#FF6B6B",
+        "sizes": ["XS", "S", "M", "L", "XL"],
+        "images": [
+          "https://images.unsplash.com/photo-1518459031867-a89b944bffe4?w=600&q=80",
+          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80"
+        ]
+      },
+      {
+        "color": "Deep Navy",
+        "colorHex": "#1B2B4B",
+        "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
+        "images": [
+          "https://images.unsplash.com/photo-1554284126-aa88f22d8b74?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 35,
+    "sku": "VE-ACT-005",
+    "deliveryDays": 3
+  },
+  {
+    "id": "p006",
+    "slug": "modal-sleep-bralette",
+    "name": "Modal Sleep Bralette",
+    "brand": "Van Elvina",
+    "category": "Sleepwear",
+    "subcategory": "Bralettes",
+    "description": "Drift into comfort with our Modal Sleep Bralette. Made from ultra-soft TENCEL Modal, this wireless bralette features a relaxed fit perfect for sleeping, lounging, or everyday wear.",
+    "highlights": [
+      "TENCEL Modal for cloud-like softness",
+      "100% wireless comfort",
+      "Relaxed adjustable fit",
+      "Removable pads",
+      "Breathable & moisture-regulating"
+    ],
+    "fabric": "95% TENCEL Modal, 5% Elastane. Pads: 100% Polyester",
+    "care": [
+      "Machine wash on gentle cycle",
+      "Use cold water",
+      "Mild detergent only",
+      "Do not wring",
+      "Hang to air dry"
+    ],
+    "price": 499,
+    "originalPrice": 799,
+    "discount": 38,
+    "rating": 4.8,
+    "reviewCount": 421,
+    "badge": "bestseller",
+    "tags": ["modal", "sleep", "bralette", "wireless", "soft"],
+    "variants": [
+      {
+        "color": "Pearl White",
+        "colorHex": "#F5F5F0",
+        "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
+        "images": [
+          "https://images.unsplash.com/photo-1521510895919-46920266ddb3?w=600&q=80",
+          "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=600&q=80"
+        ]
+      },
+      {
+        "color": "Dusty Mauve",
+        "colorHex": "#BFA0A8",
+        "sizes": ["XS", "S", "M", "L", "XL"],
+        "images": [
+          "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 76,
+    "sku": "VE-SLP-006",
+    "deliveryDays": 2
+  },
+  {
+    "id": "p007",
+    "slug": "full-coverage-minimizer-bra",
+    "name": "Full Coverage Minimizer Bra",
+    "brand": "Van Elvina",
+    "category": "Bras",
+    "subcategory": "Minimizer Bras",
+    "description": "Our Full Coverage Minimizer Bra distributes bust volume evenly for a smooth, proportional silhouette. Wider straps, reinforced side panels, and full coverage cups provide exceptional all-day support.",
+    "highlights": [
+      "Full coverage wider cups",
+      "Wide padded shoulder straps",
+      "Reinforced side-support panels",
+      "Multi-section cups for volume distribution",
+      "Non-slip strap design"
+    ],
+    "fabric": "78% Nylon, 17% Polyester, 5% Elastane",
+    "care": [
+      "Hand wash preferred",
+      "Machine wash on delicates cycle in mesh bag",
+      "Cold water only",
+      "Lay flat to dry",
+      "Do not tumble dry or iron"
+    ],
+    "price": 1099,
+    "originalPrice": 1699,
+    "discount": 35,
+    "rating": 4.5,
+    "reviewCount": 203,
+    "badge": null,
+    "tags": ["minimizer", "full-coverage", "support", "plus-size"],
+    "variants": [
+      {
+        "color": "Skin Beige",
+        "colorHex": "#C8A882",
+        "sizes": ["34C", "34D", "34DD", "36C", "36D", "36DD", "38C", "38D", "38DD", "40C", "40D"],
+        "images": [
+          "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=600&q=80"
+        ]
+      },
+      {
+        "color": "Midnight Blue",
+        "colorHex": "#191970",
+        "sizes": ["34C", "34D", "36C", "36D", "38C", "38D"],
+        "images": [
+          "https://images.unsplash.com/photo-1612903462-44de5ee9f5db?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 22,
+    "sku": "VE-BRA-007",
+    "deliveryDays": 4
+  },
+  {
+    "id": "p008",
+    "slug": "thong-microfiber-seamless",
+    "name": "Seamless Microfiber Thong",
+    "brand": "Van Elvina",
+    "category": "Panties",
+    "subcategory": "Thongs",
+    "description": "Our Seamless Microfiber Thong offers a no-show solution under fitted outfits. Ultra-thin microfiber fabric with laser-cut edges ensure zero panty lines with maximum comfort.",
+    "highlights": [
+      "Laser-cut no-show edges",
+      "Ultra-thin microfiber fabric",
+      "Low-rise comfortable waistband",
+      "Invisible under tight clothing",
+      "Cotton-lined gusset"
+    ],
+    "fabric": "92% Nylon, 8% Spandex. Gusset: 100% Cotton",
+    "care": [
+      "Machine wash cold on gentle",
+      "Wash separately for first wash",
+      "No bleach or fabric softener",
+      "Air dry flat",
+      "Do not tumble dry"
+    ],
+    "price": 199,
+    "originalPrice": 349,
+    "discount": 43,
+    "rating": 4.2,
+    "reviewCount": 89,
+    "badge": "sale",
+    "tags": ["thong", "seamless", "microfiber", "no-show"],
+    "variants": [
+      {
+        "color": "Nude",
+        "colorHex": "#D4A982",
+        "sizes": ["XS", "S", "M", "L", "XL"],
+        "images": [
+          "https://images.unsplash.com/photo-1558618047-f4e90a930dc6?w=600&q=80"
+        ]
+      },
+      {
+        "color": "Black",
+        "colorHex": "#1C1C1C",
+        "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
+        "images": [
+          "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 120,
+    "sku": "VE-PAN-008",
+    "deliveryDays": 2
+  },
+  {
+    "id": "p009",
+    "slug": "maternity-nursing-bra",
+    "name": "Maternity & Nursing Bra",
+    "brand": "Van Elvina",
+    "category": "Maternity",
+    "subcategory": "Nursing Bras",
+    "description": "Designed for new mothers, our Maternity Nursing Bra features one-handed drop-down cups for easy nursing access. Soft, stretchy fabric accommodates changing sizes throughout pregnancy and nursing.",
+    "highlights": [
+      "One-handed nursing clip",
+      "Drop-down cup design",
+      "Flexible sizing band",
+      "Ultra-soft cotton-modal blend",
+      "Wide comfortable straps"
+    ],
+    "fabric": "60% Cotton, 35% Modal, 5% Elastane",
+    "care": [
+      "Machine wash warm",
+      "Use mild detergent",
+      "Lay flat to dry",
+      "Do not use bleach",
+      "Do not tumble dry on high heat"
+    ],
+    "price": 799,
+    "originalPrice": 1299,
+    "discount": 38,
+    "rating": 4.9,
+    "reviewCount": 178,
+    "badge": "bestseller",
+    "tags": ["maternity", "nursing", "cotton", "support"],
+    "variants": [
+      {
+        "color": "Soft White",
+        "colorHex": "#F8F8F8",
+        "sizes": ["S/M", "M/L", "L/XL", "XL/XXL"],
+        "images": [
+          "https://images.unsplash.com/photo-1571782742080-29e8dcf97f9d?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 31,
+    "sku": "VE-MAT-009",
+    "deliveryDays": 3
+  },
+  {
+    "id": "p010",
+    "slug": "padded-bralette-floral-lace",
+    "name": "Padded Floral Lace Bralette",
+    "brand": "Van Elvina",
+    "category": "Bras",
+    "subcategory": "Bralettes",
+    "description": "Gorgeous floral lace meets delicate comfort in our Padded Floral Bralette. Removable pads, a racerback design, and stretch lace fabric make this the perfect everyday bralette for smaller cup sizes.",
+    "highlights": [
+      "Beautiful floral lace design",
+      "Removable padding inserts",
+      "Racerback for versatile styling",
+      "Stretch lace for comfort fit",
+      "No underwire freedom"
+    ],
+    "fabric": "90% Nylon, 10% Elastane Lace. Lining: 95% Polyester, 5% Elastane",
+    "care": [
+      "Hand wash only",
+      "Cold water with gentle soap",
+      "Rinse carefully",
+      "Do not wring",
+      "Air dry flat away from sunlight"
+    ],
+    "price": 549,
+    "originalPrice": 849,
+    "discount": 35,
+    "rating": 4.6,
+    "reviewCount": 267,
+    "badge": "new",
+    "tags": ["lace", "bralette", "padded", "floral", "style"],
+    "variants": [
+      {
+        "color": "Romantic Rose",
+        "colorHex": "#C06080",
+        "sizes": ["XS", "S", "M", "L"],
+        "images": [
+          "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=600&q=80",
+          "https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=600&q=80"
+        ]
+      },
+      {
+        "color": "Ink Black",
+        "colorHex": "#0D0D0D",
+        "sizes": ["XS", "S", "M", "L", "XL"],
+        "images": [
+          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 58,
+    "sku": "VE-BRA-010",
+    "deliveryDays": 2
+  },
+  {
+    "id": "p011",
+    "slug": "shapewear-high-waist-brief",
+    "name": "High-Waist Shaping Brief",
+    "brand": "Van Elvina",
+    "category": "Shapewear",
+    "subcategory": "Shaping Briefs",
+    "description": "Smooth and shape your silhouette effortlessly with our High-Waist Shaping Brief. Firm control at the waist and tummy with gentle shaping through the hips and thighs.",
+    "highlights": [
+      "Firm tummy and waist control",
+      "Anti-slip silicone waistband",
+      "Breathable power mesh panels",
+      "Full seat coverage",
+      "Open-bust design"
+    ],
+    "fabric": "78% Nylon, 22% Elastane. Lining: 100% Cotton",
+    "care": [
+      "Hand wash in cold water",
+      "Do not machine wash",
+      "Use mild soap",
+      "Squeeze gently, do not wring",
+      "Hang to air dry"
+    ],
+    "price": 899,
+    "originalPrice": 1399,
+    "discount": 36,
+    "rating": 4.3,
+    "reviewCount": 134,
+    "badge": null,
+    "tags": ["shapewear", "control", "high-waist", "smooth"],
+    "variants": [
+      {
+        "color": "Beige",
+        "colorHex": "#C8A882",
+        "sizes": ["S", "M", "L", "XL", "XXL", "3XL"],
+        "images": [
+          "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 45,
+    "sku": "VE-SHA-011",
+    "deliveryDays": 3
+  },
+  {
+    "id": "p012",
+    "slug": "thermal-inner-slip-vest",
+    "name": "Thermal Inner Slip Vest",
+    "brand": "Van Elvina",
+    "category": "Thermals",
+    "subcategory": "Vests",
+    "description": "Stay warm without the bulk in our Thermal Inner Slip Vest. Ultra-thin thermal knit fabric traps body heat while remaining completely invisible under your outfit.",
+    "highlights": [
+      "Ultra-thin heat-trapping knit",
+      "Invisible under clothing",
+      "Anti-static finish",
+      "Flat-lock seams for comfort",
+      "Flattering fitted silhouette"
+    ],
+    "fabric": "50% Merino Wool, 40% Polyester, 10% Elastane",
+    "care": [
+      "Machine wash on wool cycle",
+      "Cold water only",
+      "Wool-specific detergent",
+      "Do not tumble dry",
+      "Reshape and dry flat"
+    ],
+    "price": 699,
+    "originalPrice": 999,
+    "discount": 30,
+    "rating": 4.4,
+    "reviewCount": 72,
+    "badge": null,
+    "tags": ["thermal", "inner", "vest", "winter"],
+    "variants": [
+      {
+        "color": "Natural Grey",
+        "colorHex": "#ADADAD",
+        "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
+        "images": [
+          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80"
+        ]
+      }
+    ],
+    "inStock": true,
+    "stockCount": 18,
+    "sku": "VE-THM-012",
+    "deliveryDays": 4
+  }
+]

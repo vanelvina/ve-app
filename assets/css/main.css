@@ -1,0 +1,311 @@
+/* ============================================================
+   Van Elvina – Global CSS
+   Design system: Cormorant Garamond (serif) + DM Sans (body)
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ── */
+@layer base {
+  :root {
+    --color-primary: #6B2D4E;
+    --color-primary-light: #D4748C;
+    --color-accent: #C9A96E;
+    --color-bg: #FDF8F5;
+    --color-text: #2C2C2C;
+    --navbar-height: 64px;
+    --transition-fast: 150ms ease;
+    --transition-base: 250ms ease;
+    --transition-slow: 400ms ease;
+  }
+
+  html {
+    @apply scroll-smooth antialiased;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+
+  body {
+    @apply font-sans text-charcoal bg-warm-ivory;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif leading-tight;
+  }
+
+  a {
+    @apply transition-colors duration-250;
+  }
+
+  img {
+    @apply max-w-full;
+  }
+
+  input, select, textarea, button {
+    @apply font-sans;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-light-gray;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-mid-gray rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-charcoal;
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-dusty-rose rounded;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-rose-blush text-deep-plum;
+  }
+}
+
+/* ── Components ── */
+@layer components {
+  /* Page layout */
+  .page-container {
+    @apply max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-padding {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  /* Section headings */
+  .section-heading {
+    @apply text-center mb-10;
+  }
+  .section-heading h2 {
+    @apply text-heading-lg md:text-heading-xl text-deep-plum font-serif mb-2;
+  }
+  .section-heading p {
+    @apply text-mid-gray font-sans max-w-xl mx-auto text-sm md:text-base;
+  }
+
+  /* Divider */
+  .ornament-divider {
+    @apply flex items-center gap-3 justify-center my-4;
+  }
+  .ornament-divider::before,
+  .ornament-divider::after {
+    content: '';
+    @apply flex-1 h-px bg-border-gray max-w-[60px];
+  }
+
+  /* Product grid */
+  .product-grid {
+    @apply grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5;
+  }
+
+  /* Skeleton animation */
+  .skeleton {
+    @apply bg-shimmer-gradient bg-[length:200%_100%] animate-shimmer rounded;
+  }
+
+  /* Sticky add-to-cart bar (mobile) */
+  .sticky-add-to-cart {
+    @apply fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border-gray px-4 py-3 flex items-center gap-3;
+  }
+
+  /* Badge styles */
+  .badge-sale {
+    @apply bg-red-500 text-white text-[10px] font-ui font-semibold px-2 py-0.5 rounded;
+  }
+  .badge-new {
+    @apply bg-deep-plum text-white text-[10px] font-ui font-semibold px-2 py-0.5 rounded;
+  }
+  .badge-bestseller {
+    @apply bg-soft-gold text-white text-[10px] font-ui font-semibold px-2 py-0.5 rounded;
+  }
+
+  /* Input base */
+  .input-base {
+    @apply w-full px-4 py-2.5 border border-border-gray rounded-lg font-sans text-sm text-charcoal
+           placeholder-mid-gray bg-white
+           focus:outline-none focus:border-dusty-rose focus:ring-2 focus:ring-dusty-rose/20
+           transition-all duration-250;
+  }
+
+  /* Button base */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-deep-plum text-white text-sm font-ui font-medium tracking-wide rounded-lg
+           hover:bg-plum-800 active:scale-[0.98]
+           transition-all duration-250 cursor-pointer select-none;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-white text-deep-plum text-sm font-ui font-medium tracking-wide rounded-lg
+           border-2 border-deep-plum
+           hover:bg-rose-blush active:scale-[0.98]
+           transition-all duration-250 cursor-pointer select-none;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2
+           text-charcoal text-sm font-ui font-medium
+           hover:text-deep-plum hover:bg-rose-blush rounded-lg
+           transition-all duration-250 cursor-pointer select-none;
+  }
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-10 h-10 rounded-full
+           hover:bg-rose-blush text-charcoal hover:text-deep-plum
+           transition-all duration-250 cursor-pointer;
+  }
+
+  /* Card base */
+  .card {
+    @apply bg-white rounded-xl shadow-card overflow-hidden transition-shadow duration-350
+           hover:shadow-card-hover;
+  }
+
+  /* Overlay backdrop */
+  .overlay-backdrop {
+    @apply fixed inset-0 z-40 bg-charcoal/50 backdrop-blur-sm animate-fade-in;
+  }
+
+  /* Filter chip */
+  .filter-chip {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5
+           text-xs font-ui font-medium rounded-full border border-border-gray
+           cursor-pointer transition-all duration-200
+           hover:border-dusty-rose hover:text-dusty-rose;
+  }
+  .filter-chip.active {
+    @apply bg-deep-plum text-white border-deep-plum;
+  }
+
+  /* Quantity selector */
+  .qty-btn {
+    @apply w-8 h-8 flex items-center justify-center border border-border-gray rounded
+           text-charcoal hover:bg-rose-blush hover:border-dusty-rose
+           transition-colors duration-200 text-lg leading-none cursor-pointer;
+  }
+
+  /* Star rating */
+  .star-filled {
+    color: #C9A96E;
+  }
+  .star-empty {
+    color: #E0E0E0;
+  }
+
+  /* Wishlist heart */
+  .wishlist-btn {
+    @apply absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center
+           rounded-full bg-white/90 backdrop-blur-sm shadow-soft
+           transition-all duration-250
+           hover:scale-110 hover:bg-rose-blush;
+  }
+
+  /* Progress steps */
+  .step-indicator {
+    @apply flex items-center;
+  }
+  .step-dot {
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-xs font-ui font-semibold
+           border-2 transition-all duration-350;
+  }
+  .step-dot.active {
+    @apply bg-deep-plum border-deep-plum text-white;
+  }
+  .step-dot.completed {
+    @apply bg-green-500 border-green-500 text-white;
+  }
+  .step-dot.pending {
+    @apply bg-white border-border-gray text-mid-gray;
+  }
+  .step-line {
+    @apply flex-1 h-0.5 bg-border-gray mx-1;
+  }
+  .step-line.completed {
+    @apply bg-green-500;
+  }
+}
+
+/* ── Utilities ── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  .glass {
+    @apply bg-white/80 backdrop-blur-md;
+  }
+
+  .text-gradient-plum {
+    @apply bg-gradient-plum bg-clip-text text-transparent;
+  }
+
+  .no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ── Page Transitions ── */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* ── Swiper overrides ── */
+.swiper-pagination-bullet {
+  background: #D4748C !important;
+  opacity: 0.4;
+}
+.swiper-pagination-bullet-active {
+  opacity: 1 !important;
+  background: #6B2D4E !important;
+}
+.swiper-button-next,
+.swiper-button-prev {
+  color: #6B2D4E !important;
+}

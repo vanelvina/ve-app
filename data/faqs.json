@@ -1,0 +1,62 @@
+[
+  {
+    "id": "f001",
+    "question": "How do I find my correct bra size?",
+    "answer": "To find your correct bra size, measure your band size (ribcage just below bust) and your bust size (fullest part of bust). The difference between bust and band gives your cup size: 1 inch = A, 2 inches = B, 3 inches = C, 4 inches = D. We also offer a free size guide in every product page with detailed measurement instructions.",
+    "category": "Sizing"
+  },
+  {
+    "id": "f002",
+    "question": "What is your return and exchange policy?",
+    "answer": "We offer a 30-day easy return and exchange policy on all unworn, unwashed items with original tags attached. Intimate apparel (panties, shapewear) cannot be returned for hygiene reasons unless defective. Exchange for a different size is always free. To initiate a return, visit your Order History page and select 'Return/Exchange'.",
+    "category": "Returns"
+  },
+  {
+    "id": "f003",
+    "question": "How long does delivery take?",
+    "answer": "Standard delivery takes 3-5 business days across India. Express delivery (1-2 days) is available in metro cities for an additional ₹99. Orders above ₹999 get free standard shipping. You'll receive a tracking link via SMS and email once your order is dispatched.",
+    "category": "Shipping"
+  },
+  {
+    "id": "f004",
+    "question": "Are Van Elvina products safe for sensitive skin?",
+    "answer": "Yes! All our products are OEKO-TEX certified, meaning they're tested for harmful substances and safe for sensitive skin. Our cotton and modal range is especially recommended for sensitive skin types. The cotton gusset in all our panties provides an additional layer of skin-friendly comfort.",
+    "category": "Product"
+  },
+  {
+    "id": "f005",
+    "question": "Do you offer plus sizes?",
+    "answer": "Absolutely! Van Elvina is committed to inclusive sizing. Our bra range goes from 28A to 44H, and our panties range from XS to 4XL. We're continuously expanding our size range. If you can't find your size, you can join our waitlist and we'll notify you when it's available.",
+    "category": "Sizing"
+  },
+  {
+    "id": "f006",
+    "question": "How should I care for my lingerie to make it last longer?",
+    "answer": "For maximum longevity: hand wash or use a lingerie bag in the washing machine on a gentle cycle. Use cold water and mild detergent. Never put bras in the dryer — heat damages the elastic and foam. Rotate your bras (don't wear the same bra two days in a row) to allow the elastic to recover. Store bras with cups stacked, not folded.",
+    "category": "Care"
+  },
+  {
+    "id": "f007",
+    "question": "Can I track my order?",
+    "answer": "Yes! Once your order is dispatched, you'll receive an SMS and email with a tracking link. You can also track your order by visiting the 'My Orders' section in your account, or by using the 'Track Order' feature on our website with your order number and registered phone number.",
+    "category": "Shipping"
+  },
+  {
+    "id": "f008",
+    "question": "What payment methods do you accept?",
+    "answer": "We accept all major payment methods: UPI (Google Pay, PhonePe, Paytm, BHIM), Credit/Debit Cards (Visa, Mastercard, RuPay, Amex), Net Banking, EMI (no-cost EMI available on orders above ₹3,000), and Cash on Delivery (available in select pin codes).",
+    "category": "Payment"
+  },
+  {
+    "id": "f009",
+    "question": "Do you have a loyalty/rewards program?",
+    "answer": "Yes! Our 'Elvina Rewards' program lets you earn points on every purchase (1 point per ₹10 spent). Points can be redeemed for discounts on future orders. You also get bonus points for referrals, reviews, and birthday rewards. Premium members (₹5,000+ annual spend) get early access to sales and free express shipping.",
+    "category": "Loyalty"
+  },
+  {
+    "id": "f010",
+    "question": "What is the difference between wired and wireless bras?",
+    "answer": "Wired bras have an underwire that provides structure and lift, making them ideal for larger cup sizes or formal occasions. Wireless bras rely on fabric construction, seaming, and padding for support — they're more comfortable for everyday wear and highly recommended for home or casual use. Both styles have their place in every wardrobe, and Van Elvina offers premium options in both categories.",
+    "category": "Product"
+  }
+]
