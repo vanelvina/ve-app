@@ -662,7 +662,7 @@ const _inlineRuntimeConfig = {
   "public": {
     "appName": "Van Elvina",
     "appUrl": "https://vanelvina.com",
-    "apiBase": "http://localhost:5000/api"
+    "apiBase": "https://ve-api-8pml.onrender.com/api"
   }
 };
 const envOptions = {

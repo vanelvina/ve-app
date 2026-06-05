@@ -607,7 +607,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "db4505b0-94f9-4ab7-99ac-cdc866938454",
+    "buildId": "d0d48158-adac-4f42-8bea-53b81b8cfac9",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -637,7 +637,7 @@ const _inlineRuntimeConfig = {
   "public": {
     "appName": "Van Elvina",
     "appUrl": "https://vanelvina.com",
-    "apiBase": "http://localhost:5000/api"
+    "apiBase": "https://ve-api.onrender.com/api"
   }
 };
 const envOptions = {

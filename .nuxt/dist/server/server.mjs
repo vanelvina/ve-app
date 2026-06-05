@@ -947,7 +947,7 @@ const plugins = [
 ];
 const layouts = {
   checkout: defineAsyncComponent(() => import("./_nuxt/checkout-xRwOV1QM.js").then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import("./_nuxt/default-BuuMG74z.js").then((m) => m.default || m))
+  default: defineAsyncComponent(() => import("./_nuxt/default-CXWegLGN.js").then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({

@@ -955,7 +955,7 @@ const plugins = [
 ];
 const layouts = {
   checkout: defineAsyncComponent(() => import('./checkout-xRwOV1QM.mjs').then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import('./default-BuuMG74z.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-CXWegLGN.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
