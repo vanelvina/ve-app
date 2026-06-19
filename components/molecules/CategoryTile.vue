@@ -1,31 +1,29 @@
 <template>
   <NuxtLink
     :to="`/products?category=${category.slug}`"
-    class="group relative block overflow-hidden rounded-xl aspect-square bg-light-gray shadow-card hover:shadow-card-hover transition-all duration-350"
+    class="group flex flex-col items-center text-center p-2 transition-all duration-300"
     :aria-label="`Shop ${category.name}`"
   >
-    <img
-      :src="category.image"
-      :alt="category.name"
-      class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-      loading="lazy"
-      width="300"
-      height="300"
-    />
-    <!-- Gradient overlay -->
-    <div class="absolute inset-0 bg-gradient-to-t from-deep-plum/70 via-deep-plum/20 to-transparent" />
-
-    <!-- Content -->
-    <div class="absolute bottom-0 left-0 right-0 p-4">
-      <h3 class="font-serif text-white text-lg font-semibold leading-tight">{{ category.name }}</h3>
-      <p class="text-rose-blush/80 text-xs font-ui mt-0.5">{{ category.productCount }}+ styles</p>
+    <!-- Circular image container with decorative ring -->
+    <div class="category-ring-container w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-white shadow-premium overflow-hidden bg-white">
+      <img
+        :src="category.image"
+        :alt="category.name"
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        loading="lazy"
+        width="100"
+        height="100"
+      />
     </div>
 
-    <!-- Arrow icon -->
-    <div class="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-      <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-      </svg>
+    <!-- Category Label Content -->
+    <div class="mt-2 space-y-0.5">
+      <h3 class="font-sans text-charcoal group-hover:text-deep-plum text-xs sm:text-sm font-bold leading-tight transition-colors">
+        {{ category.name }}
+      </h3>
+      <p class="text-dusty-rose text-[9px] uppercase tracking-wider font-bold">
+        {{ category.productCount || 0 }}+ Styles
+      </p>
     </div>
   </NuxtLink>
 </template>

@@ -26,6 +26,18 @@
       <!-- Brand USP -->
       <SectionBrandUSP v-else-if="widget.key === 'usp'" :widget="widget" />
 
+      <!-- Promo Cards Grid -->
+      <SectionPromoGrid v-else-if="widget.type === 'promo-grid'" :widget="widget" />
+
+      <!-- Curated Collection Tabs -->
+      <SectionCollectionTabs v-else-if="widget.type === 'collection-tabs'" :widget="widget" />
+
+      <!-- Fit Sizing Calculator -->
+      <SectionFitCalculator v-else-if="widget.type === 'fit-calculator'" :widget="widget" />
+
+      <!-- Special Combos Offers Slider -->
+      <SectionOffersSlider v-else-if="widget.type === 'offers-slider'" :widget="widget" />
+
       <!-- Custom Banners -->
       <section v-else-if="widget.type === 'banner'" class="section-padding bg-warm-ivory">
         <div class="page-container">

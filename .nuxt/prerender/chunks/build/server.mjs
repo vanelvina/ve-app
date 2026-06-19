@@ -1,34 +1,34 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, inject, getCurrentInstance, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, defineAsyncComponent, computed, unref, shallowReactive, ref, Suspense, Fragment, useSSRContext, createApp, mergeProps, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, toRef, getCurrentScope, withCtx, nextTick, isReadonly, toRaw, isRef, isShallow, isReactive } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/vue/index.mjs';
-import { $fetch } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/ofetch/dist/node.mjs';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, inject, getCurrentInstance, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, defineAsyncComponent, computed, unref, shallowReactive, ref, Suspense, Fragment, useSSRContext, createApp, mergeProps, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, toRef, getCurrentScope, withCtx, nextTick, isReadonly, toRaw, isRef, isShallow, isReactive } from 'file://C:/Projects/Website/ve-app/node_modules/vue/index.mjs';
+import { $fetch } from 'file://C:/Projects/Website/ve-app/node_modules/ofetch/dist/node.mjs';
 import { b as baseURL } from '../_/renderer.mjs';
-import { createHooks } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/hookable/dist/index.mjs';
-import { getContext, executeAsync } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unctx/dist/index.mjs';
-import { sanitizeStatusCode, createError as createError$1 } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/h3/dist/index.mjs';
-import { createPinia, setActivePinia, shouldHydrate } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/pinia/dist/pinia.prod.cjs';
-import { defu } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/defu/dist/defu.mjs';
-import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/vue-router/vue-router.node.mjs';
-import { parseURL, encodePath, decodePath, hasProtocol, isScriptProtocol, joinURL, withQuery } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/ufo/dist/index.mjs';
-import { ssrRenderAttrs, ssrInterpolate, ssrRenderSuspense, ssrRenderComponent, ssrRenderVNode } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/vue/server-renderer/index.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/vue-bundle-renderer/dist/runtime.mjs';
+import { createHooks } from 'file://C:/Projects/Website/ve-app/node_modules/hookable/dist/index.mjs';
+import { getContext, executeAsync } from 'file://C:/Projects/Website/ve-app/node_modules/unctx/dist/index.mjs';
+import { sanitizeStatusCode, createError as createError$1 } from 'file://C:/Projects/Website/ve-app/node_modules/h3/dist/index.mjs';
+import { createPinia, setActivePinia, shouldHydrate } from 'file://C:/Projects/Website/ve-app/node_modules/pinia/dist/pinia.prod.cjs';
+import { defu } from 'file://C:/Projects/Website/ve-app/node_modules/defu/dist/defu.mjs';
+import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'file://C:/Projects/Website/ve-app/node_modules/vue-router/vue-router.node.mjs';
+import { parseURL, encodePath, decodePath, hasProtocol, isScriptProtocol, joinURL, withQuery } from 'file://C:/Projects/Website/ve-app/node_modules/ufo/dist/index.mjs';
+import { ssrRenderAttrs, ssrInterpolate, ssrRenderSuspense, ssrRenderComponent, ssrRenderVNode } from 'file://C:/Projects/Website/ve-app/node_modules/vue/server-renderer/index.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import '../_/nitro.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/destr/dist/index.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/node-mock-http/dist/index.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unstorage/dist/index.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unstorage/drivers/fs.mjs';
-import 'file:///C:/Project/Van%20Elvina/van-elvina/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unstorage/drivers/fs-lite.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/ohash/dist/index.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/klona/dist/index.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/scule/dist/index.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/radix3/dist/index.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/destr/dist/index.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/node-mock-http/dist/index.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/unstorage/dist/index.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/unstorage/drivers/fs.mjs';
+import 'file:///C:/Projects/Website/ve-app/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js';
+import 'file://C:/Projects/Website/ve-app/node_modules/unstorage/drivers/fs-lite.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/ohash/dist/index.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/klona/dist/index.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/scule/dist/index.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/radix3/dist/index.mjs';
 import 'node:fs';
 import 'node:url';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/pathe/dist/index.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unhead/dist/server.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/pathe/dist/index.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/unhead/dist/server.mjs';
 import 'node:async_hooks';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/devalue/index.js';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unhead/dist/plugins.mjs';
-import 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unhead/dist/utils.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/devalue/index.js';
+import 'file://C:/Projects/Website/ve-app/node_modules/unhead/dist/plugins.mjs';
+import 'file://C:/Projects/Website/ve-app/node_modules/unhead/dist/utils.mjs';
 
 if (!globalThis.$fetch) {
   globalThis.$fetch = $fetch.create({
@@ -467,45 +467,45 @@ const _routes = [
     name: "cart",
     path: "/cart",
     meta: __nuxt_page_meta$3 || {},
-    component: () => import('./cart-BX786bpQ.mjs')
+    component: () => import('./cart-Dm2Lg-GX.mjs')
   },
   {
     name: "index",
     path: "/",
-    component: () => import('./index-CHJoN6ig.mjs')
+    component: () => import('./index-BSTFIpY8.mjs')
   },
   {
     name: "checkout",
     path: "/checkout",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./checkout-iNyVp0hM.mjs')
+    component: () => import('./checkout-gD7HNZXi.mjs')
   },
   {
     name: "thank-you",
     path: "/thank-you",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./thank-you-9ragqLsk.mjs')
+    component: () => import('./thank-you-CDB3tjlM.mjs')
   },
   {
     name: "admin-login",
     path: "/admin/login",
-    component: () => import('./login-B5B79eQ7.mjs')
+    component: () => import('./login-Dr1xYFwv.mjs')
   },
   {
     name: "products",
     path: "/products",
-    component: () => import('./index-DfXBC4Ho.mjs')
+    component: () => import('./index-CcEzYCUY.mjs')
   },
   {
     name: "admin-dashboard",
     path: "/admin/dashboard",
     meta: __nuxt_page_meta || {},
-    component: () => import('./dashboard-DvirsIU6.mjs')
+    component: () => import('./dashboard-Cu_3xExl.mjs')
   },
   {
     name: "products-slug",
     path: "/products/:slug()",
-    component: () => import('./_slug_-DuqSRrbs.mjs')
+    component: () => import('./_slug_-CyGEnUrd.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -966,8 +966,8 @@ const plugins = [
   pwa_icons_plugin_C24GcIKjcI2zsa8A86om0L2LZjx1chWtzYxD11T7Txg
 ];
 const layouts = {
-  checkout: defineAsyncComponent(() => import('./checkout-xRwOV1QM.mjs').then((m) => m.default || m)),
-  default: defineAsyncComponent(() => import('./default-CXWegLGN.mjs').then((m) => m.default || m))
+  checkout: defineAsyncComponent(() => import('./checkout-Dg75qWQY.mjs').then((m) => m.default || m)),
+  default: defineAsyncComponent(() => import('./default-B0ZgPjG7.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -1204,6 +1204,32 @@ function normalizeSlot(slot, data) {
   const slotContent = slot(data);
   return slotContent.length === 1 ? h(slotContent[0]) : h(Fragment, void 0, slotContent);
 }
+const _sfc_main$3 = /* @__PURE__ */ defineComponent({
+  __name: "PwaInstallPrompt",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const showPrompt = ref(false);
+    const isIOS = ref(false);
+    ref(null);
+    return (_ctx, _push, _parent, _attrs) => {
+      if (unref(showPrompt)) {
+        _push(`<div${ssrRenderAttrs(mergeProps({
+          class: "fixed bottom-4 left-4 right-4 z-50 bg-white rounded-2xl border border-rose-blush/30 shadow-modal p-5 md:max-w-sm md:left-auto md:right-6 animate-fade-in flex flex-col space-y-4",
+          role: "dialog",
+          "aria-label": "Install App Prompt"
+        }, _attrs))} data-v-877b54f4><button class="absolute top-3 right-3 text-charcoal/40 hover:text-charcoal transition-colors p-1" aria-label="Dismiss app install prompt" data-v-877b54f4><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" data-v-877b54f4><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" data-v-877b54f4></path></svg></button><div class="flex items-center gap-3" data-v-877b54f4><div class="w-12 h-12 rounded-xl bg-deep-plum flex items-center justify-center text-white font-serif font-bold text-lg shadow-soft shrink-0" data-v-877b54f4> VE </div><div data-v-877b54f4><h4 class="font-sans font-bold text-charcoal text-sm" data-v-877b54f4>Install Van Elvina App</h4><p class="text-xs text-charcoal/60 leading-normal mt-0.5" data-v-877b54f4> Add to home screen for a premium mobile-first shopping experience. </p></div></div><div class="pt-1" data-v-877b54f4>`);
+        if (unref(isIOS)) {
+          _push(`<div class="bg-rose-blush/30 rounded-xl p-3 border border-rose-blush/50 text-[11px] text-charcoal/80 leading-relaxed" data-v-877b54f4><p class="font-semibold text-deep-plum mb-1" data-v-877b54f4>To install on iOS Safari:</p><ol class="list-decimal pl-4 space-y-1" data-v-877b54f4><li data-v-877b54f4>Tap the share icon <strong class="bg-white/80 px-1 py-0.5 rounded border border-rose-blush" data-v-877b54f4>Share 📤</strong> at the bottom.</li><li data-v-877b54f4>Scroll down and select <strong class="bg-white/80 px-1 py-0.5 rounded border border-rose-blush" data-v-877b54f4>Add to Home Screen ➕</strong>.</li></ol></div>`);
+        } else {
+          _push(`<button class="w-full py-2.5 bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-ui font-semibold uppercase tracking-wider shadow-sm transition-all duration-250 flex items-center justify-center gap-1.5" data-v-877b54f4><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" data-v-877b54f4><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" data-v-877b54f4></path></svg> Install Now </button>`);
+        }
+        _push(`</div></div>`);
+      } else {
+        _push(`<!---->`);
+      }
+    };
+  }
+});
 const _export_sfc = (sfc, props) => {
   const target = sfc.__vccOpts || sfc;
   for (const [key, val] of props) {
@@ -1211,11 +1237,20 @@ const _export_sfc = (sfc, props) => {
   }
   return target;
 };
+const _sfc_setup$3 = _sfc_main$3.setup;
+_sfc_main$3.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/organisms/PwaInstallPrompt.vue");
+  return _sfc_setup$3 ? _sfc_setup$3(props, ctx) : void 0;
+};
+const __nuxt_component_2 = /* @__PURE__ */ _export_sfc(_sfc_main$3, [["__scopeId", "data-v-877b54f4"]]);
 const _sfc_main$2 = {};
 function _sfc_ssrRender(_ctx, _push, _parent, _attrs) {
   const _component_NuxtLayout = __nuxt_component_0;
   const _component_NuxtPage = __nuxt_component_1;
-  _push(ssrRenderComponent(_component_NuxtLayout, _attrs, {
+  const _component_PwaInstallPrompt = __nuxt_component_2;
+  _push(`<div${ssrRenderAttrs(_attrs)}>`);
+  _push(ssrRenderComponent(_component_NuxtLayout, null, {
     default: withCtx((_, _push2, _parent2, _scopeId) => {
       if (_push2) {
         _push2(ssrRenderComponent(_component_NuxtPage, null, null, _parent2, _scopeId));
@@ -1227,6 +1262,8 @@ function _sfc_ssrRender(_ctx, _push, _parent, _attrs) {
     }),
     _: 1
   }, _parent));
+  _push(ssrRenderComponent(_component_PwaInstallPrompt, null, null, _parent));
+  _push(`</div>`);
 }
 const _sfc_setup$2 = _sfc_main$2.setup;
 _sfc_main$2.setup = (props, ctx) => {

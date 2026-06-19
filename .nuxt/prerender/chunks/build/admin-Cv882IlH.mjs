@@ -1,4 +1,4 @@
-import { defineStore } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/pinia/dist/pinia.prod.cjs';
+import { defineStore } from 'file://C:/Projects/Website/ve-app/node_modules/pinia/dist/pinia.prod.cjs';
 import { n as navigateTo, b as useRuntimeConfig } from './server.mjs';
 
 const useAdminStore = defineStore("admin", {

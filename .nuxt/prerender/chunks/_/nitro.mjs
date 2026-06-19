@@ -1,23 +1,23 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/h3/dist/index.mjs';
-import destr from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/destr/dist/index.mjs';
-import { createHooks } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/hookable/dist/index.mjs';
-import { createFetch, Headers as Headers$1 } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/ofetch/dist/node.mjs';
-import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/node-mock-http/dist/index.mjs';
-import { parseURL, withoutBase, joinURL, getQuery, withQuery, decodePath, withLeadingSlash, withoutTrailingSlash } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/ufo/dist/index.mjs';
-import { createStorage, prefixStorage } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unstorage/dist/index.mjs';
-import unstorage_47drivers_47fs from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unstorage/drivers/fs.mjs';
-import file_58_47_47_47C_58_47Project_47Van_3720Elvina_47van_45elvina_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js from 'file:///C:/Project/Van%20Elvina/van-elvina/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js';
-import unstorage_47drivers_47fs_45lite from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unstorage/drivers/fs-lite.mjs';
-import { digest } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/ohash/dist/index.mjs';
-import { klona } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/klona/dist/index.mjs';
-import defu, { defuFn } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/defu/dist/defu.mjs';
-import { snakeCase } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/scule/dist/index.mjs';
-import { toRouteMatcher, createRouter } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/radix3/dist/index.mjs';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus } from 'file://C:/Projects/Website/ve-app/node_modules/h3/dist/index.mjs';
+import destr from 'file://C:/Projects/Website/ve-app/node_modules/destr/dist/index.mjs';
+import { createHooks } from 'file://C:/Projects/Website/ve-app/node_modules/hookable/dist/index.mjs';
+import { createFetch, Headers as Headers$1 } from 'file://C:/Projects/Website/ve-app/node_modules/ofetch/dist/node.mjs';
+import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file://C:/Projects/Website/ve-app/node_modules/node-mock-http/dist/index.mjs';
+import { parseURL, withoutBase, joinURL, getQuery, withQuery, decodePath, withLeadingSlash, withoutTrailingSlash } from 'file://C:/Projects/Website/ve-app/node_modules/ufo/dist/index.mjs';
+import { createStorage, prefixStorage } from 'file://C:/Projects/Website/ve-app/node_modules/unstorage/dist/index.mjs';
+import unstorage_47drivers_47fs from 'file://C:/Projects/Website/ve-app/node_modules/unstorage/drivers/fs.mjs';
+import file_58_47_47_47C_58_47Projects_47Website_47ve_45app_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js from 'file:///C:/Projects/Website/ve-app/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js';
+import unstorage_47drivers_47fs_45lite from 'file://C:/Projects/Website/ve-app/node_modules/unstorage/drivers/fs-lite.mjs';
+import { digest } from 'file://C:/Projects/Website/ve-app/node_modules/ohash/dist/index.mjs';
+import { klona } from 'file://C:/Projects/Website/ve-app/node_modules/klona/dist/index.mjs';
+import defu, { defuFn } from 'file://C:/Projects/Website/ve-app/node_modules/defu/dist/defu.mjs';
+import { snakeCase } from 'file://C:/Projects/Website/ve-app/node_modules/scule/dist/index.mjs';
+import { toRouteMatcher, createRouter } from 'file://C:/Projects/Website/ve-app/node_modules/radix3/dist/index.mjs';
 import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/pathe/dist/index.mjs';
+import { dirname, resolve } from 'file://C:/Projects/Website/ve-app/node_modules/pathe/dist/index.mjs';
 
-const serverAssets = [{"baseName":"server","dir":"C:/Project/Van Elvina/van-elvina/server/assets"}];
+const serverAssets = [{"baseName":"server","dir":"C:/Projects/Website/ve-app/server/assets"}];
 
 const assets$1 = createStorage();
 
@@ -29,12 +29,12 @@ const storage = createStorage({});
 
 storage.mount('/assets', assets$1);
 
-storage.mount('internal:nuxt:prerender', file_58_47_47_47C_58_47Project_47Van_3720Elvina_47van_45elvina_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js({"driver":"file:///C:/Project/Van%20Elvina/van-elvina/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js","base":"C:/Project/Van Elvina/van-elvina/.nuxt/cache/nitro/prerender"}));
+storage.mount('internal:nuxt:prerender', file_58_47_47_47C_58_47Projects_47Website_47ve_45app_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js({"driver":"file:///C:/Projects/Website/ve-app/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js","base":"C:/Projects/Website/ve-app/.nuxt/cache/nitro/prerender"}));
 storage.mount('data', unstorage_47drivers_47fs_45lite({"driver":"fsLite","base":"./.data/kv"}));
-storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Project/Van Elvina/van-elvina","watchOptions":{"ignored":[null]}}));
-storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Project/Van Elvina/van-elvina/server","watchOptions":{"ignored":[null]}}));
-storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Project/Van Elvina/van-elvina/.nuxt"}));
-storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Project/Van Elvina/van-elvina/.nuxt/cache"}));
+storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Projects/Website/ve-app","watchOptions":{"ignored":[null]}}));
+storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Projects/Website/ve-app/server","watchOptions":{"ignored":[null]}}));
+storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Projects/Website/ve-app/.nuxt"}));
+storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Projects/Website/ve-app/.nuxt/cache"}));
 
 function useStorage(base = "") {
   return base ? prefixStorage(storage, base) : storage;
@@ -607,7 +607,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "d0d48158-adac-4f42-8bea-53b81b8cfac9",
+    "buildId": "f864624d-d6d4-4eca-b7ab-a999a3fb0eb9",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -993,7 +993,7 @@ function getAsset (id) {
 
 const METHODS = /* @__PURE__ */ new Set(["HEAD", "GET"]);
 const EncodingMap = { gzip: ".gz", br: ".br" };
-const _s5c9_J = eventHandler((event) => {
+const _MxE5kN = eventHandler((event) => {
   if (event.method && !METHODS.has(event.method)) {
     return;
   }
@@ -1059,12 +1059,12 @@ const _s5c9_J = eventHandler((event) => {
 
 const _SxA8c9 = defineEventHandler(() => {});
 
-const _lazy_FSvCWM = () => import('./renderer.mjs').then(function (n) { return n.r; });
+const _lazy_sJ0hPL = () => import('./renderer.mjs').then(function (n) { return n.r; });
 
 const handlers = [
-  { route: '', handler: _s5c9_J, lazy: false, middleware: true, method: undefined },
+  { route: '', handler: _MxE5kN, lazy: false, middleware: true, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_FSvCWM, lazy: true, middleware: false, method: undefined }
+  { route: '/**', handler: _lazy_sJ0hPL, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {

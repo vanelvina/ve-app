@@ -87,21 +87,16 @@
                 <thead>
                   <tr class="bg-warm-ivory text-deep-plum border-b border-rose-blush/20 font-semibold">
                     <th class="p-3">Preview</th>
-                    <th class="p-3">Badge &amp; Title</th>
-                    <th class="p-3">CTA Link</th>
+                    <th class="p-3">Destination Link</th>
                     <th class="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-rose-blush/10">
                   <tr v-for="banner in banners" :key="banner._id" class="hover:bg-warm-ivory/20">
                     <td class="p-3">
-                      <img :src="banner.image" class="w-20 h-10 object-cover rounded shadow-sm bg-warm-ivory" />
+                      <img :src="banner.image" class="w-28 h-12 object-cover rounded shadow-sm bg-warm-ivory" />
                     </td>
-                    <td class="p-3 font-ui">
-                      <span class="px-2 py-0.5 bg-dusty-rose/10 text-dusty-rose rounded text-[10px] uppercase font-bold" v-if="banner.badge">{{ banner.badge }}</span>
-                      <p class="font-semibold text-charcoal mt-1">{{ banner.title }}</p>
-                    </td>
-                    <td class="p-3 text-charcoal/60">{{ banner.ctaLink }}</td>
+                    <td class="p-3 text-charcoal font-semibold">{{ banner.ctaLink }}</td>
                     <td class="p-3 text-right space-x-1.5">
                       <button @click="openBannerModal(banner)" class="text-deep-plum hover:underline font-semibold">Edit</button>
                       <button @click="deleteBannerItem(banner._id)" class="text-red-500 hover:underline font-semibold">Delete</button>
@@ -266,48 +261,13 @@
         <h3 class="text-lg font-serif text-deep-plum font-bold">{{ bannerModal.isEdit ? 'Edit Banner Slide' : 'Add Banner Slide' }}</h3>
         <form @submit.prevent="saveBannerItem" class="space-y-4 text-xs font-ui">
           <div>
-            <label class="block font-semibold mb-1 text-charcoal/70">Badge Text (e.g. New Collection)</label>
-            <input v-model="bannerModal.form.badge" type="text" class="w-full p-2 border border-rose-blush/30 rounded" />
+            <label class="block font-semibold mb-1 text-charcoal/70">Image URL *</label>
+            <input v-model="bannerModal.form.image" type="text" placeholder="https://example.com/image.jpg" required class="w-full p-2 border border-rose-blush/30 rounded" />
+            <p class="text-[10px] text-charcoal/40 mt-1">Image size tip: 1400x600 pixels (or wider) is best.</p>
           </div>
           <div>
-            <label class="block font-semibold mb-1 text-charcoal/70">Main Title *</label>
-            <input v-model="bannerModal.form.title" type="text" required class="w-full p-2 border border-rose-blush/30 rounded" />
-          </div>
-          <div>
-            <label class="block font-semibold mb-1 text-charcoal/70">Subtitle (Carousel Description) *</label>
-            <textarea v-model="bannerModal.form.subtitle" rows="3" required class="w-full p-2 border border-rose-blush/30 rounded"></textarea>
-          </div>
-          <div>
-            <label class="block font-semibold mb-1 text-charcoal/70">CTA Button Text (e.g. Shop Now) *</label>
-            <input v-model="bannerModal.form.cta" type="text" required class="w-full p-2 border border-rose-blush/30 rounded" />
-          </div>
-          <div>
-            <label class="block font-semibold mb-1 text-charcoal/70">CTA Link *</label>
-            <input v-model="bannerModal.form.ctaLink" type="text" required class="w-full p-2 border border-rose-blush/30 rounded" />
-          </div>
-          <div>
-            <label class="block font-semibold mb-1 text-charcoal/70">Image (Upload direct file or enter URL) *</label>
-            <div class="flex gap-2">
-              <input v-model="bannerModal.form.image" type="text" placeholder="http://..." required class="flex-1 p-2 border border-rose-blush/30 rounded" />
-              <input type="file" @change="uploadFile($event, 'banner')" class="hidden" id="banner-file" />
-              <label for="banner-file" class="px-3 py-2 bg-rose-blush text-deep-plum font-semibold rounded cursor-pointer hover:bg-rose-blush/80">Upload File</label>
-            </div>
-            <p class="text-[10px] text-charcoal/40 mt-1">Image size tip: 1400x600 pixels is best.</p>
-          </div>
-          <div>
-            <label class="block font-semibold mb-1 text-charcoal/70">Text Color *</label>
-            <select v-model="bannerModal.form.textColor" class="w-full p-2 border border-rose-blush/30 rounded">
-              <option value="light">Light Text (For dark backgrounds)</option>
-              <option value="dark">Dark Text (For light backgrounds)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold mb-1 text-charcoal/70">Alignment *</label>
-            <select v-model="bannerModal.form.align" class="w-full p-2 border border-rose-blush/30 rounded">
-              <option value="left">Left</option>
-              <option value="center">Center</option>
-              <option value="right">Right</option>
-            </select>
+            <label class="block font-semibold mb-1 text-charcoal/70">Click Destination Link (e.g. /products?category=bras) *</label>
+            <input v-model="bannerModal.form.ctaLink" type="text" required class="w-full p-2 border border-rose-blush/30 rounded" placeholder="/products" />
           </div>
           <div class="flex justify-end gap-2 pt-2">
             <button type="button" @click="bannerModal.show = false" class="px-4 py-2 border border-rose-blush/40 rounded text-charcoal">Cancel</button>
@@ -336,11 +296,7 @@
           </div>
           <div>
             <label class="block font-semibold mb-1 text-charcoal/70">Cover Image URL *</label>
-            <div class="flex gap-2">
-              <input v-model="categoryModal.form.image" type="text" required class="flex-1 p-2 border border-rose-blush/30 rounded" placeholder="http://..." />
-              <input type="file" @change="uploadFile($event, 'category')" class="hidden" id="category-file" />
-              <label for="category-file" class="px-3 py-2 bg-rose-blush text-deep-plum font-semibold rounded cursor-pointer hover:bg-rose-blush/80">Upload File</label>
-            </div>
+            <input v-model="categoryModal.form.image" type="text" required class="w-full p-2 border border-rose-blush/30 rounded" placeholder="https://example.com/image.jpg" />
           </div>
           <div>
             <div class="flex items-center justify-between mb-1">
@@ -484,10 +440,8 @@
                   </div>
                   <div class="space-y-2">
                     <div v-for="(img, imgIdx) in v.images" :key="imgIdx" class="flex gap-2">
-                      <input v-model="v.images[imgIdx]" placeholder="http://..." class="flex-1 p-2 border border-rose-blush/30 rounded" />
-                      <input type="file" @change="uploadVariantFile($event, vIdx, imgIdx)" class="hidden" :id="`prod-file-${vIdx}-${imgIdx}`" />
-                      <label :for="`prod-file-${vIdx}-${imgIdx}`" class="px-2.5 py-2 bg-rose-blush text-deep-plum font-semibold rounded cursor-pointer">Upload</label>
-                      <button type="button" @click="v.images.splice(imgIdx, 1)" class="text-red-500">Remove</button>
+                      <input v-model="v.images[imgIdx]" placeholder="https://example.com/image.jpg" class="flex-1 p-2 border border-rose-blush/30 rounded" />
+                      <button type="button" @click="v.images.splice(imgIdx, 1)" class="text-red-500 hover:underline font-semibold">Remove</button>
                     </div>
                   </div>
                 </div>
@@ -518,10 +472,14 @@
           </div>
           <div v-if="widgetModal.isNew">
             <label class="block font-semibold mb-1 text-charcoal/70">Widget Type *</label>
-            <select v-model="widgetModal.form.type" required class="w-full p-2 border border-rose-blush/30 rounded">
+            <select v-model="widgetModal.form.type" required class="w-full p-2 border border-rose-blush/30 rounded" @change="onWidgetTypeChange">
               <option value="banner">Banner (Full screen promotional banner)</option>
               <option value="editorial">Editorial (Side-by-side text and picture)</option>
               <option value="html">Custom HTML (Embed scripts/custom components)</option>
+              <option value="promo-grid">Promo Cards Grid (Clickable banners grid)</option>
+              <option value="collection-tabs">Curated Collection Tabs (Category switcher)</option>
+              <option value="fit-calculator">Fit Sizing Calculator</option>
+              <option value="offers-slider">Special Packs & Offers Slider</option>
             </select>
           </div>
 
@@ -541,12 +499,8 @@
           </div>
 
           <div v-if="widgetModal.form.type !== 'html'">
-            <label class="block font-semibold mb-1 text-charcoal/70">Section Image (Banner / Editorial Image)</label>
-            <div class="flex gap-2">
-              <input v-model="widgetModal.form.image" type="text" class="flex-1 p-2 border border-rose-blush/30 rounded" placeholder="http://..." />
-              <input type="file" @change="uploadFile($event, 'widget')" class="hidden" id="widget-file" />
-              <label for="widget-file" class="px-3 py-2 bg-rose-blush text-deep-plum font-semibold rounded cursor-pointer">Upload</label>
-            </div>
+            <label class="block font-semibold mb-1 text-charcoal/70">Section Image URL (Banner / Editorial Image)</label>
+            <input v-model="widgetModal.form.image" type="text" class="w-full p-2 border border-rose-blush/30 rounded" placeholder="https://example.com/image.jpg" />
           </div>
 
           <!-- Bullet Points details list for Editorial sections -->
@@ -559,6 +513,78 @@
               <div v-for="(_, index) in widgetModal.form.items" :key="index" class="flex gap-2 items-center">
                 <input v-model="widgetModal.form.items[index]" class="flex-1 p-2 border border-rose-blush/30 rounded" required />
                 <button type="button" @click="widgetModal.form.items.splice(index, 1)" class="text-red-500">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Promo Cards list for promo-grid sections -->
+          <div v-if="widgetModal.form.type === 'promo-grid'">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block font-semibold text-charcoal/70">Promo Cards (Banners)</label>
+              <button type="button" @click="addPromoCardField" class="text-deep-plum font-semibold hover:underline">+ Add Promo Card</button>
+            </div>
+            <div class="space-y-3">
+              <div v-for="(item, idx) in widgetModal.form.items" :key="idx" class="p-3 bg-warm-ivory/40 rounded border border-rose-blush/30 space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-[10px] uppercase text-deep-plum">Card #{{ idx + 1 }}</span>
+                  <button type="button" @click="widgetModal.form.items.splice(idx, 1)" class="text-red-500 hover:underline">Remove</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input v-model="item.image" placeholder="Image URL *" required class="p-2 border border-rose-blush/30 rounded" />
+                  <input v-model="item.link" placeholder="Destination Link (e.g. /products)" required class="p-2 border border-rose-blush/30 rounded" />
+                </div>
+                <input v-model="item.title" placeholder="Accessible Title (e.g. Buy 2 Get 1)" class="w-full p-2 border border-rose-blush/30 rounded" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Tabs list for collection-tabs sections -->
+          <div v-if="widgetModal.form.type === 'collection-tabs'">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block font-semibold text-charcoal/70">Category Tabs Showcase</label>
+              <button type="button" @click="addCategoryTabField" class="text-deep-plum font-semibold hover:underline">+ Add Tab</button>
+            </div>
+            <div class="space-y-2">
+              <div v-for="(_, index) in widgetModal.form.items" :key="index" class="flex gap-2 items-center">
+                <input v-model="widgetModal.form.items[index]" placeholder="Category name (e.g. Bras)" class="flex-1 p-2 border border-rose-blush/30 rounded" required />
+                <button type="button" @click="widgetModal.form.items.splice(index, 1)" class="text-red-500">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sizing Fit calculator settings -->
+          <div v-if="widgetModal.form.type === 'fit-calculator'" class="space-y-3">
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Sizing Test Button Text</label>
+              <input v-model="widgetModal.form.items.btnText" placeholder="Start Sizing Test" required class="w-full p-2 border border-rose-blush/30 rounded" />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Sizing Test Button Link</label>
+              <input v-model="widgetModal.form.items.btnLink" placeholder="#" required class="w-full p-2 border border-rose-blush/30 rounded" />
+            </div>
+          </div>
+
+          <!-- Offers list for offers-slider sections -->
+          <div v-if="widgetModal.form.type === 'offers-slider'">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block font-semibold text-charcoal/70">Saver Packs & Combos</label>
+              <button type="button" @click="addOfferCardField" class="text-deep-plum font-semibold hover:underline">+ Add Combo Card</button>
+            </div>
+            <div class="space-y-3">
+              <div v-for="(item, idx) in widgetModal.form.items" :key="idx" class="p-3 bg-warm-ivory/40 rounded border border-rose-blush/30 space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-[10px] uppercase text-deep-plum">Offer #{{ idx + 1 }}</span>
+                  <button type="button" @click="widgetModal.form.items.splice(idx, 1)" class="text-red-500 hover:underline">Remove</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input v-model="item.image" placeholder="Image URL *" required class="p-2 border border-rose-blush/30 rounded" />
+                  <input v-model="item.link" placeholder="Combo Link (e.g. /products/combo)" required class="p-2 border border-rose-blush/30 rounded" />
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  <input v-model="item.title" placeholder="Offer Title *" required class="col-span-2 p-2 border border-rose-blush/30 rounded" />
+                  <input v-model="item.price" placeholder="Price (e.g. ₹799) *" required class="p-2 border border-rose-blush/30 rounded" />
+                </div>
+                <input v-model="item.subtitle" placeholder="Offer Description / Subtitle" class="w-full p-2 border border-rose-blush/30 rounded" />
               </div>
             </div>
           </div>
@@ -720,9 +746,9 @@ const openBannerModal = (banner: any | null) => {
     bannerModal.value.isEdit = true
     bannerModal.value.itemId = banner._id
     bannerModal.value.form = {
-      title: banner.title,
-      subtitle: banner.subtitle,
-      cta: banner.cta,
+      title: banner.title || '',
+      subtitle: banner.subtitle || '',
+      cta: banner.cta || '',
       ctaLink: banner.ctaLink,
       image: banner.image,
       imageMobile: banner.imageMobile || '',
@@ -945,6 +971,12 @@ const openWidgetModal = (w: any | null) => {
   if (w) {
     widgetModal.value.isNew = false
     widgetModal.value.itemId = w._id
+    let itemsVal: any = []
+    if (w.type === 'fit-calculator') {
+      itemsVal = w.items ? JSON.parse(JSON.stringify(w.items)) : { btnText: 'Start Sizing Test', btnLink: '#' }
+    } else {
+      itemsVal = w.items ? JSON.parse(JSON.stringify(w.items)) : []
+    }
     widgetModal.value.form = {
       key: w.key,
       name: w.name,
@@ -953,7 +985,7 @@ const openWidgetModal = (w: any | null) => {
       subtitle: w.subtitle || '',
       description: w.description || '',
       image: w.image || '',
-      items: w.items ? JSON.parse(JSON.stringify(w.items)) : []
+      items: itemsVal
     }
   } else {
     widgetModal.value.isNew = true
@@ -970,6 +1002,35 @@ const openWidgetModal = (w: any | null) => {
     }
   }
   widgetModal.value.show = true
+}
+
+const onWidgetTypeChange = () => {
+  if (widgetModal.value.form.type === 'fit-calculator') {
+    widgetModal.value.form.items = { btnText: 'Start Sizing Test', btnLink: '#' }
+  } else {
+    widgetModal.value.form.items = []
+  }
+}
+
+const addPromoCardField = () => {
+  if (!Array.isArray(widgetModal.value.form.items)) {
+    widgetModal.value.form.items = []
+  }
+  widgetModal.value.form.items.push({ image: '', link: '', title: '' })
+}
+
+const addCategoryTabField = () => {
+  if (!Array.isArray(widgetModal.value.form.items)) {
+    widgetModal.value.form.items = []
+  }
+  widgetModal.value.form.items.push('')
+}
+
+const addOfferCardField = () => {
+  if (!Array.isArray(widgetModal.value.form.items)) {
+    widgetModal.value.form.items = []
+  }
+  widgetModal.value.form.items.push({ image: '', link: '', title: '', subtitle: '', price: '' })
 }
 
 const saveWidgetConfig = async () => {
@@ -1037,42 +1098,5 @@ const moveWidget = async (index: number, direction: 'up' | 'down') => {
   }
 }
 
-// FILE UPLOAD CONTROLLER
-const uploadFile = async (event: any, type: string) => {
-  const file = event.target.files?.[0]
-  if (!file) return
-
-  try {
-    uiStore.addToast('success', 'Uploading image file...')
-    const res = await adminStore.uploadImage(file)
-    if (res && res.imageUrl) {
-      if (type === 'banner') {
-        bannerModal.value.form.image = res.imageUrl
-      } else if (type === 'category') {
-        categoryModal.value.form.image = res.imageUrl
-      } else if (type === 'widget') {
-        widgetModal.value.form.image = res.imageUrl
-      }
-      uiStore.addToast('success', 'File uploaded successfully!')
-    }
-  } catch (error: any) {
-    uiStore.addToast('error', error.message || 'Image upload failed')
-  }
-}
-
-const uploadVariantFile = async (event: any, vIdx: number, imgIdx: number) => {
-  const file = event.target.files?.[0]
-  if (!file) return
-
-  try {
-    uiStore.addToast('success', 'Uploading variant image...')
-    const res = await adminStore.uploadImage(file)
-    if (res && res.imageUrl) {
-      productModal.value.form.variants[vIdx].images[imgIdx] = res.imageUrl
-      uiStore.addToast('success', 'Uploaded successfully!')
-    }
-  } catch (error: any) {
-    uiStore.addToast('error', error.message || 'Image upload failed')
-  }
-}
+// Image upload handlers are removed as requested, using URL-based images.
 </script>

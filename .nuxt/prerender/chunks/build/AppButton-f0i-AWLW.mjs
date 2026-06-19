@@ -1,5 +1,5 @@
-import { defineComponent, computed, mergeProps, unref, useSSRContext } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/vue/index.mjs';
-import { ssrRenderAttrs, ssrRenderComponent, ssrRenderSlot, ssrInterpolate } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/vue/server-renderer/index.mjs';
+import { defineComponent, computed, mergeProps, unref, useSSRContext } from 'file://C:/Projects/Website/ve-app/node_modules/vue/index.mjs';
+import { ssrRenderAttrs, ssrRenderComponent, ssrRenderSlot, ssrInterpolate } from 'file://C:/Projects/Website/ve-app/node_modules/vue/server-renderer/index.mjs';
 
 const _sfc_main$1 = /* @__PURE__ */ defineComponent({
   __name: "AppSpinner",

@@ -1,12 +1,13 @@
 <template>
-  <article class="group relative card cursor-pointer" :aria-label="product.name">
+  <article class="group relative card cursor-pointer flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-premium transition-shadow duration-300 border border-rose-blush/20" :aria-label="product.name">
     <!-- Image Container -->
-    <div class="relative overflow-hidden aspect-product bg-light-gray">
+    <div class="relative overflow-hidden aspect-product bg-warm-ivory">
       <NuxtLink :to="`/products/${product.slug}`" class="block h-full">
+        <!-- Main Image -->
         <img
           :src="primaryImage"
           :alt="product.name"
-          class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+          class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
           width="300"
           height="400"
@@ -16,27 +17,33 @@
           v-if="secondaryImage"
           :src="secondaryImage"
           :alt="`${product.name} alternate view`"
-          class="absolute inset-0 w-full h-full object-cover object-center opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          class="absolute inset-0 w-full h-full object-cover object-center opacity-0 transition-opacity duration-700 group-hover:opacity-100"
           loading="lazy"
           width="300"
           height="400"
         />
       </NuxtLink>
 
-      <!-- Badge -->
+      <!-- Badge (New, Bestseller etc) -->
       <div class="absolute top-2.5 left-2.5 z-10">
-        <AppBadge v-if="product.badge" :variant="product.badge" :label="product.badge === 'bestseller' ? 'Best Seller' : product.badge" />
+        <span
+          v-if="product.badge"
+          class="px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider text-white shadow-soft"
+          :class="product.badge === 'bestseller' ? 'bg-amber-500' : product.badge === 'new' ? 'bg-deep-plum' : 'bg-dusty-rose'"
+        >
+          {{ product.badge === 'bestseller' ? 'Best Seller' : product.badge }}
+        </span>
       </div>
 
-      <!-- Discount Badge -->
-      <div v-if="product.discount > 0" class="absolute top-2.5 right-2.5 z-10 bg-red-500 text-white text-[10px] font-ui font-bold px-2 py-0.5 rounded">
+      <!-- Discount Badge (Clovia Seal Style) -->
+      <div v-if="product.discount > 0" class="absolute top-2.5 right-2.5 z-10 bg-red-500 text-white text-[10px] font-ui font-bold px-2 py-0.5 rounded shadow-soft">
         {{ product.discount }}% OFF
       </div>
 
-      <!-- Wishlist -->
+      <!-- Wishlist Heart Icon -->
       <button
-        class="wishlist-btn"
-        :class="{ 'text-dusty-rose': isWishlisted }"
+        class="wishlist-btn text-charcoal/60 hover:text-red-500 hover:bg-red-50"
+        :class="{ '!text-red-500': isWishlisted }"
         :aria-label="isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'"
         :aria-pressed="isWishlisted"
         @click.prevent="handleWishlist"
@@ -46,62 +53,65 @@
         </svg>
       </button>
 
-      <!-- Quick View (desktop hover) -->
-      <div class="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden md:block">
-        <button
-          class="w-full py-2.5 bg-deep-plum/90 backdrop-blur-sm text-white text-xs font-ui font-medium hover:bg-deep-plum transition-colors"
-          :aria-label="`Quick view ${product.name}`"
-          @click.prevent="ui.openQuickView(product.slug)"
-        >
-          Quick View
-        </button>
+      <!-- Quick Add Size Drawer (Desktop Hover) -->
+      <div class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm p-3 translate-y-full group-hover:translate-y-0 transition-all duration-300 hidden md:block border-t border-rose-blush/20">
+        <p class="text-[9px] text-charcoal/50 font-bold uppercase tracking-wider text-center mb-1.5">Quick Add Size</p>
+        <div class="flex flex-wrap gap-1 justify-center">
+          <button
+            v-for="size in product.variants[0]?.sizes || []"
+            :key="size"
+            class="px-2.5 py-1 text-[10px] font-bold border border-rose-blush hover:border-deep-plum hover:bg-deep-plum hover:text-white rounded-md transition-all cursor-pointer text-charcoal"
+            @click.prevent="quickAddToCart(size)"
+          >
+            {{ size }}
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Product Info -->
-    <div class="p-3 md:p-4">
-      <NuxtLink :to="`/products/${product.slug}`">
-        <p class="text-[11px] text-dusty-rose font-ui font-medium uppercase tracking-wider mb-1">
+    <!-- Product Details Content -->
+    <div class="p-3 md:p-4 flex flex-col flex-1">
+      <NuxtLink :to="`/products/${product.slug}`" class="flex-1">
+        <p class="text-[10px] text-dusty-rose font-ui font-semibold uppercase tracking-wider mb-1">
           {{ product.category }}
         </p>
-        <h3 class="font-sans font-medium text-charcoal text-sm leading-snug line-clamp-2 hover:text-deep-plum transition-colors mb-2">
+        <h3 class="font-sans font-semibold text-charcoal text-xs sm:text-sm leading-snug line-clamp-2 hover:text-deep-plum transition-colors mb-2">
           {{ product.name }}
         </h3>
       </NuxtLink>
 
-      <!-- Rating -->
+      <!-- Star Rating -->
       <div class="flex items-center gap-2 mb-2">
         <AppRating :rating="product.rating" :count="product.reviewCount" show-count />
       </div>
 
-      <!-- Price -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="font-sans font-semibold text-charcoal text-base">
+      <!-- Price Layout -->
+      <div class="flex items-baseline gap-2 flex-wrap">
+        <span class="font-sans font-bold text-deep-plum text-sm sm:text-base">
           {{ formatPrice(product.price) }}
         </span>
-        <span v-if="product.originalPrice > product.price" class="text-xs text-mid-gray line-through font-ui">
+        <span v-if="product.originalPrice > product.price" class="text-[11px] text-mid-gray line-through font-ui">
           {{ formatPrice(product.originalPrice) }}
         </span>
       </div>
 
-      <!-- Color dots -->
-      <div class="flex items-center gap-1.5 mt-2">
-        <button
+      <!-- Color Variant Swatches -->
+      <div class="flex items-center gap-1.5 mt-3">
+        <div
           v-for="variant in product.variants.slice(0, 4)"
           :key="variant.color"
-          class="w-4 h-4 rounded-full border-2 border-white shadow-sm transition-transform hover:scale-110 cursor-pointer"
+          class="w-3.5 h-3.5 rounded-full border border-charcoal/15 shadow-sm transition-transform hover:scale-110 cursor-pointer"
           :style="{ backgroundColor: variant.colorHex }"
-          :aria-label="variant.color"
           :title="variant.color"
         />
-        <span v-if="product.variants.length > 4" class="text-xs text-mid-gray font-ui">
+        <span v-if="product.variants.length > 4" class="text-[10px] text-mid-gray font-ui">
           +{{ product.variants.length - 4 }}
         </span>
       </div>
 
       <!-- Add to Cart (mobile visible) -->
       <button
-        class="mt-3 w-full py-2 rounded-lg bg-rose-blush text-deep-plum text-xs font-ui font-semibold hover:bg-deep-plum hover:text-white transition-all duration-250 md:hidden"
+        class="mt-3 w-full py-2.5 rounded-lg bg-rose-blush text-deep-plum text-xs font-ui font-semibold hover:bg-deep-plum hover:text-white transition-all duration-250 md:hidden"
         :aria-label="`Add ${product.name} to cart`"
         @click.prevent="handleQuickAdd"
       >
@@ -114,10 +124,12 @@
 <script setup lang="ts">
 import type { Product } from '~/types'
 import { formatPrice } from '~/utils/formatters'
+import { useCart } from '~/composables/useCart'
 
 const props = defineProps<{ product: Product }>()
 
 const ui = useUIStore()
+const { addToCart } = useCart()
 const { toggle, isWishlisted: isWishlistedFn } = useWishlist()
 
 const isWishlisted = computed(() => isWishlistedFn(props.product.id))
@@ -131,5 +143,11 @@ const handleWishlist = () => toggle(props.product)
 
 const handleQuickAdd = () => {
   ui.openQuickView(props.product.slug)
+}
+
+const quickAddToCart = (size: string) => {
+  const defaultVariant = props.product.variants[0]
+  const colorName = defaultVariant?.color || 'Default Color'
+  addToCart(props.product, colorName, size, 1)
 }
 </script>

@@ -26,6 +26,7 @@ export const ProductCardSkeleton: typeof import("../components/molecules/Product
 export const ReviewCard: typeof import("../components/molecules/ReviewCard.vue")['default']
 export const HeroBanner: typeof import("../components/organisms/HeroBanner.vue")['default']
 export const MobileMenu: typeof import("../components/organisms/MobileMenu.vue")['default']
+export const PwaInstallPrompt: typeof import("../components/organisms/PwaInstallPrompt.vue")['default']
 export const QuickViewModal: typeof import("../components/organisms/QuickViewModal.vue")['default']
 export const SearchOverlay: typeof import("../components/organisms/SearchOverlay.vue")['default']
 export const SizeGuideModal: typeof import("../components/organisms/SizeGuideModal.vue")['default']
@@ -34,10 +35,14 @@ export const TheNavbar: typeof import("../components/organisms/TheNavbar.vue")['
 export const ToastNotifications: typeof import("../components/organisms/ToastNotifications.vue")['default']
 export const SectionBestSellers: typeof import("../components/sections/SectionBestSellers.vue")['default']
 export const SectionBrandUSP: typeof import("../components/sections/SectionBrandUSP.vue")['default']
+export const SectionCollectionTabs: typeof import("../components/sections/SectionCollectionTabs.vue")['default']
 export const SectionCustomerReviews: typeof import("../components/sections/SectionCustomerReviews.vue")['default']
 export const SectionEverydayComfort: typeof import("../components/sections/SectionEverydayComfort.vue")['default']
 export const SectionFeaturedProducts: typeof import("../components/sections/SectionFeaturedProducts.vue")['default']
+export const SectionFitCalculator: typeof import("../components/sections/SectionFitCalculator.vue")['default']
 export const SectionNewArrivals: typeof import("../components/sections/SectionNewArrivals.vue")['default']
+export const SectionOffersSlider: typeof import("../components/sections/SectionOffersSlider.vue")['default']
+export const SectionPromoGrid: typeof import("../components/sections/SectionPromoGrid.vue")['default']
 export const SectionShopByCategory: typeof import("../components/sections/SectionShopByCategory.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
@@ -82,6 +87,7 @@ export const LazyProductCardSkeleton: LazyComponent<typeof import("../components
 export const LazyReviewCard: LazyComponent<typeof import("../components/molecules/ReviewCard.vue")['default']>
 export const LazyHeroBanner: LazyComponent<typeof import("../components/organisms/HeroBanner.vue")['default']>
 export const LazyMobileMenu: LazyComponent<typeof import("../components/organisms/MobileMenu.vue")['default']>
+export const LazyPwaInstallPrompt: LazyComponent<typeof import("../components/organisms/PwaInstallPrompt.vue")['default']>
 export const LazyQuickViewModal: LazyComponent<typeof import("../components/organisms/QuickViewModal.vue")['default']>
 export const LazySearchOverlay: LazyComponent<typeof import("../components/organisms/SearchOverlay.vue")['default']>
 export const LazySizeGuideModal: LazyComponent<typeof import("../components/organisms/SizeGuideModal.vue")['default']>
@@ -90,10 +96,14 @@ export const LazyTheNavbar: LazyComponent<typeof import("../components/organisms
 export const LazyToastNotifications: LazyComponent<typeof import("../components/organisms/ToastNotifications.vue")['default']>
 export const LazySectionBestSellers: LazyComponent<typeof import("../components/sections/SectionBestSellers.vue")['default']>
 export const LazySectionBrandUSP: LazyComponent<typeof import("../components/sections/SectionBrandUSP.vue")['default']>
+export const LazySectionCollectionTabs: LazyComponent<typeof import("../components/sections/SectionCollectionTabs.vue")['default']>
 export const LazySectionCustomerReviews: LazyComponent<typeof import("../components/sections/SectionCustomerReviews.vue")['default']>
 export const LazySectionEverydayComfort: LazyComponent<typeof import("../components/sections/SectionEverydayComfort.vue")['default']>
 export const LazySectionFeaturedProducts: LazyComponent<typeof import("../components/sections/SectionFeaturedProducts.vue")['default']>
+export const LazySectionFitCalculator: LazyComponent<typeof import("../components/sections/SectionFitCalculator.vue")['default']>
 export const LazySectionNewArrivals: LazyComponent<typeof import("../components/sections/SectionNewArrivals.vue")['default']>
+export const LazySectionOffersSlider: LazyComponent<typeof import("../components/sections/SectionOffersSlider.vue")['default']>
+export const LazySectionPromoGrid: LazyComponent<typeof import("../components/sections/SectionPromoGrid.vue")['default']>
 export const LazySectionShopByCategory: LazyComponent<typeof import("../components/sections/SectionShopByCategory.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>

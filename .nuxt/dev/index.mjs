@@ -3,44 +3,44 @@ import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/h3/dist/index.mjs';
-import { escapeHtml } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/@vue/shared/dist/shared.cjs.js';
-import viteNodeEntry_mjs from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
-import { viteNodeFetch } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
-import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/vue-bundle-renderer/dist/runtime.mjs';
-import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, encodePath, joinRelativeURL } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/ufo/dist/index.mjs';
-import { renderToString } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/vue/server-renderer/index.mjs';
-import { klona } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/klona/dist/index.mjs';
-import defu, { defuFn } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/defu/dist/defu.mjs';
-import destr, { destr as destr$1 } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/destr/dist/index.mjs';
-import { snakeCase } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/scule/dist/index.mjs';
-import { createHead as createHead$1, propsToString, renderSSRHead } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unhead/dist/server.mjs';
-import { stringify, uneval } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/devalue/index.js';
-import { isVNode, isRef, toValue } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/vue/index.mjs';
-import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unhead/dist/plugins.mjs';
-import { createHooks } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/hookable/dist/index.mjs';
-import { createFetch, Headers as Headers$1 } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/ofetch/dist/node.mjs';
-import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/node-mock-http/dist/index.mjs';
-import { createStorage, prefixStorage } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unstorage/dist/index.mjs';
-import unstorage_47drivers_47fs from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unstorage/drivers/fs.mjs';
-import file_58_47_47_47C_58_47Project_47Van_3720Elvina_47van_45elvina_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js';
-import { digest, hash as hash$1 } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/ohash/dist/index.mjs';
-import { toRouteMatcher, createRouter } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/radix3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file://C:/Projects/Website/ve-app/node_modules/h3/dist/index.mjs';
+import { escapeHtml } from 'file://C:/Projects/Website/ve-app/node_modules/@vue/shared/dist/shared.cjs.js';
+import viteNodeEntry_mjs from 'file://C:/Projects/Website/ve-app/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
+import { viteNodeFetch } from 'file://C:/Projects/Website/ve-app/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
+import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Projects/Website/ve-app/node_modules/vue-bundle-renderer/dist/runtime.mjs';
+import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, encodePath, joinRelativeURL } from 'file://C:/Projects/Website/ve-app/node_modules/ufo/dist/index.mjs';
+import { renderToString } from 'file://C:/Projects/Website/ve-app/node_modules/vue/server-renderer/index.mjs';
+import { klona } from 'file://C:/Projects/Website/ve-app/node_modules/klona/dist/index.mjs';
+import defu, { defuFn } from 'file://C:/Projects/Website/ve-app/node_modules/defu/dist/defu.mjs';
+import destr, { destr as destr$1 } from 'file://C:/Projects/Website/ve-app/node_modules/destr/dist/index.mjs';
+import { snakeCase } from 'file://C:/Projects/Website/ve-app/node_modules/scule/dist/index.mjs';
+import { createHead as createHead$1, propsToString, renderSSRHead } from 'file://C:/Projects/Website/ve-app/node_modules/unhead/dist/server.mjs';
+import { stringify, uneval } from 'file://C:/Projects/Website/ve-app/node_modules/devalue/index.js';
+import { isVNode, isRef, toValue } from 'file://C:/Projects/Website/ve-app/node_modules/vue/index.mjs';
+import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file://C:/Projects/Website/ve-app/node_modules/unhead/dist/plugins.mjs';
+import { createHooks } from 'file://C:/Projects/Website/ve-app/node_modules/hookable/dist/index.mjs';
+import { createFetch, Headers as Headers$1 } from 'file://C:/Projects/Website/ve-app/node_modules/ofetch/dist/node.mjs';
+import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file://C:/Projects/Website/ve-app/node_modules/node-mock-http/dist/index.mjs';
+import { createStorage, prefixStorage } from 'file://C:/Projects/Website/ve-app/node_modules/unstorage/dist/index.mjs';
+import unstorage_47drivers_47fs from 'file://C:/Projects/Website/ve-app/node_modules/unstorage/drivers/fs.mjs';
+import file_58_47_47_47C_58_47Projects_47Website_47ve_45app_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js from 'file://C:/Projects/Website/ve-app/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js';
+import { digest, hash as hash$1 } from 'file://C:/Projects/Website/ve-app/node_modules/ohash/dist/index.mjs';
+import { toRouteMatcher, createRouter } from 'file://C:/Projects/Website/ve-app/node_modules/radix3/dist/index.mjs';
 import { readFile } from 'node:fs/promises';
-import consola, { consola as consola$1 } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/consola/dist/index.mjs';
-import { ErrorParser } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/youch-core/build/index.js';
-import { Youch } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/youch/build/index.js';
-import { SourceMapConsumer } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/source-map/source-map.js';
+import consola, { consola as consola$1 } from 'file://C:/Projects/Website/ve-app/node_modules/consola/dist/index.mjs';
+import { ErrorParser } from 'file://C:/Projects/Website/ve-app/node_modules/youch-core/build/index.js';
+import { Youch } from 'file://C:/Projects/Website/ve-app/node_modules/youch/build/index.js';
+import { SourceMapConsumer } from 'file://C:/Projects/Website/ve-app/node_modules/source-map/source-map.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { getContext } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unctx/dist/index.mjs';
-import { captureRawStackTrace, parseRawStackTrace } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/errx/dist/index.js';
-import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
+import { getContext } from 'file://C:/Projects/Website/ve-app/node_modules/unctx/dist/index.mjs';
+import { captureRawStackTrace, parseRawStackTrace } from 'file://C:/Projects/Website/ve-app/node_modules/errx/dist/index.js';
+import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file://C:/Projects/Website/ve-app/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
 import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname as dirname$1, resolve as resolve$1 } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/pathe/dist/index.mjs';
-import { walkResolver } from 'file://C:/Project/Van%20Elvina/van-elvina/node_modules/unhead/dist/utils.mjs';
+import { dirname as dirname$1, resolve as resolve$1 } from 'file://C:/Projects/Website/ve-app/node_modules/pathe/dist/index.mjs';
+import { walkResolver } from 'file://C:/Projects/Website/ve-app/node_modules/unhead/dist/utils.mjs';
 
-const serverAssets = [{"baseName":"server","dir":"C:/Project/Van Elvina/van-elvina/server/assets"}];
+const serverAssets = [{"baseName":"server","dir":"C:/Projects/Website/ve-app/server/assets"}];
 
 const assets$1 = createStorage();
 
@@ -52,12 +52,12 @@ const storage = createStorage({});
 
 storage.mount('/assets', assets$1);
 
-storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Project/Van Elvina/van-elvina","watchOptions":{"ignored":[null]}}));
-storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Project/Van Elvina/van-elvina/server","watchOptions":{"ignored":[null]}}));
-storage.mount('cache:nuxt:payload', file_58_47_47_47C_58_47Project_47Van_3720Elvina_47van_45elvina_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js({"driver":"file:///C:/Project/Van%20Elvina/van-elvina/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js","base":"C:/Project/Van Elvina/van-elvina/.nuxt/cache/nuxt/payload"}));
-storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Project/Van Elvina/van-elvina/.nuxt"}));
-storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Project/Van Elvina/van-elvina/.nuxt/cache"}));
-storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"C:/Project/Van Elvina/van-elvina/.data/kv"}));
+storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Projects/Website/ve-app","watchOptions":{"ignored":[null]}}));
+storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"C:/Projects/Website/ve-app/server","watchOptions":{"ignored":[null]}}));
+storage.mount('cache:nuxt:payload', file_58_47_47_47C_58_47Projects_47Website_47ve_45app_47node_modules_47_64nuxt_47nitro_45server_47dist_47runtime_47utils_47cache_45driver_46js({"driver":"file:///C:/Projects/Website/ve-app/node_modules/@nuxt/nitro-server/dist/runtime/utils/cache-driver.js","base":"C:/Projects/Website/ve-app/.nuxt/cache/nuxt/payload"}));
+storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Projects/Website/ve-app/.nuxt"}));
+storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"C:/Projects/Website/ve-app/.nuxt/cache"}));
+storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"C:/Projects/Website/ve-app/.data/kv"}));
 
 function useStorage(base = "") {
   return base ? prefixStorage(storage, base) : storage;
@@ -2047,7 +2047,7 @@ async function errorHandler(error, event) {
   // H3 will handle fallback
 }
 
-const rootDir = "C:/Project/Van Elvina/van-elvina";
+const rootDir = "C:/Projects/Website/ve-app";
 
 const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"Shop premium women's innerwear at Van Elvina. Discover unmatched comfort, elegant designs, and everyday essentials for the modern woman."},{"name":"theme-color","content":"#6B2D4E"},{"property":"og:site_name","content":"Van Elvina"},{"property":"og:type","content":"website"},{"name":"twitter:card","content":"summary_large_image"}],"link":[{"rel":"icon","type":"image/png","href":"/favicon.png"},{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"preconnect","href":"https://fonts.gstatic.com","crossorigin":""},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap"}],"style":[],"script":[],"noscript":[],"title":"Van Elvina – Women Comfort First","charset":"utf-8","viewport":"width=device-width, initial-scale=1"};
 
@@ -2073,7 +2073,7 @@ const asyncContext = getContext("nuxt-dev", {
 	asyncContext: true,
 	AsyncLocalStorage
 });
-const _cayhC1bWjG_GyxCRikHEJxEC8liMse0HnY3uXW4Pe8 = (nitroApp) => {
+const _DAiRHQzdxnZ4xBJyBhmDJVbSw_XEWukNh_5YvhnQbSQ = (nitroApp) => {
 	const handler = nitroApp.h3App.handler;
 	nitroApp.h3App.handler = (event) => {
 		return asyncContext.callAsync({
@@ -2149,7 +2149,7 @@ function onConsoleLog(callback) {
 }
 
 const plugins = [
-  _cayhC1bWjG_GyxCRikHEJxEC8liMse0HnY3uXW4Pe8,
+  _DAiRHQzdxnZ4xBJyBhmDJVbSw_XEWukNh_5YvhnQbSQ,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
@@ -2178,7 +2178,7 @@ function getAsset (id) {
 
 const METHODS = /* @__PURE__ */ new Set(["HEAD", "GET"]);
 const EncodingMap = { gzip: ".gz", br: ".br" };
-const _s5c9_J = eventHandler((event) => {
+const _MxE5kN = eventHandler((event) => {
   if (event.method && !METHODS.has(event.method)) {
     return;
   }
@@ -2684,13 +2684,13 @@ async function getIslandContext(event) {
 	};
 }
 
-const _lazy_FSvCWM = () => Promise.resolve().then(function () { return renderer; });
+const _lazy_sJ0hPL = () => Promise.resolve().then(function () { return renderer; });
 
 const handlers = [
-  { route: '', handler: _s5c9_J, lazy: false, middleware: true, method: undefined },
-  { route: '/__nuxt_error', handler: _lazy_FSvCWM, lazy: true, middleware: false, method: undefined },
+  { route: '', handler: _MxE5kN, lazy: false, middleware: true, method: undefined },
+  { route: '/__nuxt_error', handler: _lazy_sJ0hPL, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_FSvCWM, lazy: true, middleware: false, method: undefined }
+  { route: '/**', handler: _lazy_sJ0hPL, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {
