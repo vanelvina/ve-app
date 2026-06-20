@@ -1,7 +1,17 @@
 <template>
   <div>
     <!-- Render widgets dynamically based on active order and status -->
-    <div v-for="widget in activeWidgets" :key="widget.key">
+    <div>
+      <div 
+        v-for="widget in activeWidgets" 
+        :key="widget.key"
+        :class="{
+          'mt-4 md:mt-8': widget.margins?.top,
+          'mb-4 md:mb-8': widget.margins?.bottom,
+          'ml-4 md:ml-6': widget.margins?.left,
+          'mr-4 md:mr-6': widget.margins?.right
+        }"
+      >
       <!-- Hero Banner -->
       <HeroBanner v-if="widget.key === 'hero'" :widget="widget" />
 
@@ -38,20 +48,53 @@
       <!-- Special Combos Offers Slider -->
       <SectionOffersSlider v-else-if="widget.type === 'offers-slider'" :widget="widget" />
 
-      <!-- Custom Banners -->
-      <section v-else-if="widget.type === 'banner'" class="section-padding bg-warm-ivory">
-        <div class="page-container">
-          <div class="relative overflow-hidden rounded-2xl aspect-[16/6] shadow-card-hover min-h-[220px]">
-            <img :src="widget.image" :alt="widget.title" class="absolute inset-0 w-full h-full object-cover" />
-            <div class="absolute inset-0 bg-black/40 flex items-center justify-center text-center p-6">
-              <div>
-                <span v-if="widget.subtitle" class="inline-block px-3 py-1 bg-deep-plum text-white text-xs rounded-full uppercase tracking-wider mb-2">{{ widget.subtitle }}</span>
-                <h2 class="text-2xl md:text-5xl font-serif text-white font-bold mb-3">{{ widget.title }}</h2>
-                <p class="text-white/80 text-sm md:text-base max-w-lg mx-auto">{{ widget.description }}</p>
-              </div>
-            </div>
-          </div>
+      <!-- Countdown Sales Banner with Timer -->
+      <SectionCountdownBanner v-else-if="widget.type === 'countdown-banner'" :widget="widget" />
+
+      <!-- Custom Image Only Banners (no text, no timer, natural proportions) -->
+      <section v-else-if="widget.type === 'image-only'" class="w-full bg-white" :aria-labelledby="`image-only-heading-${widget?.key}`">
+        <!-- Optional Section Header -->
+        <div v-if="widget?.title || widget?.subtitle" class="section-heading py-6 mb-0">
+          <span v-if="widget?.subtitle" class="subtitle">
+            {{ widget.subtitle }}
+          </span>
+          <h2 :id="`image-only-heading-${widget?.key}`">
+            {{ widget.title }}
+          </h2>
+          <p v-if="widget?.description" class="text-mid-gray text-xs md:text-sm max-w-lg mx-auto font-sans leading-relaxed mt-2 text-center">
+            {{ widget.description }}
+          </p>
         </div>
+        <NuxtLink :to="widget.items?.link || '/products'" class="block w-full">
+          <picture>
+            <source media="(max-width: 768px)" :srcset="widget.imageMobile || widget.image" />
+            <img
+              :src="widget.image"
+              :alt="widget.name || 'Promotional Banner'"
+              class="w-full h-auto block"
+              loading="lazy"
+            />
+          </picture>
+        </NuxtLink>
+      </section>
+
+      <!-- Custom Vertical Cards Auto-Play Carousel -->
+      <SectionVerticalCarousel v-else-if="widget.type === 'vertical-carousel'" :widget="widget" />
+
+      <!-- Heading Banner (Full-width image banner) -->
+      <SectionHeadingBanner v-else-if="widget.type === 'heading-banner'" :widget="widget" />
+
+      <!-- Flexible Image Grid (1, 2, 3, or 4 photos grid) -->
+      <SectionFlexibleGrid v-else-if="widget.type === 'flexible-grid'" :widget="widget" />
+
+      <!-- Custom Banners -->
+      <section v-else-if="widget.type === 'banner'" class="w-full">
+        <NuxtLink :to="widget.items?.link || '/products'" class="block w-full">
+          <picture>
+            <source media="(max-width: 768px)" :srcset="widget.imageMobile || widget.image" />
+            <img :src="widget.image" :alt="widget.title" class="w-full h-auto block" loading="lazy" />
+          </picture>
+        </NuxtLink>
       </section>
 
       <!-- Custom Editorial/Comfort sections -->
@@ -59,12 +102,15 @@
         <div class="page-container">
           <div class="grid md:grid-cols-2 gap-8 items-center">
             <div class="space-y-4">
-              <span v-if="widget.subtitle" class="text-xs font-ui font-semibold text-dusty-rose uppercase tracking-wider">{{ widget.subtitle }}</span>
-              <h2 class="text-3xl md:text-4xl font-serif text-deep-plum font-bold">{{ widget.title }}</h2>
-              <p class="text-mid-gray text-sm md:text-base leading-relaxed">{{ widget.description }}</p>
+              <span v-if="widget.subtitle" class="subtitle text-left">{{ widget.subtitle }}</span>
+              <h2 class="text-3xl md:text-4xl font-serif text-deep-plum font-medium tracking-tight">{{ widget.title }}</h2>
+              <p class="text-mid-gray text-sm md:text-base leading-relaxed font-sans">{{ widget.description }}</p>
             </div>
-            <div v-if="widget.image" class="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-md min-h-[200px]">
-              <img :src="widget.image" :alt="widget.title" class="w-full h-full object-cover" />
+            <div v-if="widget.image">
+              <picture>
+                <source media="(max-width: 768px)" :srcset="widget.imageMobile || widget.image" />
+                <img :src="widget.image" :alt="widget.title" class="w-full h-auto block" loading="lazy" />
+              </picture>
             </div>
           </div>
         </div>
@@ -74,6 +120,10 @@
       <section v-else-if="widget.type === 'html'" class="section-padding bg-warm-ivory">
         <div class="page-container" v-html="widget.description"></div>
       </section>
+
+      <!-- 3 Set Carousel -->
+      <SectionThreeSetCarousel v-else-if="widget.type === '3-set-carousel'" :widget="widget" />
+    </div>
     </div>
   </div>
 </template>

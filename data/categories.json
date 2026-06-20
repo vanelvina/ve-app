@@ -4,7 +4,7 @@
     "slug": "bras",
     "name": "Bras",
     "description": "Find your perfect fit from our wide range of comfortable, supportive bras.",
-    "image": "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=600&q=80",
+    "image": "https://images.unsplash.com/photo-1628413993904-94ecb60f1239?w=600&q=80",
     "productCount": 84,
     "subcategories": [
       { "id": "sub001", "name": "T-Shirt Bras", "slug": "t-shirt-bras" },
@@ -35,7 +35,7 @@
     "slug": "shapewear",
     "name": "Shapewear",
     "description": "Smooth and shape your silhouette with our premium shapewear range.",
-    "image": "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=600&q=80",
+    "image": "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80",
     "productCount": 36,
     "subcategories": [
       { "id": "sub012", "name": "Shaping Briefs", "slug": "shaping-briefs" },
@@ -48,7 +48,7 @@
     "slug": "sleepwear",
     "name": "Sleepwear",
     "description": "Rest and rejuvenate in our ultra-soft, breathable sleepwear.",
-    "image": "https://images.unsplash.com/photo-1521510895919-46920266ddb3?w=600&q=80",
+    "image": "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80",
     "productCount": 48,
     "subcategories": [
       { "id": "sub015", "name": "Sleep Sets", "slug": "sleep-sets" },
@@ -61,7 +61,7 @@
     "slug": "activewear",
     "name": "Activewear",
     "description": "Move freely in our high-performance activewear designed for every workout.",
-    "image": "https://images.unsplash.com/photo-1518459031867-a89b944bffe4?w=600&q=80",
+    "image": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80",
     "productCount": 29,
     "subcategories": [
       { "id": "sub018", "name": "Sports Bras", "slug": "sports-bras" },
@@ -73,7 +73,7 @@
     "slug": "maternity",
     "name": "Maternity",
     "description": "Specially crafted innerwear for every stage of your motherhood journey.",
-    "image": "https://images.unsplash.com/photo-1571782742080-29e8dcf97f9d?w=600&q=80",
+    "image": "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&q=80",
     "productCount": 22,
     "subcategories": [
       { "id": "sub020", "name": "Nursing Bras", "slug": "nursing-bras" },
@@ -85,7 +85,7 @@
     "slug": "thermals",
     "name": "Thermals",
     "description": "Stay warm and cozy with our premium thermal innerwear collection.",
-    "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80",
+    "image": "https://images.unsplash.com/photo-1554284126-aa88f22d8b74?w=600&q=80",
     "productCount": 18,
     "subcategories": [
       { "id": "sub022", "name": "Thermal Tops", "slug": "thermal-tops" },
@@ -98,7 +98,7 @@
     "slug": "new-arrivals",
     "name": "New Arrivals",
     "description": "Be the first to explore our latest styles and seasonal collections.",
-    "image": "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=600&q=80",
+    "image": "https://images.unsplash.com/photo-1616150638538-ffb0679a3fc4?w=600&q=80",
     "productCount": 24,
     "subcategories": []
   }

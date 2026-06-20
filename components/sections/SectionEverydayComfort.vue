@@ -8,14 +8,17 @@
         <!-- Editorial image (Clovia Stamp frame style) -->
         <div class="flex justify-center">
           <div class="relative group stamp-frame w-full max-w-md aspect-[4/3] overflow-hidden transform md:-rotate-1 hover:rotate-0 transition-transform duration-500 shadow-premium">
-            <img
-              :src="widget?.image || 'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=800&q=80'"
-              :alt="widget?.title || 'Everyday Comfort Collection by Van Elvina'"
-              class="w-full h-full object-cover transition-transform duration-750 group-hover:scale-105"
-              loading="lazy"
-              width="800"
-              height="600"
-            />
+            <picture>
+              <source media="(max-width: 768px)" :srcset="widget?.imageMobile || widget?.image || 'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=800&q=80'" />
+              <img
+                :src="widget?.image || 'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=800&q=80'"
+                :alt="widget?.title || 'Everyday Comfort Collection by Van Elvina'"
+                class="w-full h-full object-cover transition-transform duration-750 group-hover:scale-105"
+                loading="lazy"
+                width="800"
+                height="600"
+              />
+            </picture>
             <div class="absolute inset-0 bg-gradient-to-tr from-deep-plum/20 to-transparent pointer-events-none" />
             <div class="absolute bottom-4 left-4">
               <AppBadge variant="new" :label="widget?.subtitle || 'Premium Quality'" />
@@ -26,10 +29,10 @@
         <!-- Content (Zivame typography and spacing) -->
         <div class="space-y-6">
           <div class="space-y-3">
-            <p class="text-xs font-ui font-bold text-dusty-rose uppercase tracking-[0.25em]">{{ widget?.subtitle || 'Everyday Essentials' }}</p>
-            <h2 id="everyday-heading" class="font-serif text-3xl sm:text-4xl lg:text-5xl text-deep-plum font-extrabold leading-[1.15]" v-html="widget?.title || 'Everyday Comfort<br />Collection'">
+            <span class="subtitle text-left">{{ widget?.subtitle || 'Everyday Essentials' }}</span>
+            <h2 id="everyday-heading" class="font-serif text-3xl sm:text-4xl lg:text-5xl text-deep-plum font-medium tracking-tight leading-[1.15]" v-html="widget?.title || 'Everyday Comfort<br />Collection'">
             </h2>
-            <p class="text-charcoal/70 font-ui text-sm sm:text-base leading-relaxed">
+            <p class="text-charcoal/70 font-sans text-sm sm:text-base leading-relaxed">
               {{ widget?.description || "Designed for real life — from morning rush to evening wind-down. Our Everyday Comfort Collection features ultra-soft fabrics, thoughtful fits, and styles that move with you. Because comfort isn't a luxury. It's a daily right." }}
             </p>
           </div>

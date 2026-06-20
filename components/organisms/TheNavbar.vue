@@ -1,16 +1,20 @@
 <template>
-  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-navbar" role="banner">
-    <!-- Announcement Bar (Zivame style) -->
-    <div class="bg-deep-plum text-white text-[11px] font-ui py-2 px-4 select-none border-b border-white/5">
-      <div class="page-container flex justify-between items-center">
-        <div class="flex items-center gap-4">
-          <span class="flex items-center gap-1">⚡ Free Shipping on orders above ₹999</span>
-          <span class="hidden md:flex items-center gap-1">⭐ Easy 30-day Exchange</span>
-        </div>
-        <div class="flex items-center gap-4 font-medium">
-          <NuxtLink to="/products?badge=bestseller" class="hover:text-rose-blush transition-colors">Bestsellers</NuxtLink>
-          <span class="text-white/20">|</span>
-          <NuxtLink to="/products?badge=new" class="hover:text-rose-blush transition-colors">New Arrivals</NuxtLink>
+  <header
+    class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-navbar transition-transform duration-300"
+    :class="navbarHidden ? '-translate-y-full' : 'translate-y-0'"
+    role="banner"
+  >
+    <!-- Trust Badges Ribbon (Light Golden Background, Top Left) -->
+    <div class="bg-[#FAF5E4] border-b border-rose-blush/20 py-1.5 px-4 select-none">
+      <div class="page-container">
+        <div class="flex flex-wrap items-center gap-3 sm:gap-4 text-[9px] font-ui font-bold tracking-wider text-deep-plum/70">
+          <span class="flex items-center gap-1">FREE SHIPPING</span>
+          <span class="text-charcoal/20">|</span>
+          <span class="flex items-center gap-1">100% PRIVACY</span>
+          <span class="text-charcoal/20">|</span>
+          <span class="flex items-center gap-1">CASH ON DELIVERY</span>
+          <span class="text-charcoal/20">|</span>
+          <span class="flex items-center gap-1">EASY EXCHANGE AND RETURN</span>
         </div>
       </div>
     </div>
@@ -36,11 +40,8 @@
           <img src="/logo.png" alt="Van Elvina Logo" class="h-9 md:h-11 w-auto object-contain" />
         </NuxtLink>
 
-        <!-- Spacer -->
-        <div class="hidden lg:block lg:flex-1" />
-
-        <!-- Search bar (desktop) -->
-        <div class="hidden md:flex items-center flex-1 max-w-md relative mx-4">
+        <!-- Search bar (desktop - extended to logo) -->
+        <div class="hidden md:flex items-center flex-1 relative mx-4">
           <button
             class="w-full flex items-center gap-2 px-5 py-2.5 bg-light-gray rounded-full text-xs text-mid-gray font-ui hover:bg-rose-blush/40 transition-colors duration-200 border border-transparent hover:border-dusty-rose/20"
             aria-label="Search products"
@@ -58,12 +59,12 @@
 
         <!-- Right icons (including "Find Your Fit") -->
         <div class="flex items-center gap-2 md:gap-3">
-          <!-- Find Your Fit Button (Zivame style) -->
+          <!-- Find Your Fit Button (Solid Gold, no icon) -->
           <button
             @click="ui.openSizeGuide"
-            class="hidden md:inline-flex items-center gap-1.5 px-4 py-1.5 bg-dusty-rose hover:bg-deep-plum text-white text-xs font-semibold rounded-full pulse-fit transition-all duration-300 select-none cursor-pointer"
+            class="hidden md:inline-flex items-center px-4 py-1.5 bg-[#C59B27] hover:bg-[#A37B1D] text-white text-xs font-semibold rounded-full pulse-fit transition-all duration-300 select-none cursor-pointer"
           >
-            📏 Find Your Fit
+            Find Your Fit
           </button>
 
           <!-- Search (mobile only) -->
@@ -86,11 +87,15 @@
           </NuxtLink>
 
           <!-- Account -->
-          <NuxtLink to="/account" class="btn-icon hidden sm:flex text-charcoal hover:text-deep-plum" aria-label="My account">
+          <button
+            @click="ui.openProfileDrawer"
+            class="btn-icon hidden sm:flex text-charcoal hover:text-deep-plum"
+            aria-label="My account"
+          >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-          </NuxtLink>
+          </button>
 
           <!-- Cart -->
           <NuxtLink to="/cart" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Shopping cart">
@@ -111,6 +116,20 @@
     <div class="hidden lg:block border-t border-rose-blush/40 bg-warm-ivory/30">
       <div class="page-container py-2 flex items-center justify-center">
         <nav class="flex items-center gap-1.5" aria-label="Category navigation ribbon">
+          <!-- Highlighted New Arrivals (Text Gradient, Front Index) -->
+          <NuxtLink
+            to="/products?badge=new"
+            class="px-4 py-1.5 text-xs font-ui font-extrabold uppercase tracking-wider bg-gradient-to-r from-[#B76E79] to-[#C59B27] bg-clip-text text-transparent hover:opacity-80 transition-all duration-200"
+          >
+            New Arrivals
+          </NuxtLink>
+          <!-- Highlighted Bestsellers (Text Gradient, Front Index) -->
+          <NuxtLink
+            to="/products?badge=bestseller"
+            class="px-4 py-1.5 text-xs font-ui font-extrabold uppercase tracking-wider bg-gradient-to-r from-[#B76E79] to-[#C59B27] bg-clip-text text-transparent hover:opacity-80 transition-all duration-200"
+          >
+            Bestsellers
+          </NuxtLink>
           <NuxtLink
             v-for="cat in navCategories"
             :key="cat.slug"
@@ -122,15 +141,15 @@
           </NuxtLink>
           <NuxtLink
             to="/products?badge=sale"
-            class="px-4 py-1.5 text-xs font-ui font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 rounded-md transition-all duration-200 flex items-center gap-1"
+            class="px-4 py-1.5 text-xs font-ui font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 rounded-md transition-all duration-200"
           >
-            Sale 🔥
+            Sale
           </NuxtLink>
           <NuxtLink
             to="/products"
             class="px-4 py-1.5 text-xs font-ui font-semibold uppercase tracking-wider text-deep-plum bg-rose-blush hover:bg-dusty-rose hover:text-white rounded-md transition-all duration-200"
           >
-            3 FOR ₹1099 ⚡
+            3 FOR ₹1099
           </NuxtLink>
         </nav>
       </div>
@@ -145,5 +164,37 @@ const ui = useUIStore()
 const cart = useCartStore()
 const wishlist = useWishlistStore()
 
-const navCategories = categoriesData.slice(0, 6)
+const navCategories = categoriesData.slice(0, 5)
+
+// ── Auto-hide navbar on scroll ──────────────────────────────────────────────
+// Hide when scrolled past ~2 viewport heights (approx. second widget)
+// and scrolling DOWN. Reveal immediately when scrolling UP.
+const HIDE_THRESHOLD = typeof window !== 'undefined' ? window.innerHeight * 1.5 : 600
+
+const navbarHidden = ref(false)
+let lastScrollY = 0
+
+const onScroll = () => {
+  const currentY = window.scrollY
+  const scrollingDown = currentY > lastScrollY
+
+  if (currentY > HIDE_THRESHOLD && scrollingDown) {
+    // User scrolled past second widget going down → hide
+    navbarHidden.value = true
+  } else if (!scrollingDown) {
+    // Any upward scroll → reveal immediately
+    navbarHidden.value = false
+  }
+
+  lastScrollY = currentY
+}
+
+onMounted(() => {
+  lastScrollY = window.scrollY
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll)
+})
 </script>

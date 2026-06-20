@@ -70,6 +70,10 @@
 import { useAdminStore } from '~/stores/admin'
 import { useUIStore } from '~/stores/ui'
 
+definePageMeta({
+  layout: 'admin'
+})
+
 const adminStore = useAdminStore()
 const uiStore = useUIStore()
 

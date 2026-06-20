@@ -2,13 +2,13 @@
   <section class="section-padding bg-white" :aria-labelledby="`tabs-heading-${widget?.key}`">
     <div class="page-container">
       <div class="section-heading mb-6">
-        <p v-if="widget?.subtitle" class="text-xs font-ui font-semibold text-dusty-rose uppercase tracking-[0.2em] mb-2">
+        <span v-if="widget?.subtitle" class="subtitle">
           {{ widget.subtitle }}
-        </p>
-        <h2 :id="`tabs-heading-${widget?.key}`" class="font-serif text-2xl md:text-3xl text-deep-plum font-bold">
+        </span>
+        <h2 :id="`tabs-heading-${widget?.key}`">
           {{ widget?.title || 'Shop Curated Collections' }}
         </h2>
-        <p v-if="widget?.description" class="text-charcoal/65 mt-1 text-sm">
+        <p v-if="widget?.description">
           {{ widget.description }}
         </p>
       </div>

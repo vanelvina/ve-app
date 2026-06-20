@@ -1,60 +1,82 @@
 <template>
-  <section class="relative overflow-hidden bg-warm-ivory border-b border-rose-blush/20" aria-label="Featured banners">
-    <!-- Slides -->
-    <div
-      class="flex transition-transform duration-700 ease-in-out"
-      :style="{ transform: `translateX(-${current * 100}%)` }"
-    >
+  <div>
+    <section class="relative overflow-hidden bg-white" aria-label="Featured banners">
+      <!-- Slides -->
       <div
-        v-for="(banner, idx) in banners"
-        :key="banner.id || idx"
-        class="w-full shrink-0 relative aspect-[16/7] md:aspect-[16/6] min-h-[180px] sm:min-h-[300px] md:min-h-[420px] lg:min-h-[500px]"
+        class="flex transition-transform duration-700 ease-in-out"
+        :style="{ transform: `translateX(-${current * 100}%)` }"
       >
-        <NuxtLink :to="banner.ctaLink || '/products'" class="block w-full h-full">
-          <img
-            :src="banner.image"
-            :alt="banner.title || 'Featured Banner'"
-            class="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.01]"
-            :loading="idx === 0 ? 'eager' : 'lazy'"
-          />
-        </NuxtLink>
+        <div
+          v-for="(banner, idx) in banners"
+          :key="banner.id || idx"
+          class="w-full shrink-0"
+        >
+          <NuxtLink :to="banner.ctaLink || '/products'" class="block w-full">
+            <picture>
+              <source media="(max-width: 768px)" :srcset="banner.imageMobile || banner.image" />
+              <img
+                :src="banner.image"
+                :alt="banner.title || 'Featured Banner'"
+                class="w-full h-auto block"
+                :loading="idx === 0 ? 'eager' : 'lazy'"
+              />
+            </picture>
+          </NuxtLink>
+        </div>
       </div>
-    </div>
 
-    <!-- Frosted glassy navigation arrows -->
-    <button
-      class="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/35 hover:bg-white/50 text-deep-plum hover:text-plum-800 flex items-center justify-center transition-all duration-300 backdrop-blur-md shadow-premium border border-white/20"
-      aria-label="Previous banner"
-      @click="prev"
-    >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-      </svg>
-    </button>
-    <button
-      class="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/35 hover:bg-white/50 text-deep-plum hover:text-plum-800 flex items-center justify-center transition-all duration-300 backdrop-blur-md shadow-premium border border-white/20"
-      aria-label="Next banner"
-      @click="next"
-    >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-      </svg>
-    </button>
+      <!-- Navigation arrows (overlaid on the image) -->
+      <button
+        class="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/50 hover:bg-white text-deep-plum flex items-center justify-center transition-all duration-300 backdrop-blur-sm border border-white/30"
+        aria-label="Previous banner"
+        @click="prev"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button
+        class="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-white/50 hover:bg-white text-deep-plum flex items-center justify-center transition-all duration-300 backdrop-blur-sm border border-white/30"
+        aria-label="Next banner"
+        @click="next"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </section>
 
-    <!-- Navigation dots -->
-    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-10" role="tablist" aria-label="Banner navigation">
+    <!-- Dots — active dot IS the X/Y counter pill -->
+    <div
+      v-if="banners.length > 1"
+      class="flex items-center justify-center gap-1.5 py-2.5 bg-white select-none"
+      role="tablist"
+      aria-label="Banner navigation"
+    >
       <button
         v-for="(_, idx) in banners"
         :key="idx"
-        class="transition-all duration-300 rounded-full"
-        :class="idx === current ? 'w-8 h-2 bg-deep-plum shadow-premium' : 'w-2.5 h-2.5 bg-deep-plum/20 hover:bg-deep-plum/50'"
+        class="transition-all duration-300 flex items-center justify-center"
         :aria-label="`Go to slide ${idx + 1}`"
         :aria-selected="idx === current"
         role="tab"
         @click="current = idx"
-      />
+      >
+        <!-- Active slide: show X/Y pill -->
+        <span
+          v-if="idx === current"
+          class="text-[11px] font-ui font-semibold text-white bg-deep-plum px-2.5 py-0.5 rounded-full tabular-nums leading-none"
+        >
+          {{ idx + 1 }}/{{ banners.length }}
+        </span>
+        <!-- Inactive: plain small circle -->
+        <span
+          v-else
+          class="block w-2 h-2 rounded-full bg-deep-plum/25 hover:bg-deep-plum/60"
+        />
+      </button>
     </div>
-  </section>
+  </div>
 </template>
 
 <script setup lang="ts">

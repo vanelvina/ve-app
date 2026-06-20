@@ -7,6 +7,7 @@ export const useUIStore = defineStore('ui', {
     quickViewProductSlug: null as string | null,
     sizeGuideOpen: false,
     filterDrawerOpen: false,
+    profileDrawerOpen: false,
     toasts: [] as Array<{ id: string; type: 'success' | 'error' | 'info'; message: string }>,
   }),
 
@@ -27,6 +28,10 @@ export const useUIStore = defineStore('ui', {
     openFilterDrawer() { this.filterDrawerOpen = true },
     closeFilterDrawer() { this.filterDrawerOpen = false },
     toggleFilterDrawer() { this.filterDrawerOpen = !this.filterDrawerOpen },
+
+    openProfileDrawer() { this.profileDrawerOpen = true },
+    closeProfileDrawer() { this.profileDrawerOpen = false },
+    toggleProfileDrawer() { this.profileDrawerOpen = !this.profileDrawerOpen },
 
     addToast(type: 'success' | 'error' | 'info', message: string) {
       const id = Date.now().toString()

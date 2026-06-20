@@ -33,7 +33,7 @@ export default defineNuxtConfig({
       viewport: 'width=device-width, initial-scale=1',
       meta: [
         { name: 'description', content: 'Shop premium women\'s innerwear at Van Elvina. Discover unmatched comfort, elegant designs, and everyday essentials for the modern woman.' },
-        { name: 'theme-color', content: '#6B2D4E' },
+        { name: 'theme-color', content: '#8A4F5A' },
         { property: 'og:site_name', content: 'Van Elvina' },
         { property: 'og:type', content: 'website' },
         { name: 'twitter:card', content: 'summary_large_image' },
@@ -67,7 +67,7 @@ export default defineNuxtConfig({
       name: 'Van Elvina – Women Comfort First',
       short_name: 'Van Elvina',
       description: 'Premium women\'s innerwear brand. Comfort, elegance, and style.',
-      theme_color: '#6B2D4E',
+      theme_color: '#8A4F5A',
       background_color: '#FDF8F5',
       display: 'standalone',
       orientation: 'portrait',

@@ -2,13 +2,13 @@
   <section class="section-padding bg-warm-ivory/50" :aria-labelledby="`offers-heading-${widget?.key}`">
     <div class="page-container">
       <div class="section-heading mb-8">
-        <p v-if="widget?.subtitle" class="text-xs font-ui font-semibold text-dusty-rose uppercase tracking-[0.2em] mb-2">
+        <span v-if="widget?.subtitle" class="subtitle">
           {{ widget.subtitle }}
-        </p>
-        <h2 :id="`offers-heading-${widget?.key}`" class="font-serif text-2xl md:text-3xl text-deep-plum font-bold">
+        </span>
+        <h2 :id="`offers-heading-${widget?.key}`">
           {{ widget?.title || 'Special Packs & Combos' }}
         </h2>
-        <p v-if="widget?.description" class="text-charcoal/65 mt-1 text-sm">
+        <p v-if="widget?.description">
           {{ widget.description }}
         </p>
       </div>
@@ -21,13 +21,16 @@
           class="w-72 sm:w-88 shrink-0 bg-white rounded-2xl border border-rose-blush/20 shadow-soft hover:shadow-card-hover transition-all duration-300 overflow-hidden flex flex-col snap-start group"
         >
           <!-- Image Banner -->
-          <div class="relative aspect-[4/3] bg-warm-ivory overflow-hidden">
-            <img
-              :src="offer.image"
-              :alt="offer.title"
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              loading="lazy"
-            />
+          <div class="relative bg-warm-ivory overflow-hidden">
+            <picture>
+              <source media="(max-width: 768px)" :srcset="offer.imageMobile || offer.image" />
+              <img
+                :src="offer.image"
+                :alt="offer.title"
+                class="w-full h-auto block"
+                loading="lazy"
+              />
+            </picture>
             <!-- Price overlay tag -->
             <div v-if="offer.price" class="absolute bottom-3 right-3 bg-deep-plum text-white text-xs font-ui font-bold px-3 py-1.5 rounded-full shadow-md">
               {{ offer.price }}

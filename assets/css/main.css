@@ -10,10 +10,10 @@
 /* ── Base ── */
 @layer base {
   :root {
-    --color-primary: #6B2D4E;
-    --color-primary-light: #D4748C;
-    --color-accent: #C9A96E;
-    --color-bg: #FDF8F5;
+    --color-primary: #8A4F5A;
+    --color-primary-light: #B76E79;
+    --color-accent: #C5A58E;
+    --color-bg: #FDFBFB;
     --color-text: #2C2C2C;
     --navbar-height: 64px;
     --transition-fast: 150ms ease;
@@ -87,13 +87,16 @@
 
   /* Section headings */
   .section-heading {
-    @apply text-center mb-10;
+    @apply text-center mb-8 max-w-2xl mx-auto px-4;
   }
   .section-heading h2 {
-    @apply text-heading-lg md:text-heading-xl text-deep-plum font-serif mb-2;
+    @apply text-heading-lg md:text-heading-xl text-deep-plum font-serif font-medium tracking-tight mb-2.5;
   }
   .section-heading p {
-    @apply text-mid-gray font-sans max-w-xl mx-auto text-sm md:text-base;
+    @apply text-charcoal/60 font-sans text-xs md:text-sm max-w-lg mx-auto leading-relaxed;
+  }
+  .section-heading .subtitle {
+    @apply text-[10px] md:text-xs font-ui font-bold text-dusty-rose uppercase tracking-[0.25em] mb-2 block;
   }
 
   /* Divider */

@@ -4,24 +4,27 @@
       <div class="bg-white rounded-3xl overflow-hidden border border-rose-blush/20 shadow-card flex flex-col lg:flex-row min-h-[360px]">
         <!-- Image Banner Left Side (or background) -->
         <div class="lg:w-1/2 relative min-h-[240px] lg:min-h-[auto] bg-warm-ivory">
-          <img
-            :src="widget?.image || 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80'"
-            alt="Women styling size guide"
-            class="absolute inset-0 w-full h-full object-cover"
-          />
+          <picture>
+            <source media="(max-width: 768px)" :srcset="widget?.imageMobile || widget?.items?.imageMobile || widget?.image || widget?.items?.image || 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80'" />
+            <img
+              :src="widget?.image || widget?.items?.image || 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80'"
+              alt="Women styling size guide"
+              class="absolute inset-0 w-full h-full object-cover"
+            />
+          </picture>
           <div class="absolute inset-0 bg-deep-plum/20" />
         </div>
 
         <!-- Info details and Modal Trigger -->
         <div class="lg:w-1/2 p-8 md:p-12 flex flex-col justify-center space-y-6">
           <div>
-            <p v-if="widget?.subtitle" class="text-xs font-ui font-semibold text-dusty-rose uppercase tracking-[0.2em] mb-2.5">
+            <span v-if="widget?.subtitle" class="subtitle">
               {{ widget.subtitle }}
-            </p>
-            <h2 :id="`fit-heading-${widget?.key}`" class="font-serif text-2xl md:text-3.5xl text-deep-plum font-bold leading-tight">
+            </span>
+            <h2 :id="`fit-heading-${widget?.key}`" class="font-serif text-2xl md:text-3.5xl text-deep-plum font-medium tracking-tight leading-tight">
               {{ widget?.title || 'Calculate Your Perfect Bra Fit' }}
             </h2>
-            <p class="text-charcoal/70 text-sm leading-relaxed mt-4">
+            <p class="text-charcoal/70 text-sm leading-relaxed mt-4 font-sans">
               {{ widget?.description || '80% of women wear the wrong bra size. Take our 60-second sizing test to find your exact match and shop with confidence.' }}
             </p>
           </div>

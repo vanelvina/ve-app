@@ -266,6 +266,11 @@
             <p class="text-[10px] text-charcoal/40 mt-1">Image size tip: 1400x600 pixels (or wider) is best.</p>
           </div>
           <div>
+            <label class="block font-semibold mb-1 text-charcoal/70">Mobile Image URL</label>
+            <input v-model="bannerModal.form.imageMobile" type="text" placeholder="https://example.com/image-mobile.jpg" class="w-full p-2 border border-rose-blush/30 rounded" />
+            <p class="text-[10px] text-charcoal/40 mt-1">Image size tip: 800x800 pixels is best.</p>
+          </div>
+          <div>
             <label class="block font-semibold mb-1 text-charcoal/70">Click Destination Link (e.g. /products?category=bras) *</label>
             <input v-model="bannerModal.form.ctaLink" type="text" required class="w-full p-2 border border-rose-blush/30 rounded" placeholder="/products" />
           </div>
@@ -480,7 +485,56 @@
               <option value="collection-tabs">Curated Collection Tabs (Category switcher)</option>
               <option value="fit-calculator">Fit Sizing Calculator</option>
               <option value="offers-slider">Special Packs & Offers Slider</option>
+              <option value="countdown-banner">Countdown Sale Banner (Single full width image with timer)</option>
+              <option value="image-only">Image-Only Banner (Single banner image with no text/timer, natural size)</option>
+              <option value="vertical-carousel">Vertical Cards Carousel (Sliding horizontal cards with timer)</option>
+              <option value="3-set-carousel">3 Set Carousel (Shows 3 horizontal images at a time)</option>
+              <option value="heading-banner">Heading Banner (Full-width, image only)</option>
+              <option value="flexible-grid">Flexible Image Grid (1, 2, 3, or 4 photos grid)</option>
             </select>
+          </div>
+
+          <!-- Position control — always shown for both new & existing widgets -->
+          <div class="bg-rose-blush/10 border border-rose-blush/30 rounded-lg p-3 flex items-center gap-4">
+            <div class="flex-1">
+              <label class="block font-semibold mb-1 text-deep-plum">Homepage Position</label>
+              <p class="text-[10px] text-charcoal/50 mb-1.5">Where this widget appears on the page (1 = very top)</p>
+              <input
+                v-model.number="widgetModal.form.position"
+                type="number"
+                min="1"
+                :max="widgets.length + (widgetModal.isNew ? 1 : 0)"
+                class="w-28 p-2 border border-rose-blush/30 rounded font-mono font-bold text-deep-plum text-center"
+              />
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-bold text-deep-plum/20 font-mono leading-none">{{ widgetModal.form.position }}</div>
+              <div class="text-[10px] text-charcoal/40 mt-0.5">of {{ widgets.length + (widgetModal.isNew ? 1 : 0) }}</div>
+            </div>
+          </div>
+
+          <!-- Margins Toggles -->
+          <div class="bg-rose-blush/10 border border-rose-blush/30 rounded-lg p-3">
+            <label class="block font-semibold mb-2 text-deep-plum">Widget Margins (Spacing)</label>
+            <p class="text-[10px] text-charcoal/50 mb-3">Enable or disable standard spacing around this widget.</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <label class="flex items-center cursor-pointer gap-2 bg-white/50 p-2 rounded border border-rose-blush/20">
+                <input type="checkbox" v-model="widgetModal.form.margins.top" class="accent-deep-plum w-4 h-4" />
+                <span class="text-xs font-semibold text-charcoal">Top Margin</span>
+              </label>
+              <label class="flex items-center cursor-pointer gap-2 bg-white/50 p-2 rounded border border-rose-blush/20">
+                <input type="checkbox" v-model="widgetModal.form.margins.bottom" class="accent-deep-plum w-4 h-4" />
+                <span class="text-xs font-semibold text-charcoal">Bottom Margin</span>
+              </label>
+              <label class="flex items-center cursor-pointer gap-2 bg-white/50 p-2 rounded border border-rose-blush/20">
+                <input type="checkbox" v-model="widgetModal.form.margins.left" class="accent-deep-plum w-4 h-4" />
+                <span class="text-xs font-semibold text-charcoal">Left Margin</span>
+              </label>
+              <label class="flex items-center cursor-pointer gap-2 bg-white/50 p-2 rounded border border-rose-blush/20">
+                <input type="checkbox" v-model="widgetModal.form.margins.right" class="accent-deep-plum w-4 h-4" />
+                <span class="text-xs font-semibold text-charcoal">Right Margin</span>
+              </label>
+            </div>
           </div>
 
           <div>
@@ -501,6 +555,10 @@
           <div v-if="widgetModal.form.type !== 'html'">
             <label class="block font-semibold mb-1 text-charcoal/70">Section Image URL (Banner / Editorial Image)</label>
             <input v-model="widgetModal.form.image" type="text" class="w-full p-2 border border-rose-blush/30 rounded" placeholder="https://example.com/image.jpg" />
+          </div>
+          <div v-if="widgetModal.form.type !== 'html'">
+            <label class="block font-semibold mb-1 text-charcoal/70">Section Mobile Image URL</label>
+            <input v-model="widgetModal.form.imageMobile" type="text" class="w-full p-2 border border-rose-blush/30 rounded" placeholder="https://example.com/image-mobile.jpg" />
           </div>
 
           <!-- Bullet Points details list for Editorial sections -->
@@ -531,7 +589,10 @@
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <input v-model="item.image" placeholder="Image URL *" required class="p-2 border border-rose-blush/30 rounded" />
-                  <input v-model="item.link" placeholder="Destination Link (e.g. /products)" required class="p-2 border border-rose-blush/30 rounded" />
+                  <input v-model="item.imageMobile" placeholder="Mobile Image URL" class="p-2 border border-rose-blush/30 rounded" />
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input v-model="item.link" placeholder="Destination Link (e.g. /products)" required class="col-span-2 p-2 border border-rose-blush/30 rounded" />
                 </div>
                 <input v-model="item.title" placeholder="Accessible Title (e.g. Buy 2 Get 1)" class="w-full p-2 border border-rose-blush/30 rounded" />
               </div>
@@ -555,12 +616,172 @@
           <!-- Sizing Fit calculator settings -->
           <div v-if="widgetModal.form.type === 'fit-calculator'" class="space-y-3">
             <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Mobile Image URL</label>
+              <input v-model="widgetModal.form.items.imageMobile" placeholder="https://example.com/image-mobile.jpg" class="w-full p-2 border border-rose-blush/30 rounded" />
+            </div>
+            <div>
               <label class="block font-semibold mb-1 text-charcoal/70">Sizing Test Button Text</label>
               <input v-model="widgetModal.form.items.btnText" placeholder="Start Sizing Test" required class="w-full p-2 border border-rose-blush/30 rounded" />
             </div>
             <div>
               <label class="block font-semibold mb-1 text-charcoal/70">Sizing Test Button Link</label>
               <input v-model="widgetModal.form.items.btnLink" placeholder="#" required class="w-full p-2 border border-rose-blush/30 rounded" />
+            </div>
+          </div>
+
+          <!-- Countdown sale banner settings -->
+          <div v-if="widgetModal.form.type === 'countdown-banner'" class="space-y-3">
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Click Destination Link (e.g. /products) *</label>
+              <input v-model="widgetModal.form.items.link" placeholder="/products?category=activewear" required class="w-full p-2 border border-rose-blush/30 rounded" />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Countdown End Date &amp; Time *</label>
+              <input v-model="widgetModal.form.items.endDate" type="datetime-local" required class="w-full p-2 border border-rose-blush/30 rounded" />
+              <p class="text-[10px] text-charcoal/40 mt-1">Select the target date and time when the countdown timer will hit 00:00:00.</p>
+            </div>
+          </div>
+
+          <!-- Image-only sale banner settings -->
+          <div v-if="widgetModal.form.type === 'image-only'" class="space-y-3">
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Click Destination Link (e.g. /products) *</label>
+              <input v-model="widgetModal.form.items.link" placeholder="/products?category=panties" required class="w-full p-2 border border-rose-blush/30 rounded" />
+            </div>
+          </div>
+
+          <!-- Heading Banner settings -->
+          <div v-if="widgetModal.form.type === 'heading-banner'" class="space-y-3">
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Click Destination Link (e.g. /products) *</label>
+              <input v-model="widgetModal.form.items.link" placeholder="/products?category=activewear" required class="w-full p-2 border border-rose-blush/30 rounded" />
+            </div>
+          </div>
+
+          <!-- Flexible Image Grid settings -->
+          <div v-if="widgetModal.form.type === 'flexible-grid'" class="space-y-3">
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Grid Layout Type *</label>
+              <select v-model="widgetModal.form.items.layout" class="w-full p-2 border border-rose-blush/30 rounded" required>
+                <option value="1-col">1 Column (1 Full Width Photo)</option>
+                <option value="2-col">2 Columns (2 Photos in 1 Row)</option>
+                <option value="3-col">3 Columns (3 Photos in 1 Row)</option>
+                <option value="4-grid">4 Grid (4 Photos in 2 Rows & 2 Columns)</option>
+              </select>
+            </div>
+
+            <!-- Demo Pre-load buttons -->
+            <div class="bg-rose-blush/10 p-3 rounded border border-rose-blush/30 space-y-2">
+              <span class="block font-semibold text-deep-plum text-[10px] uppercase tracking-wider">Demo Wise Templates</span>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" @click="loadFlexibleGridDemo(1)" class="px-2 py-1 bg-white hover:bg-rose-blush border border-rose-blush/40 text-deep-plum text-[10px] rounded font-bold transition-all">Load 1 Photo Demo</button>
+                <button type="button" @click="loadFlexibleGridDemo(2)" class="px-2 py-1 bg-white hover:bg-rose-blush border border-rose-blush/40 text-deep-plum text-[10px] rounded font-bold transition-all">Load 2 Photos Demo</button>
+                <button type="button" @click="loadFlexibleGridDemo(3)" class="px-2 py-1 bg-white hover:bg-rose-blush border border-rose-blush/40 text-deep-plum text-[10px] rounded font-bold transition-all">Load 3 Photos Demo</button>
+                <button type="button" @click="loadFlexibleGridDemo(4)" class="px-2 py-1 bg-white hover:bg-rose-blush border border-rose-blush/40 text-deep-plum text-[10px] rounded font-bold transition-all">Load 4 Photos Demo</button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between border-t border-rose-blush/10 pt-2">
+              <label class="block font-semibold text-charcoal/70">Grid Photos</label>
+              <button type="button" @click="addFlexibleGridPhoto" class="text-deep-plum font-semibold hover:underline">+ Add Photo</button>
+            </div>
+
+            <div class="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+              <div v-for="(photo, idx) in widgetModal.form.items.photos" :key="idx" class="p-3 bg-warm-ivory/40 rounded border border-rose-blush/30 space-y-2 relative">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-[10px] uppercase text-deep-plum">Photo #{{ idx + 1 }}</span>
+                  <button type="button" @click="widgetModal.form.items.photos.splice(idx, 1)" class="text-red-500 hover:underline">Remove</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] text-charcoal/50 mb-0.5">Image URL *</label>
+                    <input v-model="photo.image" placeholder="Image URL" required class="w-full p-1.5 border border-rose-blush/30 rounded text-xs" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-charcoal/50 mb-0.5">Mobile Image URL</label>
+                    <input v-model="photo.imageMobile" placeholder="Mobile Image URL" class="w-full p-1.5 border border-rose-blush/30 rounded text-xs" />
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] text-charcoal/50 mb-0.5">Click Destination Link</label>
+                    <input v-model="photo.link" placeholder="/products" required class="w-full p-1.5 border border-rose-blush/30 rounded text-xs" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-charcoal/50 mb-0.5">Overlay Category Title</label>
+                    <input v-model="photo.title" placeholder="e.g. Signature Bras" class="w-full p-1.5 border border-rose-blush/30 rounded text-xs" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cards Carousel List (Shared by vertical and 3-set) -->
+          <div v-if="widgetModal.form.type === 'vertical-carousel' || widgetModal.form.type === '3-set-carousel'" class="space-y-3">
+            <div v-if="widgetModal.form.type === 'vertical-carousel'">
+              <label class="block font-semibold mb-1 text-charcoal/70">Auto-Play Scroll Speed (seconds) *</label>
+              <input v-model.number="widgetModal.form.items.interval" type="number" min="1" max="60" required class="w-full p-2 border border-rose-blush/30 rounded" placeholder="3" />
+              <p class="text-[10px] text-charcoal/40 mt-1">Number of seconds to wait before auto-scrolling to the next card (e.g. 3 or 5).</p>
+            </div>
+
+            <!-- Styling/Dimensions Options -->
+            <div class="bg-rose-blush/10 p-3 rounded border border-rose-blush/35 space-y-3 text-xs">
+              <h5 class="font-bold text-[10px] text-deep-plum uppercase tracking-wider">Image Sizing & Style Settings</h5>
+              <div class="grid grid-cols-2 gap-2 text-[11px]">
+                <div>
+                  <label class="block font-semibold mb-1 text-charcoal/50">Width (e.g. 200px or leave blank for auto)</label>
+                  <input v-model="widgetModal.form.items.cardWidth" placeholder="e.g. 200px" class="w-full p-2 border border-rose-blush/30 rounded" />
+                </div>
+                <div>
+                  <label class="block font-semibold mb-1 text-charcoal/50">Height (e.g. 250px or leave blank for auto)</label>
+                  <input v-model="widgetModal.form.items.cardHeight" placeholder="e.g. 250px" class="w-full p-2 border border-rose-blush/30 rounded" />
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-[11px]">
+                <div>
+                  <label class="block font-semibold mb-1 text-charcoal/50">Border Radius (e.g. 12px or 0px)</label>
+                  <input v-model="widgetModal.form.items.borderRadius" placeholder="e.g. 12px" class="w-full p-2 border border-rose-blush/30 rounded" />
+                </div>
+                <div>
+                  <label class="block font-semibold mb-1 text-charcoal/50">Object Fit Size</label>
+                  <select v-model="widgetModal.form.items.objectFit" class="w-full p-2 border border-rose-blush/30 rounded">
+                    <option value="cover">Cover (Fill & Crop)</option>
+                    <option value="contain">Contain (Fit inside)</option>
+                    <option value="fill">Fill (Stretch)</option>
+                    <option value="none">Original Size</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex items-center gap-6 pt-1">
+                <label class="inline-flex items-center cursor-pointer">
+                  <input type="checkbox" v-model="widgetModal.form.items.widthFull" class="sr-only peer" />
+                  <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-deep-plum"></div>
+                  <span class="ms-2 text-[10px] font-semibold text-charcoal/85">Width Full (w-full)</span>
+                </label>
+                <label class="inline-flex items-center cursor-pointer">
+                  <input type="checkbox" v-model="widgetModal.form.items.showBorders" class="sr-only peer" />
+                  <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-deep-plum"></div>
+                  <span class="ms-2 text-[10px] font-semibold text-charcoal/85">Show Card Borders</span>
+                </label>
+              </div>
+            </div>
+            <div class="flex items-center justify-between mb-2 border-t border-rose-blush/10 pt-3">
+              <label class="block font-semibold text-charcoal/70">Card Slides</label>
+              <button type="button" @click="addVerticalCarouselCardField" class="text-deep-plum font-semibold hover:underline">+ Add Card Slide</button>
+            </div>
+            
+            <div class="space-y-3">
+              <div v-for="(item, idx) in widgetModal.form.items.list" :key="idx" class="p-3 bg-warm-ivory/40 rounded border border-rose-blush/30 space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-[10px] uppercase text-deep-plum">Card Slide #{{ idx + 1 }}</span>
+                  <button type="button" @click="widgetModal.form.items.list.splice(idx, 1)" class="text-red-500 hover:underline">Remove</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input v-model="item.image" placeholder="Image URL *" required class="p-2 border border-rose-blush/30 rounded" />
+                  <input v-model="item.imageMobile" placeholder="Mobile Image URL" class="p-2 border border-rose-blush/30 rounded" />
+                </div>
+                <input v-model="item.link" placeholder="Destination Click Link (e.g. /products)" required class="w-full p-2 border border-rose-blush/30 rounded" />
+              </div>
             </div>
           </div>
 
@@ -578,7 +799,10 @@
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <input v-model="item.image" placeholder="Image URL *" required class="p-2 border border-rose-blush/30 rounded" />
-                  <input v-model="item.link" placeholder="Combo Link (e.g. /products/combo)" required class="p-2 border border-rose-blush/30 rounded" />
+                  <input v-model="item.imageMobile" placeholder="Mobile Image URL" class="p-2 border border-rose-blush/30 rounded" />
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input v-model="item.link" placeholder="Combo Link (e.g. /products/combo)" required class="col-span-2 p-2 border border-rose-blush/30 rounded" />
                 </div>
                 <div class="grid grid-cols-3 gap-2">
                   <input v-model="item.title" placeholder="Offer Title *" required class="col-span-2 p-2 border border-rose-blush/30 rounded" />
@@ -604,7 +828,7 @@ import { useAdminStore } from '~/stores/admin'
 import { useUIStore } from '~/stores/ui'
 
 definePageMeta({
-  layout: 'default'
+  layout: 'admin'
 })
 
 const adminStore = useAdminStore()
@@ -692,6 +916,9 @@ const widgetModal = ref({
     subtitle: '',
     description: '',
     image: '',
+    imageMobile: '',
+    position: 1 as number,
+    margins: { top: false, bottom: false, left: false, right: false },
     items: [] as any[]
   }
 })
@@ -973,7 +1200,16 @@ const openWidgetModal = (w: any | null) => {
     widgetModal.value.itemId = w._id
     let itemsVal: any = []
     if (w.type === 'fit-calculator') {
-      itemsVal = w.items ? JSON.parse(JSON.stringify(w.items)) : { btnText: 'Start Sizing Test', btnLink: '#' }
+      itemsVal = w.items ? JSON.parse(JSON.stringify(w.items)) : { btnText: 'Start Sizing Test', btnLink: '#', image: '', imageMobile: '' }
+    } else if (w.type === 'countdown-banner' || w.type === 'image-only' || w.type === 'heading-banner') {
+      itemsVal = w.items ? JSON.parse(JSON.stringify(w.items)) : { link: '/products', endDate: '' }
+    } else if (w.type === 'flexible-grid') {
+      itemsVal = w.items ? JSON.parse(JSON.stringify(w.items)) : { layout: '2-col', photos: [] }
+    } else if (w.type === 'vertical-carousel' || w.type === '3-set-carousel') {
+      itemsVal = w.items ? JSON.parse(JSON.stringify(w.items)) : { list: [] }
+      if (!itemsVal.list) {
+        itemsVal = { ...itemsVal, list: Array.isArray(itemsVal) ? itemsVal : [] }
+      }
     } else {
       itemsVal = w.items ? JSON.parse(JSON.stringify(w.items)) : []
     }
@@ -985,6 +1221,9 @@ const openWidgetModal = (w: any | null) => {
       subtitle: w.subtitle || '',
       description: w.description || '',
       image: w.image || '',
+      imageMobile: w.imageMobile || '',
+      position: (widgets.value.findIndex((x: any) => x._id === w._id) + 1) || 1,
+      margins: w.margins ? JSON.parse(JSON.stringify(w.margins)) : { top: false, bottom: false, left: false, right: false },
       items: itemsVal
     }
   } else {
@@ -998,6 +1237,9 @@ const openWidgetModal = (w: any | null) => {
       subtitle: '',
       description: '',
       image: '',
+      imageMobile: '',
+      position: widgets.value.length + 1,
+      margins: { top: false, bottom: false, left: false, right: false },
       items: []
     }
   }
@@ -1006,9 +1248,82 @@ const openWidgetModal = (w: any | null) => {
 
 const onWidgetTypeChange = () => {
   if (widgetModal.value.form.type === 'fit-calculator') {
-    widgetModal.value.form.items = { btnText: 'Start Sizing Test', btnLink: '#' }
+    widgetModal.value.form.items = { btnText: 'Start Sizing Test', btnLink: '#', image: '', imageMobile: '' }
+  } else if (widgetModal.value.form.type === 'countdown-banner' || widgetModal.value.form.type === 'image-only' || widgetModal.value.form.type === 'heading-banner') {
+    widgetModal.value.form.items = { link: '/products', endDate: '' }
+  } else if (widgetModal.value.form.type === 'flexible-grid') {
+    widgetModal.value.form.items = { layout: '2-col', photos: [] }
+  } else if (widgetModal.value.form.type === 'vertical-carousel' || widgetModal.value.form.type === '3-set-carousel') {
+    widgetModal.value.form.items = { interval: 3, list: [] }
   } else {
     widgetModal.value.form.items = []
+  }
+}
+
+const addFlexibleGridPhoto = () => {
+  if (!widgetModal.value.form.items.photos) {
+    widgetModal.value.form.items.photos = []
+  }
+  widgetModal.value.form.items.photos.push({ image: '', imageMobile: '', link: '/products', title: '' })
+}
+
+const loadFlexibleGridDemo = (count: number) => {
+  const demoPhotos = [
+    {
+      image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80',
+      imageMobile: '',
+      title: 'Summer Lingerie Collection',
+      link: '/products?badge=sale'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1628413993904-94ecb60f1239?w=600&q=80',
+      imageMobile: '',
+      title: 'Comfort Everyday Bras',
+      link: '/products?category=bras'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80',
+      imageMobile: '',
+      title: 'Seamless Comfort Panties',
+      link: '/products?category=panties'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80',
+      imageMobile: '',
+      title: 'Elegant Shapewear',
+      link: '/products?category=shapewear'
+    },
+    {
+      image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80',
+      imageMobile: '',
+      title: 'Sleep & Lounge Wear',
+      link: '/products?category=sleepwear'
+    }
+  ]
+
+  widgetModal.value.form.items.photos = []
+  if (count === 1) {
+    widgetModal.value.form.items.layout = '1-col'
+    widgetModal.value.form.items.photos.push(demoPhotos[0])
+  } else if (count === 2) {
+    widgetModal.value.form.items.layout = '2-col'
+    widgetModal.value.form.items.photos.push(demoPhotos[1], demoPhotos[2])
+  } else if (count === 3) {
+    widgetModal.value.form.items.layout = '3-col'
+    widgetModal.value.form.items.photos.push(demoPhotos[1], demoPhotos[3], demoPhotos[4])
+  } else if (count === 4) {
+    widgetModal.value.form.items.layout = '4-grid'
+    widgetModal.value.form.items.photos.push(
+      demoPhotos[1],
+      demoPhotos[2],
+      demoPhotos[3],
+      {
+        image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',
+        imageMobile: '',
+        title: 'Active Bralettes',
+        link: '/products?category=activewear'
+      }
+    )
   }
 }
 
@@ -1016,7 +1331,7 @@ const addPromoCardField = () => {
   if (!Array.isArray(widgetModal.value.form.items)) {
     widgetModal.value.form.items = []
   }
-  widgetModal.value.form.items.push({ image: '', link: '', title: '' })
+  widgetModal.value.form.items.push({ image: '', imageMobile: '', link: '', title: '' })
 }
 
 const addCategoryTabField = () => {
@@ -1030,23 +1345,57 @@ const addOfferCardField = () => {
   if (!Array.isArray(widgetModal.value.form.items)) {
     widgetModal.value.form.items = []
   }
-  widgetModal.value.form.items.push({ image: '', link: '', title: '', subtitle: '', price: '' })
+  widgetModal.value.form.items.push({ image: '', imageMobile: '', link: '', title: '', subtitle: '', price: '' })
+}
+
+const addVerticalCarouselCardField = () => {
+  if (!widgetModal.value.form.items.list) {
+    widgetModal.value.form.items.list = []
+  }
+  widgetModal.value.form.items.list.push({ image: '', imageMobile: '', link: '' })
 }
 
 const saveWidgetConfig = async () => {
   try {
+    const desiredPosition = Number(widgetModal.value.form.position) || (widgets.value.length + 1)
     if (widgetModal.value.isNew) {
-      const order = widgets.value.length + 1
+      // Create widget first (appended at end)
       const payload = {
         ...widgetModal.value.form,
-        order,
+        order: widgets.value.length + 1,
         enabled: true
       }
       await adminStore.createWidget(payload)
       uiStore.addToast('success', 'Custom widget created')
+
+      // Re-fetch updated list then reorder if position differs from last
+      await loadAllData()
+      const newList = [...widgets.value]
+      const newWidgetIdx = newList.length - 1
+      const targetIdx = Math.max(0, Math.min(desiredPosition - 1, newList.length - 1))
+      if (newWidgetIdx !== targetIdx) {
+        // Move new widget to desired position by reordering all
+        const [moved] = newList.splice(newWidgetIdx, 1)
+        newList.splice(targetIdx, 0, moved)
+        await Promise.all(
+          newList.map((w: any, i: number) => adminStore.updateWidget(w._id, { order: i + 1 }))
+        )
+      }
     } else {
       await adminStore.updateWidget(widgetModal.value.itemId, widgetModal.value.form)
       uiStore.addToast('success', 'Widget settings saved')
+
+      // Reposition if the position changed
+      const currentIdx = widgets.value.findIndex((w: any) => w._id === widgetModal.value.itemId)
+      const targetIdx = Math.max(0, Math.min(desiredPosition - 1, widgets.value.length - 1))
+      if (currentIdx !== targetIdx && currentIdx !== -1) {
+        const newList = [...widgets.value]
+        const [moved] = newList.splice(currentIdx, 1)
+        newList.splice(targetIdx, 0, moved)
+        await Promise.all(
+          newList.map((w: any, i: number) => adminStore.updateWidget(w._id, { order: i + 1 }))
+        )
+      }
     }
     widgetModal.value.show = false
     loadAllData()
@@ -1080,21 +1429,21 @@ const moveWidget = async (index: number, direction: 'up' | 'down') => {
   const targetIndex = direction === 'up' ? index - 1 : index + 1
   if (targetIndex < 0 || targetIndex >= widgets.value.length) return
 
-  const currentWidget = widgets.value[index]
-  const targetWidget = widgets.value[targetIndex]
+  // Swap in local array first for instant UI feedback
+  const newList = [...widgets.value]
+  const tmp = newList[index]
+  newList[index] = newList[targetIndex]
+  newList[targetIndex] = tmp
+  widgets.value = newList
 
-  // Swap their order values
-  const currentOrder = currentWidget.order
-  const targetOrder = targetWidget.order
-
+  // Persist new order for all widgets (reassign sequential order values)
   try {
-    await Promise.all([
-      adminStore.updateWidget(currentWidget._id, { order: targetOrder }),
-      adminStore.updateWidget(targetWidget._id, { order: currentOrder })
-    ])
-    loadAllData()
+    await Promise.all(
+      newList.map((w: any, i: number) => adminStore.updateWidget(w._id, { order: i + 1 }))
+    )
   } catch (error: any) {
-    uiStore.addToast('error', 'Failed to swap widget order layout')
+    uiStore.addToast('error', 'Failed to save new widget order')
+    loadAllData() // revert on error
   }
 }
 

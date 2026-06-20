@@ -22,7 +22,13 @@
 
         <!-- Gallery -->
         <div class="space-y-3">
-          <div class="relative aspect-product bg-light-gray rounded-2xl overflow-hidden">
+          <div 
+            class="relative aspect-product bg-light-gray rounded-2xl overflow-hidden cursor-zoom-in group/gallery"
+            @touchstart="onTouchStart"
+            @touchmove="onTouchMove"
+            @touchend="onTouchEnd"
+            @click="openLightbox"
+          >
             <img
               :src="activeImage"
               :alt="product.name"
@@ -30,9 +36,41 @@
               width="600" height="800"
               fetchpriority="high"
             />
+            
+            <!-- Desktop Arrow Indicators -->
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-300">
+              <button 
+                @click.stop="prevImage" 
+                class="hidden md:flex w-9 h-9 rounded-full bg-white/75 hover:bg-white text-deep-plum items-center justify-center shadow-md transition-all border border-rose-blush/20"
+                aria-label="Previous Image"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            </div>
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-300">
+              <button 
+                @click.stop="nextImage" 
+                class="hidden md:flex w-9 h-9 rounded-full bg-white/75 hover:bg-white text-deep-plum items-center justify-center shadow-md transition-all border border-rose-blush/20"
+                aria-label="Next Image"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Top Overlay Badges & Zoom Icon -->
             <div class="absolute top-4 left-4 flex flex-col gap-2">
               <AppBadge v-if="product.badge" :variant="product.badge" :label="product.badge === 'bestseller' ? 'Best Seller' : product.badge" />
               <AppBadge v-if="product.discount" :label="`${product.discount}% OFF`" variant="sale" />
+            </div>
+            
+            <div class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/75 hover:bg-white text-deep-plum flex items-center justify-center shadow-md transition-all pointer-events-none border border-rose-blush/20">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+              </svg>
             </div>
           </div>
           <!-- Thumbnails -->
@@ -296,6 +334,86 @@
     <p class="font-serif text-2xl text-deep-plum mb-4">Product not found</p>
     <NuxtLink to="/products" class="btn-primary">Browse All Products</NuxtLink>
   </div>
+
+  <!-- LIGHTBOX OVERLAY -->
+  <Transition name="fade">
+    <div 
+      v-if="showLightbox" 
+      class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center select-none outline-none"
+      @keydown.esc="closeLightbox"
+      @keydown.left="prevImage"
+      @keydown.right="nextImage"
+      tabindex="0"
+      ref="lightboxRef"
+    >
+      <!-- Close button -->
+      <button 
+        @click="closeLightbox" 
+        class="absolute top-4 right-4 text-white/70 hover:text-white hover:bg-white/10 p-2.5 rounded-full transition-all z-50 cursor-pointer"
+        aria-label="Close image gallery"
+      >
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+
+      <!-- Navigation arrows (Desktop) -->
+      <button 
+        @click="prevImage" 
+        class="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white items-center justify-center transition-all z-10 cursor-pointer"
+        aria-label="Previous image"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button 
+        @click="nextImage" 
+        class="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white items-center justify-center transition-all z-10 cursor-pointer"
+        aria-label="Next image"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      <!-- Main Lightbox Image Area -->
+      <div 
+        class="w-full max-w-4xl px-4 flex items-center justify-center h-[75vh] cursor-zoom-out"
+        @click.self="closeLightbox"
+        @touchstart="onTouchStart"
+        @touchmove="onTouchMove"
+        @touchend="onTouchEnd"
+      >
+        <Transition name="slide-fade" mode="out-in">
+          <img 
+            :key="activeImageIdx" 
+            :src="allImages[activeImageIdx]" 
+            :alt="`Product detailed image ${activeImageIdx + 1}`"
+            class="max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-all duration-350 select-none"
+            @click="closeLightbox"
+          />
+        </Transition>
+      </div>
+
+      <!-- Lightbox Counter and Dots indicator -->
+      <div class="mt-6 text-center space-y-4">
+        <p class="text-white/60 text-xs font-semibold tracking-widest font-ui uppercase">
+          {{ activeImageIdx + 1 }} / {{ allImages.length }}
+        </p>
+        <div class="flex gap-2.5 justify-center">
+          <button
+            v-for="(_, idx) in allImages"
+            :key="idx"
+            class="w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer"
+            :class="activeImageIdx === idx ? 'bg-white scale-125' : 'bg-white/20 hover:bg-white/40'"
+            @click="activeImageIdx = idx"
+            :aria-label="`Go to image ${idx + 1}`"
+          />
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -323,6 +441,66 @@ const deliveryOk = ref(false)
 const activeImageIdx = ref(0)
 const activeTab = ref('Description')
 const openFaq = ref<number | null>(null)
+
+// Lightbox and Swipe functionality states
+const showLightbox = ref(false)
+const lightboxRef = ref<HTMLElement | null>(null)
+
+const touchStartX = ref(0)
+const touchEndX = ref(0)
+
+const onTouchStart = (e: TouchEvent) => {
+  touchStartX.value = e.touches[0].clientX
+  touchEndX.value = e.touches[0].clientX
+}
+
+const onTouchMove = (e: TouchEvent) => {
+  touchEndX.value = e.touches[0].clientX
+}
+
+const onTouchEnd = () => {
+  const diff = touchStartX.value - touchEndX.value
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) {
+      nextImage()
+    } else {
+      prevImage()
+    }
+  }
+}
+
+const nextImage = () => {
+  if (allImages.value.length === 0) return
+  activeImageIdx.value = (activeImageIdx.value + 1) % allImages.value.length
+}
+
+const prevImage = () => {
+  if (allImages.value.length === 0) return
+  activeImageIdx.value = (activeImageIdx.value - 1 + allImages.value.length) % allImages.value.length
+}
+
+const openLightbox = () => {
+  showLightbox.value = true
+  if (typeof window !== 'undefined') {
+    document.body.style.overflow = 'hidden'
+  }
+  nextTick(() => {
+    lightboxRef.value?.focus()
+  })
+}
+
+const closeLightbox = () => {
+  showLightbox.value = false
+  if (typeof window !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+}
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+})
 
 const tabs = ['Description', 'Fabric & Care', 'Reviews', 'FAQs']
 const faqs = faqsData.slice(0, 5)
@@ -394,4 +572,27 @@ watchEffect(() => {
 .expand-enter-active, .expand-leave-active { transition: all 0.25s ease; overflow: hidden; }
 .expand-enter-from, .expand-leave-to { max-height: 0; opacity: 0; }
 .expand-enter-to, .expand-leave-from { max-height: 300px; opacity: 1; }
+
+/* Lightbox Image Swiping Transitions */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.25s ease-out;
+}
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: translateX(15px);
+}
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-15px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

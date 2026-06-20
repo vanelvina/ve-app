@@ -35,9 +35,9 @@
         "colorHex": "#FDF8F5",
         "sizes": ["30B", "32B", "32C", "34B", "34C", "36B", "36C", "38B"],
         "images": [
-          "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=600&q=80",
-          "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&q=80",
-          "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=600&q=80"
+          "https://images.unsplash.com/photo-1628413993904-94ecb60f1239?w=600&q=80",
+          "https://images.unsplash.com/photo-1569591159212-b02ea8a9f239?w=600&q=80",
+          "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=600&q=80"
         ]
       },
       {
@@ -45,8 +45,8 @@
         "colorHex": "#D4748C",
         "sizes": ["30B", "32B", "32C", "34B", "34C", "36B"],
         "images": [
-          "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=600&q=80",
-          "https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=600&q=80"
+          "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=600&q=80",
+          "https://images.unsplash.com/photo-1628413993904-94ecb60f1239?w=600&q=80"
         ]
       },
       {
@@ -54,8 +54,8 @@
         "colorHex": "#1a1a1a",
         "sizes": ["32B", "32C", "34B", "34C", "36B", "36C"],
         "images": [
-          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80",
-          "https://images.unsplash.com/photo-1612336307429-8a898d10e223?w=600&q=80"
+          "https://images.unsplash.com/photo-1616150638538-ffb0679a3fc4?w=600&q=80",
+          "https://images.unsplash.com/photo-1569591159212-b02ea8a9f239?w=600&q=80"
         ]
       }
     ],
@@ -101,7 +101,7 @@
         "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
         "images": [
           "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80",
-          "https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=600&q=80"
+          "https://images.unsplash.com/photo-1608748324285-7824f8d22744?w=600&q=80"
         ]
       },
       {
@@ -109,7 +109,7 @@
         "colorHex": "#FFFFF0",
         "sizes": ["XS", "S", "M", "L", "XL"],
         "images": [
-          "https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?w=600&q=80"
+          "https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=600&q=80"
         ]
       }
     ],
@@ -154,8 +154,8 @@
         "colorHex": "#D4A96A",
         "sizes": ["30B", "32B", "32C", "32D", "34B", "34C", "34D", "36B", "36C"],
         "images": [
-          "https://images.unsplash.com/photo-1571782742080-29e8dcf97f9d?w=600&q=80",
-          "https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=600&q=80"
+          "https://images.unsplash.com/photo-1569591159212-b02ea8a9f239?w=600&q=80",
+          "https://images.unsplash.com/photo-1628413993904-94ecb60f1239?w=600&q=80"
         ]
       },
       {
@@ -163,7 +163,7 @@
         "colorHex": "#0D0D0D",
         "sizes": ["30B", "32B", "32C", "34B", "34C", "34D", "36B"],
         "images": [
-          "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"
+          "https://images.unsplash.com/photo-1616150638538-ffb0679a3fc4?w=600&q=80"
         ]
       }
     ],
@@ -208,7 +208,7 @@
         "colorHex": "#87A878",
         "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
         "images": [
-          "https://images.unsplash.com/photo-1562157873-818bc0726f68?w=600&q=80"
+          "https://images.unsplash.com/photo-1608748324285-7824f8d22744?w=600&q=80"
         ]
       },
       {
@@ -216,7 +216,7 @@
         "colorHex": "#C9B3D9",
         "sizes": ["S", "M", "L", "XL"],
         "images": [
-          "https://images.unsplash.com/photo-1557821552-17105176677c?w=600&q=80"
+          "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80"
         ]
       }
     ],
@@ -261,8 +261,8 @@
         "colorHex": "#FF6B6B",
         "sizes": ["XS", "S", "M", "L", "XL"],
         "images": [
-          "https://images.unsplash.com/photo-1518459031867-a89b944bffe4?w=600&q=80",
-          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80"
+          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80",
+          "https://images.unsplash.com/photo-1554284126-aa88f22d8b74?w=600&q=80"
         ]
       },
       {
@@ -270,7 +270,7 @@
         "colorHex": "#1B2B4B",
         "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
         "images": [
-          "https://images.unsplash.com/photo-1554284126-aa88f22d8b74?w=600&q=80"
+          "https://images.unsplash.com/photo-1616150638538-ffb0679a3fc4?w=600&q=80"
         ]
       }
     ],
@@ -315,8 +315,8 @@
         "colorHex": "#F5F5F0",
         "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
         "images": [
-          "https://images.unsplash.com/photo-1521510895919-46920266ddb3?w=600&q=80",
-          "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?w=600&q=80"
+          "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80",
+          "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&q=80"
         ]
       },
       {
@@ -324,7 +324,7 @@
         "colorHex": "#BFA0A8",
         "sizes": ["XS", "S", "M", "L", "XL"],
         "images": [
-          "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=600&q=80"
+          "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=600&q=80"
         ]
       }
     ],
@@ -369,7 +369,7 @@
         "colorHex": "#C8A882",
         "sizes": ["34C", "34D", "34DD", "36C", "36D", "36DD", "38C", "38D", "38DD", "40C", "40D"],
         "images": [
-          "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=600&q=80"
+          "https://images.unsplash.com/photo-1628413993904-94ecb60f1239?w=600&q=80"
         ]
       },
       {
@@ -377,7 +377,7 @@
         "colorHex": "#191970",
         "sizes": ["34C", "34D", "36C", "36D", "38C", "38D"],
         "images": [
-          "https://images.unsplash.com/photo-1612903462-44de5ee9f5db?w=600&q=80"
+          "https://images.unsplash.com/photo-1569591159212-b02ea8a9f239?w=600&q=80"
         ]
       }
     ],
@@ -422,7 +422,7 @@
         "colorHex": "#D4A982",
         "sizes": ["XS", "S", "M", "L", "XL"],
         "images": [
-          "https://images.unsplash.com/photo-1558618047-f4e90a930dc6?w=600&q=80"
+          "https://images.unsplash.com/photo-1608748324285-7824f8d22744?w=600&q=80"
         ]
       },
       {
@@ -430,7 +430,7 @@
         "colorHex": "#1C1C1C",
         "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
         "images": [
-          "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=600&q=80"
+          "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80"
         ]
       }
     ],
@@ -475,7 +475,7 @@
         "colorHex": "#F8F8F8",
         "sizes": ["S/M", "M/L", "L/XL", "XL/XXL"],
         "images": [
-          "https://images.unsplash.com/photo-1571782742080-29e8dcf97f9d?w=600&q=80"
+          "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=600&q=80"
         ]
       }
     ],
@@ -520,8 +520,8 @@
         "colorHex": "#C06080",
         "sizes": ["XS", "S", "M", "L"],
         "images": [
-          "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=600&q=80",
-          "https://images.unsplash.com/photo-1591369822096-ffd140ec948f?w=600&q=80"
+          "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=600&q=80",
+          "https://images.unsplash.com/photo-1628413993904-94ecb60f1239?w=600&q=80"
         ]
       },
       {
@@ -529,7 +529,7 @@
         "colorHex": "#0D0D0D",
         "sizes": ["XS", "S", "M", "L", "XL"],
         "images": [
-          "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80"
+          "https://images.unsplash.com/photo-1616150638538-ffb0679a3fc4?w=600&q=80"
         ]
       }
     ],
@@ -574,7 +574,7 @@
         "colorHex": "#C8A882",
         "sizes": ["S", "M", "L", "XL", "XXL", "3XL"],
         "images": [
-          "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=600&q=80"
+          "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80"
         ]
       }
     ],
@@ -619,7 +619,7 @@
         "colorHex": "#ADADAD",
         "sizes": ["XS", "S", "M", "L", "XL", "XXL"],
         "images": [
-          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80"
+          "https://images.unsplash.com/photo-1554284126-aa88f22d8b74?w=600&q=80"
         ]
       }
     ],
