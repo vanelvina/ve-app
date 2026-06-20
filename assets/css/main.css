@@ -1,7 +1,20 @@
 /* ============================================================
    Van Elvina – Global CSS
-   Design system: Cormorant Garamond (serif) + DM Sans (body)
+   Design system: Publica Sans Regular
    ============================================================ */
+
+@font-face {
+  font-family: "Publica Sans Regular";
+  src: url("https://db.onlinewebfonts.com/t/2da648610423269fab0d0cceaada478b.eot");
+  src: url("https://db.onlinewebfonts.com/t/2da648610423269fab0d0cceaada478b.eot?#iefix") format("embedded-opentype"),
+       url("https://db.onlinewebfonts.com/t/2da648610423269fab0d0cceaada478b.woff2") format("woff2"),
+       url("https://db.onlinewebfonts.com/t/2da648610423269fab0d0cceaada478b.woff") format("woff"),
+       url("https://db.onlinewebfonts.com/t/2da648610423269fab0d0cceaada478b.ttf") format("truetype"),
+       url("https://db.onlinewebfonts.com/t/2da648610423269fab0d0cceaada478b.svg#Publica Sans W00 Regular") format("svg");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -34,6 +47,8 @@
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif leading-tight;
+    letter-spacing: -0.015em;
+    text-rendering: optimizeLegibility;
   }
 
   a {
@@ -368,5 +383,30 @@
 
 .shadow-premium {
   box-shadow: 0 20px 40px -15px rgba(107, 45, 78, 0.08);
+}
+
+/* Premium Typography Pairings */
+.font-classic-heading {
+  font-family: "Publica Sans Regular", sans-serif;
+  letter-spacing: -0.01em;
+  text-rendering: optimizeLegibility;
+}
+
+.font-classic-italic {
+  font-family: "Publica Sans Regular", sans-serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.font-modern-ui {
+  font-family: "Publica Sans Regular", sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.font-modern-title {
+  font-family: "Publica Sans Regular", sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
 }
 

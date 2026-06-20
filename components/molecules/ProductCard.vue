@@ -52,21 +52,6 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </svg>
       </button>
-
-      <!-- Quick Add Size Drawer (Desktop Hover) -->
-      <div class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm p-3 translate-y-full group-hover:translate-y-0 transition-all duration-300 hidden md:block border-t border-rose-blush/20">
-        <p class="text-[9px] text-charcoal/50 font-bold uppercase tracking-wider text-center mb-1.5">Quick Add Size</p>
-        <div class="flex flex-wrap gap-1 justify-center">
-          <button
-            v-for="size in product.variants[0]?.sizes || []"
-            :key="size"
-            class="px-2.5 py-1 text-[10px] font-bold border border-rose-blush hover:border-deep-plum hover:bg-deep-plum hover:text-white rounded-md transition-all cursor-pointer text-charcoal"
-            @click.prevent="quickAddToCart(size)"
-          >
-            {{ size }}
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Product Details Content -->
@@ -143,11 +128,5 @@ const handleWishlist = () => toggle(props.product)
 
 const handleQuickAdd = () => {
   ui.openQuickView(props.product.slug)
-}
-
-const quickAddToCart = (size: string) => {
-  const defaultVariant = props.product.variants[0]
-  const colorName = defaultVariant?.color || 'Default Color'
-  addToCart(props.product, colorName, size, 1)
 }
 </script>

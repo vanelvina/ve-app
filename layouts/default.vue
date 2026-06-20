@@ -15,8 +15,8 @@
     <!-- Size Guide Modal -->
     <SizeGuideModal />
 
-    <!-- Main Content -->
-    <main class="flex-1">
+    <!-- Main Content – extra bottom padding on mobile for tab bar -->
+    <main class="flex-1 pb-16 md:pb-0">
       <slot />
     </main>
 
@@ -31,6 +31,9 @@
 
     <!-- Profile Sidebar Drawer -->
     <ProfileDrawer />
+
+    <!-- Mobile Bottom Tab Bar -->
+    <MobileBottomBar />
   </div>
 </template>
 

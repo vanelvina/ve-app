@@ -27,6 +27,9 @@
       <!-- Best Sellers -->
       <SectionBestSellers v-else-if="widget.key === 'best-sellers'" :widget="widget" />
 
+      <!-- Trending Now -->
+      <SectionTrendingNow v-else-if="widget.key === 'trending-now'" :widget="widget" />
+
       <!-- Shop By Category -->
       <SectionShopByCategory v-else-if="widget.key === 'categories'" :widget="widget" />
 
@@ -87,6 +90,12 @@
       <!-- Flexible Image Grid (1, 2, 3, or 4 photos grid) -->
       <SectionFlexibleGrid v-else-if="widget.type === 'flexible-grid'" :widget="widget" />
 
+      <!-- Centered Square Packs Grid -->
+      <SectionSquareGrid v-else-if="widget.type === 'square-grid'" :widget="widget" />
+
+      <!-- Shoppers Talk Reviews Carousel -->
+      <SectionShoppersTalk v-else-if="widget.type === 'shoppers-talk'" :widget="widget" />
+
       <!-- Custom Banners -->
       <section v-else-if="widget.type === 'banner'" class="w-full">
         <NuxtLink :to="widget.items?.link || '/products'" class="block w-full">
@@ -131,14 +140,16 @@
 <script setup lang="ts">
 import { organizationSchema } from '~/utils/schema'
 
-const widgets = ref<any[]>([])
-const loading = ref(true)
+const widgets = useState<any[]>('homepage-widgets', () => [])
+const loading = ref(widgets.value.length === 0)
 
 const fetchWidgets = async () => {
   const config = useRuntimeConfig()
   try {
     const data = await $fetch<any[]>(`${config.public.apiBase}/widgets`)
-    widgets.value = data
+    if (JSON.stringify(widgets.value) !== JSON.stringify(data)) {
+      widgets.value = data
+    }
   } catch (error) {
     console.error('Failed to load layout widgets:', error)
   } finally {
@@ -147,7 +158,12 @@ const fetchWidgets = async () => {
 }
 
 onMounted(() => {
-  fetchWidgets()
+  if (widgets.value.length === 0) {
+    fetchWidgets()
+  } else {
+    loading.value = false
+    fetchWidgets()
+  }
 })
 
 const activeWidgets = computed(() => {

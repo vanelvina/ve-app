@@ -1,12 +1,12 @@
 <template>
-  <section class="py-12 bg-white relative group" aria-labelledby="bestsellers-heading">
+  <section class="py-12 bg-white relative group" aria-labelledby="trending-heading">
     <div class="page-container">
       <!-- Section Header -->
       <div class="flex items-center justify-between pb-3 mb-6 relative">
         <div class="relative flex items-center gap-2">
-          <h2 id="bestsellers-heading" class="text-lg md:text-xl font-sans font-bold text-gray-900 tracking-tight flex items-center gap-2.5 pb-1">
-            <span>{{ widget?.title || "Bestsellers you can't miss" }}</span>
-            <img src="https://cdn.zivame.com/media/v3/Bestsellers.png" alt="Bestsellers Icon" class="h-6 w-auto object-contain inline-block shrink-0" />
+          <h2 id="trending-heading" class="text-lg md:text-xl font-sans font-bold text-gray-900 tracking-tight flex items-center gap-2.5 pb-1">
+            <span>{{ widget?.title || "Trending Now" }}</span>
+            <img src="https://cdn.zivame.com/media/v3/Trending%20now.png" alt="Trending Now Icon" class="h-6 w-auto object-contain inline-block shrink-0" />
           </h2>
         </div>
         <!-- Thicker Grey Divider Line (4px) -->
@@ -67,7 +67,7 @@
           </div>
           <!-- Empty State -->
           <div v-if="filteredProducts.length === 0" class="w-full text-center py-12 text-gray-400 text-sm">
-             No best sellers found in this category.
+             No trending styles found in this category.
           </div>
         </div>
 
@@ -108,12 +108,14 @@ const tabs = [
 
 const { all } = useProducts()
 
+// Filter all products based on active tab category
 const filteredProducts = computed(() => {
-  let list = all.value.filter(p => p.badge === 'bestseller')
+  let list = all.value.filter(p => p.badge === 'trending')
   if (activeTab.value !== 'all') {
     list = list.filter(p => p.category.toLowerCase() === activeTab.value.toLowerCase())
   }
-  return list
+  // Let's sort by rating or review count to represent "trending now"
+  return [...list].sort((a, b) => b.rating - a.rating)
 })
 
 const rowRef = ref<HTMLElement | null>(null)

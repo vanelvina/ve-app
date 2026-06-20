@@ -200,7 +200,7 @@
     "discount": 34,
     "rating": 4.6,
     "reviewCount": 156,
-    "badge": "new",
+    "badge": "trending",
     "tags": ["bamboo", "sustainable", "mid-rise", "eco"],
     "variants": [
       {
@@ -361,7 +361,7 @@
     "discount": 35,
     "rating": 4.5,
     "reviewCount": 203,
-    "badge": null,
+    "badge": "trending",
     "tags": ["minimizer", "full-coverage", "support", "plus-size"],
     "variants": [
       {
@@ -512,7 +512,7 @@
     "discount": 35,
     "rating": 4.6,
     "reviewCount": 267,
-    "badge": "new",
+    "badge": "trending",
     "tags": ["lace", "bralette", "padded", "floral", "style"],
     "variants": [
       {
@@ -566,7 +566,7 @@
     "discount": 36,
     "rating": 4.3,
     "reviewCount": 134,
-    "badge": null,
+    "badge": "trending",
     "tags": ["shapewear", "control", "high-waist", "smooth"],
     "variants": [
       {

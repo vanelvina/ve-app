@@ -1,5 +1,6 @@
 <template>
-  <div v-if="product" class="bg-warm-ivory min-h-screen">
+  <div>
+    <div v-if="product" class="bg-warm-ivory min-h-screen">
     <!-- Breadcrumb -->
     <div class="bg-white border-b border-border-gray">
       <div class="page-container py-3">
@@ -414,6 +415,7 @@
       </div>
     </div>
   </Transition>
+  </div>
 </template>
 
 <script setup lang="ts">

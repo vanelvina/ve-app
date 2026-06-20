@@ -42,9 +42,9 @@ export default {
         },
       },
       fontFamily: {
-        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
-        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
-        ui: ['"Inter"', 'system-ui', 'sans-serif'],
+        serif: ['"Publica Sans Regular"', 'Georgia', 'serif'],
+        sans: ['"Publica Sans Regular"', 'system-ui', 'sans-serif'],
+        ui: ['"Publica Sans Regular"', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         'display': ['3.5rem', { lineHeight: '1.1', fontWeight: '700' }],

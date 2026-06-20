@@ -49,20 +49,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps<{
   widget: any
 }>()
 
 const carouselRef = ref<HTMLElement | null>(null)
+let autoplayTimer: ReturnType<typeof setInterval> | null = null
+
+const startAutoplay = () => {
+  stopAutoplay()
+  autoplayTimer = setInterval(() => {
+    const el = carouselRef.value
+    if (!el) return
+    const isEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 20
+    if (isEnd) {
+      el.scrollTo({ left: 0, behavior: 'smooth' })
+    } else {
+      const scrollAmount = el.clientWidth * 0.9
+      el.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+    }
+  }, 1500)
+}
+
+const stopAutoplay = () => {
+  if (autoplayTimer) {
+    clearInterval(autoplayTimer)
+    autoplayTimer = null
+  }
+}
 
 const scroll = (direction: 'left' | 'right') => {
   if (!carouselRef.value) return
-  // Scroll by almost one full view minus a bit for overlapping
+  // Restart autoplay timer on user click to reset the 1.5s window
+  startAutoplay()
   const scrollAmount = carouselRef.value.clientWidth * 0.9
   carouselRef.value.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' })
 }
+
+onMounted(() => {
+  startAutoplay()
+})
+
+onUnmounted(() => {
+  stopAutoplay()
+})
 </script>
 
 <style scoped>
