@@ -11,8 +11,8 @@
           : 'An unexpected error occurred. Please try again.' }}
       </p>
       <div class="flex gap-3 justify-center">
-        <button class="btn-primary" @click="clearError({ redirect: '/' })">Go Home</button>
-        <button class="btn-secondary" @click="clearError({ redirect: '/products' })">Browse Products</button>
+        <button class="btn-primary" @click="handleGoHome">Go Home</button>
+        <button class="btn-secondary" @click="handleBrowse">Browse Products</button>
       </div>
     </div>
   </div>
@@ -21,4 +21,14 @@
 <script setup lang="ts">
 const props = defineProps<{ error: { statusCode: number; message?: string } | null }>()
 const { clearError } = useError()
+
+const handleGoHome = async () => {
+  await clearError()
+  await navigateTo('/')
+}
+
+const handleBrowse = async () => {
+  await clearError()
+  await navigateTo('/products')
+}
 </script>

@@ -32,10 +32,11 @@
       </NuxtLink>
 
       <!-- Category -->
-      <button
+      <NuxtLink
+        to="/categories"
         class="flex-1 flex flex-col items-center justify-center gap-0.5 group"
         aria-label="Browse categories"
-        @click="activeTab = 'category'; ui.toggleMobileMenu()"
+        @click="() => activeTab = 'category'"
       >
         <div
           class="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200"
@@ -53,7 +54,7 @@
           class="text-[10px] font-ui font-semibold transition-colors duration-200"
           :class="activeTab === 'category' ? 'text-deep-plum' : 'text-gray-400'"
         >Category</span>
-      </button>
+      </NuxtLink>
 
       <!-- Explore / Search -->
       <button
@@ -114,6 +115,7 @@ const route = useRoute()
 const activeTab = computed(() => {
   const path = route.path
   if (path === '/') return 'home'
+  if (path === '/categories') return 'category'
   if (path.startsWith('/products')) return 'explore'
   return 'home'
 })

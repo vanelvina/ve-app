@@ -166,7 +166,7 @@
     </div>
 
     <!-- Copyright (full-width black bar) -->
-    <div class="bg-black py-4 text-center">
+    <div class="bg-black pt-4 pb-20 md:pb-4 text-center">
       <div class="page-container flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-white/50 font-ui">
         <p class="w-full md:text-left text-center">© Copyright 2026 Van Elvina. All rights reserved.</p>
         <div class="w-full md:text-right text-center flex items-center justify-center md:justify-end gap-3 text-[10px] text-white/30">

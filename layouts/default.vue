@@ -3,8 +3,6 @@
     <!-- Navbar -->
     <TheNavbar />
 
-    <!-- Mobile Menu -->
-    <MobileMenu />
 
     <!-- Search Overlay -->
     <SearchOverlay />
