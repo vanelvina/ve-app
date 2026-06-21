@@ -37,6 +37,12 @@
           >
             {{ widgets.length }}
           </span>
+          <span 
+            v-else-if="tab.id === 'blogs' && blogs.length"
+            class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
+          >
+            {{ blogs.length }}
+          </span>
         </button>
       </nav>
 
@@ -425,11 +431,11 @@
       <!-- TAB 5: WIDGET LAYOUT -->
       <section v-if="activeTab === 'widgets'" class="space-y-6 animate-fade-in">
         <!-- Separate mobile and desktop view layouts tabs -->
-        <div class="flex border-b border-rose-blush/20 text-xs">
+        <div class="flex border-b-0 md:border-b border-rose-blush/20 text-xs">
           <button 
             type="button" 
             @click="widgetDeviceTab = 'desktop'" 
-            class="px-5 py-3 font-bold focus:outline-none transition-all border-b-2"
+            class="px-5 py-3 font-bold focus:outline-none transition-all border-b-0 md:border-b-2"
             :class="widgetDeviceTab === 'desktop' ? 'border-deep-plum text-deep-plum bg-rose-blush/10 rounded-t-xl' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
           >
             🖥️ Desktop Layout
@@ -437,7 +443,7 @@
           <button 
             type="button" 
             @click="widgetDeviceTab = 'mobile'" 
-            class="px-5 py-3 font-bold focus:outline-none transition-all border-b-2"
+            class="px-5 py-3 font-bold focus:outline-none transition-all border-b-0 md:border-b-2"
             :class="widgetDeviceTab === 'mobile' ? 'border-deep-plum text-deep-plum bg-rose-blush/10 rounded-t-xl' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
           >
             📱 Mobile Layout
@@ -535,6 +541,80 @@
                 <button v-if="widget.type !== 'system'" @click="deleteWidgetItem(widget._id)" class="px-3 py-1.5 text-[11px] font-bold text-red-500 hover:bg-red-50 transition-colors">Delete</button>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: BLOGS -->
+      <section v-if="activeTab === 'blogs'" class="space-y-4 animate-fade-in">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="relative w-full md:max-w-xs shadow-soft rounded-xl">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-charcoal/40">🔍</span>
+            <input v-model="searchQueries.blogs" placeholder="Search blogs..." class="w-full pl-9 pr-4 py-2 border border-charcoal/20 bg-white rounded-xl text-xs focus:outline-none focus:border-deep-plum" />
+          </div>
+          <button @click="openBlogModal(null)" class="px-4 py-2 bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-semibold shadow-premium transition-all self-end md:self-auto">
+            + Write a Blog Post
+          </button>
+        </div>
+
+        <div class="bg-white border border-charcoal/20 rounded-2xl shadow-soft overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs font-sans">
+              <thead>
+                <tr class="bg-warm-ivory text-deep-plum border-b border-rose-blush/30 font-semibold">
+                  <th class="p-4">Cover Image</th>
+                  <th class="p-4">Title / Author</th>
+                  <th class="p-4">Summary</th>
+                  <th class="p-4">Tags</th>
+                  <th class="p-4">Published Date</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-rose-blush/10">
+                <tr v-if="filteredBlogs.length === 0">
+                  <td colspan="7" class="p-8 text-center text-xs text-charcoal/45 italic">No blog posts found.</td>
+                </tr>
+                <tr v-for="blog in filteredBlogs" :key="blog._id" class="hover:bg-warm-ivory/20 transition-colors">
+                  <td class="p-4">
+                    <img :src="blog.image" class="w-16 h-10 object-cover rounded-xl shadow-soft bg-warm-ivory" />
+                  </td>
+                  <td class="p-4">
+                    <p class="font-bold text-charcoal text-sm">{{ blog.title }}</p>
+                    <p class="text-[10px] text-charcoal/50 mt-0.5">By {{ blog.author }}</p>
+                  </td>
+                  <td class="p-4 max-w-xs truncate text-charcoal/70">{{ blog.summary }}</td>
+                  <td class="p-4">
+                    <div class="flex flex-wrap gap-1">
+                      <span v-for="tag in blog.tags" :key="tag" class="px-2 py-0.5 bg-rose-blush text-deep-plum rounded text-[9px] font-semibold">
+                        {{ tag }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="p-4 text-charcoal font-medium">
+                    {{ new Date(blog.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) }}
+                  </td>
+                  <td class="p-4">
+                    <button
+                      @click="toggleBlogStatus(blog)"
+                      class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                      :class="blog.enabled ? 'bg-green-600' : 'bg-gray-200'"
+                    >
+                      <span
+                        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-soft ring-0 transition duration-200 ease-in-out"
+                        :class="blog.enabled ? 'translate-x-5' : 'translate-x-0'"
+                      />
+                    </button>
+                  </td>
+                  <td class="p-4 text-right">
+                    <div class="inline-flex rounded-lg shadow-soft border border-rose-blush overflow-hidden bg-white">
+                      <button @click="openBlogModal(blog)" class="px-3 py-1.5 text-[11px] font-bold text-deep-plum hover:bg-rose-blush/30 transition-colors border-r border-rose-blush">Edit</button>
+                      <button @click="deleteBlogItem(blog._id)" class="px-3 py-1.5 text-[11px] font-bold text-red-500 hover:bg-red-50 transition-colors">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -1229,6 +1309,68 @@
       </div>
     </div>
 
+    <!-- 7. BLOG MODAL -->
+    <div v-if="blogModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
+      <div class="bg-white rounded-3xl w-full max-w-xl p-6 overflow-y-auto max-h-[90vh] border border-charcoal/20 shadow-modal space-y-5 relative">
+        <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
+        
+        <div class="relative z-10 flex items-center justify-between border-b border-rose-blush/10 pb-3">
+          <h3 class="text-base font-serif text-deep-plum font-bold">{{ blogModal.isEdit ? 'Edit Blog Post' : 'Write a Blog Post' }}</h3>
+          <button @click="blogModal.show = false" class="text-charcoal/45 hover:text-deep-plum text-sm">✕</button>
+        </div>
+
+        <form @submit.prevent="saveBlogItem" class="space-y-4 text-xs font-ui relative z-10">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Blog Title *</label>
+              <input v-model="blogModal.form.title" type="text" required placeholder="e.g. How to Style Bralette" class="w-full p-2.5 border border-charcoal/20 rounded-xl" @input="generateBlogSlug" />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">URL Slug *</label>
+              <input v-model="blogModal.form.slug" type="text" required placeholder="e.g. how-to-style-bralette" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Author Name *</label>
+              <input v-model="blogModal.form.author" type="text" required placeholder="e.g. Tanya Agarwal" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
+            </div>
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Tags (Comma-separated) *</label>
+              <input v-model="blogModal.form.tagsString" type="text" required placeholder="e.g. Fashion, Lifestyle" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold mb-1 text-charcoal/70">Cover Image URL *</label>
+            <div class="flex gap-2">
+              <div class="w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
+                <img v-if="blogModal.form.image" :src="blogModal.form.image" class="w-full h-full object-cover" />
+                <span v-else class="text-[10px] text-charcoal/40">No preview</span>
+              </div>
+              <input v-model="blogModal.form.image" type="text" required placeholder="https://example.com/cover.jpg" class="flex-1 p-2.5 border border-charcoal/20 rounded-xl" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold mb-1 text-charcoal/70">Summary *</label>
+            <input v-model="blogModal.form.summary" type="text" required placeholder="Short summary displaying on list cards" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
+          </div>
+
+          <div>
+            <label class="block font-semibold mb-1 text-charcoal/70">Content (HTML or Markdown) *</label>
+            <textarea v-model="blogModal.form.content" rows="6" required placeholder="Write the main blog content here..." class="w-full p-2.5 border border-charcoal/20 rounded-xl font-mono"></textarea>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t border-rose-blush/10">
+            <button type="button" @click="blogModal.show = false" class="px-4 py-2 border border-charcoal/20 rounded-xl text-charcoal">Cancel</button>
+            <button type="submit" class="px-5 py-2 bg-deep-plum text-white rounded-xl shadow-premium">Save Post</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -1254,6 +1396,7 @@ const tabs = [
   { id: 'categories', name: 'Categories Selector', icon: '🗂️' },
   { id: 'products', name: 'Products Catalog', icon: '🛍️' },
   { id: 'widgets', name: 'Widgets & Layout', icon: '⚙️' },
+  { id: 'blogs', name: 'Blogs Management', icon: '📝' },
 ]
 
 // Base loaded lists
@@ -1261,6 +1404,7 @@ const banners = ref<any[]>([])
 const categories = ref<any[]>([])
 const products = ref<any[]>([])
 const widgets = ref<any[]>([])
+const blogs = ref<any[]>([])
 
 const loadingData = ref(false)
 
@@ -1269,7 +1413,8 @@ const searchQueries = ref({
   banners: '',
   categories: '',
   products: '',
-  widgets: ''
+  widgets: '',
+  blogs: ''
 })
 const productFilterCategory = ref('')
 const productFilterStock = ref('all') // 'all' | 'instock' | 'lowstock' | 'outofstock'
@@ -1351,6 +1496,16 @@ const filteredWidgets = computed(() => {
   return list
 })
 
+const filteredBlogs = computed(() => {
+  const q = searchQueries.value.blogs.toLowerCase().trim()
+  if (!q) return blogs.value
+  return blogs.value.filter(b => 
+    b.title.toLowerCase().includes(q) ||
+    b.author.toLowerCase().includes(q) ||
+    b.summary.toLowerCase().includes(q)
+  )
+})
+
 // Modals states
 const bannerModal = ref({
   show: false,
@@ -1423,6 +1578,21 @@ const widgetModal = ref({
   }
 })
 
+const blogModal = ref({
+  show: false,
+  isEdit: false,
+  itemId: '',
+  form: {
+    title: '',
+    slug: '',
+    author: 'Admin',
+    tagsString: '',
+    image: '',
+    summary: '',
+    content: ''
+  }
+})
+
 onMounted(async () => {
   adminStore.init()
   if (!adminStore.isAuthenticated) {
@@ -1444,16 +1614,18 @@ const loadAllData = async () => {
   loadingData.value = true
   const config = useRuntimeConfig()
   try {
-    const [bannersData, categoriesData, productsData, widgetsData] = await Promise.all([
+    const [bannersData, categoriesData, productsData, widgetsData, blogsData] = await Promise.all([
       $fetch<any[]>(`${config.public.apiBase}/banners`),
       $fetch<any[]>(`${config.public.apiBase}/categories`),
       $fetch<any[]>(`${config.public.apiBase}/products`),
-      $fetch<any[]>(`${config.public.apiBase}/widgets`)
+      $fetch<any[]>(`${config.public.apiBase}/widgets`),
+      $fetch<any[]>(`${config.public.apiBase}/blogs/admin`, { headers: adminStore.getHeaders() })
     ])
     banners.value = bannersData
     categories.value = categoriesData
     products.value = productsData
     widgets.value = widgetsData
+    blogs.value = blogsData
   } catch (error) {
     console.error('Failed to load dashboard data:', error)
     uiStore.addToast('error', 'Error loading database resources')
@@ -1966,6 +2138,87 @@ const moveWidget = async (index: number, direction: 'up' | 'down') => {
   } catch (error: any) {
     uiStore.addToast('error', 'Failed to save new widget order')
     loadAllData()
+  }
+}
+
+// BLOGS CRUD & HANDLERS
+const openBlogModal = (blog: any | null) => {
+  if (blog) {
+    blogModal.value.isEdit = true
+    blogModal.value.itemId = blog._id
+    blogModal.value.form = {
+      title: blog.title,
+      slug: blog.slug,
+      author: blog.author || 'Admin',
+      tagsString: blog.tags ? blog.tags.join(', ') : '',
+      image: blog.image,
+      summary: blog.summary,
+      content: blog.content
+    }
+  } else {
+    blogModal.value.isEdit = false
+    blogModal.value.itemId = ''
+    blogModal.value.form = {
+      title: '',
+      slug: '',
+      author: 'Admin',
+      tagsString: 'Fashion, Lifestyle',
+      image: '',
+      summary: '',
+      content: ''
+    }
+  }
+  blogModal.value.show = true
+}
+
+const generateBlogSlug = () => {
+  if (!blogModal.value.isEdit) {
+    blogModal.value.form.slug = blogModal.value.form.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_]+/g, '-')
+  }
+}
+
+const saveBlogItem = async () => {
+  const payload = {
+    ...blogModal.value.form,
+    tags: blogModal.value.form.tagsString.split(',').map((t: string) => t.trim()).filter((t: string) => t)
+  }
+  try {
+    if (blogModal.value.isEdit) {
+      await adminStore.updateBlog(blogModal.value.itemId, payload)
+      uiStore.addToast('success', 'Blog post updated successfully')
+    } else {
+      await adminStore.createBlog(payload)
+      uiStore.addToast('success', 'Blog post created successfully')
+    }
+    blogModal.value.show = false
+    loadAllData()
+  } catch (error: any) {
+    uiStore.addToast('error', error.message || 'Failed to save blog post')
+  }
+}
+
+const toggleBlogStatus = async (blog: any) => {
+  try {
+    await adminStore.updateBlog(blog._id, { enabled: !blog.enabled })
+    uiStore.addToast('success', `Blog status updated successfully`)
+    loadAllData()
+  } catch (error: any) {
+    uiStore.addToast('error', error.message || 'Failed to toggle blog')
+  }
+}
+
+const deleteBlogItem = async (id: string) => {
+  if (!confirm('Are you sure you want to delete this blog post?')) return
+  try {
+    await adminStore.deleteBlog(id)
+    uiStore.addToast('success', 'Blog post deleted successfully')
+    loadAllData()
+  } catch (error: any) {
+    uiStore.addToast('error', error.message || 'Failed to delete blog')
   }
 }
 </script>

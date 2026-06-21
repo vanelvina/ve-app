@@ -9,7 +9,7 @@
         <div
           v-for="(item, idx) in widget.items?.list"
           :key="idx"
-          class="shrink-0 w-[calc(100%/3-0.33rem)] md:w-[calc(100%/3-0.66rem)] snap-start"
+          class="shrink-0 w-[calc(50%-0.25rem)] md:w-[calc(100%/3-0.66rem)] snap-start"
         >
           <NuxtLink :to="item.link || '/products'" class="block w-full">
             <picture>

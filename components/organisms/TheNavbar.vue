@@ -17,7 +17,7 @@
           <NuxtLink to="/" aria-label="Van Elvina – Home">
             <img src="/favicon.png" alt="Van Elvina" class="w-10 h-10 object-contain" />
           </NuxtLink>
-          <p class="text-base font-bold font-serif text-deep-plum tracking-tight">Hey Delicate! 👋</p>
+          <p class="text-base font-bold font-serif text-deep-plum tracking-tight">Hey Delicate!</p>
         </div>
 
         <!-- Right icon tray -->
@@ -235,11 +235,13 @@ const onScroll = () => {
     const y = window.scrollY
 
     if (isMobile()) {
-      // Direction-based: instant hide on any downward movement
-      if (y === 0) {
+      // Direction-based: hide on scroll down, show on scroll up
+      if (y <= 0) {
         navbarHidden.value = false
       } else if (y > lastScrollY) {
         navbarHidden.value = true
+      } else if (y < lastScrollY) {
+        navbarHidden.value = false
       }
     } else {
       // Position-based with hysteresis: hide at 50%, show again at 20%

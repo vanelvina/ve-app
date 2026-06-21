@@ -19,6 +19,7 @@
     </main>
 
     <!-- Footer -->
+    <SectionBlogs v-if="!route.path.startsWith('/blogs')" />
     <TheFooter />
 
     <!-- Toast Notifications -->
@@ -36,5 +37,5 @@
 </template>
 
 <script setup lang="ts">
-// Layout is auto-loaded, no additional setup needed
+const route = useRoute()
 </script>

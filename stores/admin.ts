@@ -183,6 +183,31 @@ export const useAdminStore = defineStore('admin', {
       })
     },
 
+    // CRUD Blogs
+    async createBlog(blogData: any) {
+      const config = useRuntimeConfig()
+      return $fetch(`${config.public.apiBase}/blogs`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: blogData
+      })
+    },
+    async updateBlog(id: string, blogData: any) {
+      const config = useRuntimeConfig()
+      return $fetch(`${config.public.apiBase}/blogs/${id}`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: blogData
+      })
+    },
+    async deleteBlog(id: string) {
+      const config = useRuntimeConfig()
+      return $fetch(`${config.public.apiBase}/blogs/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders()
+      })
+    },
+
     // File Upload
     async uploadImage(file: File) {
       const config = useRuntimeConfig()

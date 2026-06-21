@@ -162,7 +162,16 @@ const fetchWidgets = async () => {
   }
 }
 
+const isMobileScreen = ref(false)
+
+const updateScreenSize = () => {
+  isMobileScreen.value = window.innerWidth < 768
+}
+
 onMounted(() => {
+  updateScreenSize()
+  window.addEventListener('resize', updateScreenSize, { passive: true })
+
   if (widgets.value.length === 0) {
     fetchWidgets()
   } else {
@@ -171,9 +180,22 @@ onMounted(() => {
   }
 })
 
+onUnmounted(() => {
+  if (import.meta.client) {
+    window.removeEventListener('resize', updateScreenSize)
+  }
+})
+
 const activeWidgets = computed(() => {
   return [...widgets.value]
     .filter(w => w.enabled)
+    .filter(w => {
+      if (isMobileScreen.value) {
+        return w.device === 'mobile'
+      } else {
+        return w.device !== 'mobile'
+      }
+    })
     .map(w => ({
       ...w,
       cleanKey: w.key ? w.key.replace('-mobile', '').replace('-desktop', '') : ''
