@@ -423,7 +423,27 @@
       </section>
 
       <!-- TAB 5: WIDGET LAYOUT -->
-      <section v-if="activeTab === 'widgets'" class="space-y-4 animate-fade-in">
+      <section v-if="activeTab === 'widgets'" class="space-y-6 animate-fade-in">
+        <!-- Separate mobile and desktop view layouts tabs -->
+        <div class="flex border-b border-rose-blush/20 text-xs">
+          <button 
+            type="button" 
+            @click="widgetDeviceTab = 'desktop'" 
+            class="px-5 py-3 font-bold focus:outline-none transition-all border-b-2"
+            :class="widgetDeviceTab === 'desktop' ? 'border-deep-plum text-deep-plum bg-rose-blush/10 rounded-t-xl' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
+          >
+            🖥️ Desktop Layout
+          </button>
+          <button 
+            type="button" 
+            @click="widgetDeviceTab = 'mobile'" 
+            class="px-5 py-3 font-bold focus:outline-none transition-all border-b-2"
+            :class="widgetDeviceTab === 'mobile' ? 'border-deep-plum text-deep-plum bg-rose-blush/10 rounded-t-xl' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
+          >
+            📱 Mobile Layout
+          </button>
+        </div>
+
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div class="flex flex-col sm:flex-row gap-3 w-full sm:max-w-md">
             <div class="relative shadow-soft rounded-xl w-full">
@@ -441,6 +461,7 @@
               <option value="flexible-grid">Flexible Photo Grid</option>
               <option value="square-grid">Square Pack Grid</option>
               <option value="shoppers-talk">Shoppers Talk Reviews</option>
+              <option value="mobile-category-list">Mobile Category List (Circles)</option>
             </select>
           </div>
 
@@ -904,6 +925,7 @@
               <option value="flexible-grid">Flexible Multi Grid</option>
               <option value="square-grid">Centered Square Grid Icons</option>
               <option value="shoppers-talk">Shoppers Talk Reviews Grid</option>
+              <option value="mobile-category-list">Mobile Category List (Circular Tiles)</option>
             </select>
           </div>
 
@@ -949,18 +971,16 @@
             <label class="block font-semibold mb-1 text-charcoal/70">Description / Embed HTML Code</label>
             <textarea v-model="widgetModal.form.description" rows="3" class="w-full p-2.5 border border-charcoal/20 rounded-xl"></textarea>
           </div>
-
-          <div v-if="widgetModal.form.type !== 'html'" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
+          <div v-if="widgetModal.form.type !== 'html'" class="grid grid-cols-1 gap-3">
+            <div v-if="widgetModal.form.device === 'desktop'">
               <label class="block font-semibold mb-1 text-charcoal/70">Section Desktop Image URL</label>
               <input v-model="widgetModal.form.image" type="text" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
             </div>
-            <div>
+            <div v-if="widgetModal.form.device === 'mobile'">
               <label class="block font-semibold mb-1 text-charcoal/70">Section Mobile Image URL</label>
               <input v-model="widgetModal.form.imageMobile" type="text" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
             </div>
           </div>
-
           <!-- DYNAMIC TYPE-SPECIFIC EDITOR MODULES -->
 
           <!-- 1. Editorial Comfort Feature Checklist -->
@@ -987,9 +1007,9 @@
               <div v-for="(item, idx) in widgetModal.form.items" :key="idx" class="p-3 bg-warm-ivory border border-rose-blush/25 rounded-2xl space-y-2 relative">
                 <button type="button" @click="widgetModal.form.items.splice(idx, 1)" class="absolute top-2 right-2 text-red-500 text-xs">✕</button>
                 <span class="font-bold text-[9px] uppercase text-deep-plum">Promo Card #{{ idx + 1 }}</span>
-                <div class="grid grid-cols-2 gap-2">
-                  <input v-model="item.image" placeholder="Image URL *" required class="p-2 border border-charcoal/20 bg-white rounded-lg" />
-                  <input v-model="item.imageMobile" placeholder="Mobile Image URL" class="p-2 border border-charcoal/20 bg-white rounded-lg" />
+                <div class="grid grid-cols-1 gap-2">
+                  <input v-if="widgetModal.form.device === 'desktop'" v-model="item.image" placeholder="Image URL *" required class="p-2 border border-charcoal/20 bg-white rounded-lg" />
+                  <input v-if="widgetModal.form.device === 'mobile'" v-model="item.imageMobile" placeholder="Mobile Image URL *" required class="p-2 border border-charcoal/20 bg-white rounded-lg" />
                 </div>
                 <input v-model="item.link" placeholder="Destination Link (e.g. /products)" required class="w-full p-2 border border-charcoal/20 bg-white rounded-lg" />
                 <input v-model="item.title" placeholder="Accessible Text Title (e.g. Buy 2 Get 1)" class="w-full p-2 border border-charcoal/20 bg-white rounded-lg" />
@@ -1034,6 +1054,59 @@
             </div>
           </div>
 
+          <!-- 9. Mobile Category List items editor -->
+          <div v-if="widgetModal.form.type === 'mobile-category-list'" class="border-t border-rose-blush/15 pt-3">
+            <div class="flex items-center justify-between mb-1">
+              <label class="block font-bold text-deep-plum">Category Circle Items</label>
+              <button type="button" @click="addMobileCategoryItem" class="text-deep-plum font-bold hover:underline">+ Add Item</button>
+            </div>
+            <p class="text-[9px] text-charcoal/45 mb-2">Each item = one circular tile. Image is optional; you can use overlay text + bgColor instead (e.g. for a sale badge).</p>
+            <div v-if="widgetModal.form.items?.viewAllLink !== undefined" class="mb-2">
+              <label class="block font-semibold mb-1 text-charcoal/70">View All Link (optional)</label>
+              <input v-model="widgetModal.form.items.viewAllLink" placeholder="/products" class="w-full p-2 border border-charcoal/20 bg-white rounded-lg text-xs" />
+            </div>
+            <div class="space-y-3 max-h-[280px] overflow-y-auto pr-1">
+              <div
+                v-for="(item, idx) in (widgetModal.form.items?.list ?? [])"
+                :key="idx"
+                class="p-3 bg-warm-ivory border border-rose-blush/25 rounded-2xl space-y-2 relative"
+              >
+                <button type="button" @click="(widgetModal.form.items.list).splice(idx, 1)" class="absolute top-2 right-2 text-red-500 text-xs font-bold">✕</button>
+                <span class="font-bold text-[9px] uppercase text-deep-plum">Circle #{{ idx + 1 }}</span>
+
+                <!-- Image + preview -->
+                <div class="flex gap-2 items-center">
+                  <div class="w-10 h-10 shrink-0 rounded-full overflow-hidden bg-rose-blush border border-charcoal/20 flex items-center justify-center shadow-soft">
+                    <img v-if="item.image" :src="item.image" class="w-full h-full object-cover" />
+                    <span v-else class="text-[9px] text-charcoal/40">No img</span>
+                  </div>
+                  <input v-model="item.image" placeholder="Image URL (optional)" class="flex-1 p-2 border border-charcoal/20 bg-white rounded-lg text-xs" />
+                </div>
+
+                <div>
+                  <label class="block text-[9px] font-bold text-charcoal/50 mb-0.5">Link *</label>
+                  <input v-model="item.link" placeholder="/products?category=bras" required class="w-full p-2 border border-charcoal/20 bg-white rounded-lg text-xs" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[9px] font-bold text-charcoal/50 mb-0.5">Overlay Text (on image)</label>
+                    <input v-model="item.overlay" placeholder="e.g. SOS Sale" class="w-full p-2 border border-charcoal/20 bg-white rounded-lg text-xs" />
+                  </div>
+                  <div>
+                    <label class="block text-[9px] font-bold text-charcoal/50 mb-0.5">BG Color / Gradient CSS</label>
+                    <input v-model="item.bgColor" placeholder="#B76E79 or gradient…" class="w-full p-2 border border-charcoal/20 bg-white rounded-lg text-xs" />
+                  </div>
+                </div>
+
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" v-model="item.highlight" class="rounded" />
+                  <span class="text-[10px] font-semibold text-charcoal/70">Highlight (dark ring border)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <!-- 5. Category Tabs Slider -->
           <div v-if="widgetModal.form.type === 'collection-tabs'" class="border-t border-rose-blush/15 pt-3">
             <div class="flex items-center justify-between mb-2">
@@ -1050,7 +1123,11 @@
 
           <!-- 6. Fit Sizing Calculator Config -->
           <div v-if="widgetModal.form.type === 'fit-calculator'" class="space-y-3 border-t border-rose-blush/15 pt-3">
-            <div>
+            <div v-if="widgetModal.form.device === 'desktop'">
+              <label class="block font-semibold mb-1 text-charcoal/70">Desktop Banner Image</label>
+              <input v-model="widgetModal.form.items.image" placeholder="https://example.com/desk-calc.jpg" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
+            </div>
+            <div v-if="widgetModal.form.device === 'mobile'">
               <label class="block font-semibold mb-1 text-charcoal/70">Mobile Banner Image</label>
               <input v-model="widgetModal.form.items.imageMobile" placeholder="https://example.com/mobile-calc.jpg" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
             </div>
@@ -1076,9 +1153,9 @@
               <div v-for="(item, idx) in widgetModal.form.items" :key="idx" class="p-3 bg-warm-ivory border border-rose-blush/25 rounded-2xl space-y-2 relative">
                 <button type="button" @click="widgetModal.form.items.splice(idx, 1)" class="absolute top-2 right-2 text-red-500 text-xs">✕</button>
                 <span class="font-bold text-[9px] uppercase text-deep-plum">Combo Card #{{ idx + 1 }}</span>
-                <div class="grid grid-cols-2 gap-2">
-                  <input v-model="item.image" placeholder="Image URL *" required class="p-2 border border-charcoal/20 bg-white rounded-lg" />
-                  <input v-model="item.imageMobile" placeholder="Mobile Image URL" class="p-2 border border-charcoal/20 bg-white rounded-lg" />
+                <div class="grid grid-cols-1 gap-2">
+                  <input v-if="widgetModal.form.device === 'desktop'" v-model="item.image" placeholder="Image URL *" required class="p-2 border border-charcoal/20 bg-white rounded-lg" />
+                  <input v-if="widgetModal.form.device === 'mobile'" v-model="item.imageMobile" placeholder="Mobile Image URL *" required class="p-2 border border-charcoal/20 bg-white rounded-lg" />
                 </div>
                 <input v-model="item.link" placeholder="Combo Link (e.g. /products)" required class="w-full p-2 border border-charcoal/20 bg-white rounded-lg" />
                 <div class="grid grid-cols-3 gap-2">
@@ -1135,9 +1212,9 @@
               <div v-for="(item, idx) in widgetModal.form.items.list" :key="idx" class="p-3 bg-warm-ivory border border-rose-blush/25 rounded-2xl space-y-2 relative">
                 <button type="button" @click="widgetModal.form.items.list.splice(idx, 1)" class="absolute top-2 right-2 text-red-500 text-xs">✕</button>
                 <span class="font-bold text-[9px] uppercase text-deep-plum">Slide #{{ idx + 1 }}</span>
-                <div class="grid grid-cols-2 gap-2">
-                  <input v-model="item.image" placeholder="Image URL *" required class="p-2 border border-charcoal/20 bg-white rounded-lg" />
-                  <input v-model="item.imageMobile" placeholder="Mobile Image URL" class="p-2 border border-charcoal/20 bg-white rounded-lg" />
+                <div class="grid grid-cols-1 gap-2">
+                  <input v-if="widgetModal.form.device === 'desktop'" v-model="item.image" placeholder="Image URL *" required class="p-2 border border-charcoal/20 bg-white rounded-lg" />
+                  <input v-if="widgetModal.form.device === 'mobile'" v-model="item.imageMobile" placeholder="Mobile Image URL *" required class="p-2 border border-charcoal/20 bg-white rounded-lg" />
                 </div>
                 <input v-model="item.link" placeholder="Destination Redirect Link *" required class="w-full p-2 border border-charcoal/20 bg-white rounded-lg" />
               </div>
@@ -1169,6 +1246,7 @@ const uiStore = useUIStore()
 
 const activeTab = ref('overview')
 const productFormTab = ref('general')
+const widgetDeviceTab = ref('desktop')
 
 const tabs = [
   { id: 'overview', name: 'Dashboard Overview', icon: '📊' },
@@ -1265,6 +1343,11 @@ const filteredWidgets = computed(() => {
   if (widgetFilterType.value !== 'all') {
     list = list.filter(w => w.type === widgetFilterType.value)
   }
+  // Filter by target device view (default existing ones to desktop)
+  list = list.filter(w => {
+    const dev = w.device || 'desktop'
+    return dev === widgetDeviceTab.value
+  })
   return list
 })
 
@@ -1328,6 +1411,7 @@ const widgetModal = ref({
     key: '',
     name: '',
     type: 'system',
+    device: 'desktop',
     title: '',
     subtitle: '',
     description: '',
@@ -1637,6 +1721,11 @@ const openWidgetModal = (w: any | null) => {
       if (!itemsVal.list) {
         itemsVal = { ...itemsVal, list: [] }
       }
+    } else if (w.type === 'mobile-category-list') {
+      itemsVal = (w.items && typeof w.items === 'object' && !Array.isArray(w.items))
+        ? JSON.parse(JSON.stringify(w.items))
+        : { viewAllLink: '', list: [] }
+      if (!itemsVal.list) itemsVal.list = []
     } else {
       itemsVal = Array.isArray(w.items) ? JSON.parse(JSON.stringify(w.items)) : []
     }
@@ -1644,6 +1733,7 @@ const openWidgetModal = (w: any | null) => {
       key: w.key,
       name: w.name,
       type: w.type || 'system',
+      device: w.device || 'desktop',
       title: w.title || '',
       subtitle: w.subtitle || '',
       description: w.description || '',
@@ -1660,6 +1750,7 @@ const openWidgetModal = (w: any | null) => {
       key: '',
       name: '',
       type: 'banner',
+      device: widgetDeviceTab.value,
       title: '',
       subtitle: '',
       description: '',
@@ -1684,6 +1775,8 @@ const onWidgetTypeChange = () => {
     widgetModal.value.form.items = { interval: 3, list: [] }
   } else if (widgetModal.value.form.type === 'square-grid' || widgetModal.value.form.type === 'shoppers-talk') {
     widgetModal.value.form.items = []
+  } else if (widgetModal.value.form.type === 'mobile-category-list') {
+    widgetModal.value.form.items = { viewAllLink: '', list: [] }
   } else {
     widgetModal.value.form.items = []
   }
@@ -1733,12 +1826,70 @@ const addVerticalCarouselCardField = () => {
   widgetModal.value.form.items.list.push({ image: '', imageMobile: '', link: '' })
 }
 
+const addMobileCategoryItem = () => {
+  if (!widgetModal.value.form.items || typeof widgetModal.value.form.items !== 'object') {
+    widgetModal.value.form.items = { viewAllLink: '', list: [] }
+  }
+  if (!widgetModal.value.form.items.list) {
+    widgetModal.value.form.items.list = []
+  }
+  widgetModal.value.form.items.list.push({
+    image: '',
+    label: '',
+    link: '/products',
+    overlay: '',
+    bgColor: '',
+    highlight: false
+  })
+}
 const saveWidgetConfig = async () => {
   try {
     const desiredPosition = Number(widgetModal.value.form.position) || (widgets.value.length + 1)
+    
+    // Clone form to sanitize before saving
+    const formCopy = JSON.parse(JSON.stringify(widgetModal.value.form))
+    
+    // Sanitize image fields based on selected device view
+    if (formCopy.device === 'desktop') {
+      formCopy.imageMobile = ''
+      if (formCopy.type === 'fit-calculator' && formCopy.items) {
+        formCopy.items.imageMobile = ''
+      }
+      if (formCopy.type === 'promo-grid' || formCopy.type === 'offers-slider') {
+        if (Array.isArray(formCopy.items)) {
+          formCopy.items.forEach((item: any) => {
+            if (item) item.imageMobile = ''
+          })
+        }
+      }
+      if ((formCopy.type === 'vertical-carousel' || formCopy.type === '3-set-carousel') && formCopy.items?.list) {
+        formCopy.items.list.forEach((item: any) => {
+          if (item) item.imageMobile = ''
+        })
+      }
+    } else if (formCopy.device === 'mobile') {
+      // Mobile form gets imageMobile, we copy it to image for fallback
+      formCopy.image = formCopy.imageMobile
+      if (formCopy.type === 'fit-calculator' && formCopy.items) {
+        formCopy.items.image = formCopy.items.imageMobile
+      }
+      if (formCopy.type === 'promo-grid' || formCopy.type === 'offers-slider') {
+        if (Array.isArray(formCopy.items)) {
+          formCopy.items.forEach((item: any) => {
+            if (item) item.image = item.imageMobile
+          })
+        }
+      }
+      if ((formCopy.type === 'vertical-carousel' || formCopy.type === '3-set-carousel') && formCopy.items?.list) {
+        formCopy.items.list.forEach((item: any) => {
+          if (item) item.image = item.imageMobile
+        })
+      }
+    }
+
     if (widgetModal.value.isNew) {
       const payload = {
-        ...widgetModal.value.form,
+        ...formCopy,
         order: widgets.value.length + 1,
         enabled: true
       }
@@ -1757,7 +1908,7 @@ const saveWidgetConfig = async () => {
         )
       }
     } else {
-      await adminStore.updateWidget(widgetModal.value.itemId, widgetModal.value.form)
+      await adminStore.updateWidget(widgetModal.value.itemId, formCopy)
       uiStore.addToast('success', 'Widget settings saved')
 
       const currentIdx = widgets.value.findIndex((w: any) => w._id === widgetModal.value.itemId)
@@ -1777,7 +1928,6 @@ const saveWidgetConfig = async () => {
     uiStore.addToast('error', error.message || 'Failed to save widget settings')
   }
 }
-
 const toggleWidgetStatus = async (widget: any) => {
   try {
     await adminStore.updateWidget(widget._id, { enabled: !widget.enabled })

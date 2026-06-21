@@ -4,40 +4,42 @@
     <div>
       <div 
         v-for="widget in activeWidgets" 
-        :key="widget.key"
+        :key="widget._id"
         :class="{
           'mt-4 md:mt-8': widget.margins?.top,
           'mb-4 md:mb-8': widget.margins?.bottom,
           'ml-4 md:ml-6': widget.margins?.left,
-          'mr-4 md:mr-6': widget.margins?.right
+          'mr-4 md:mr-6': widget.margins?.right,
+          'block md:hidden': widget.device === 'mobile',
+          'hidden md:block': widget.device !== 'mobile'
         }"
       >
       <!-- Hero Banner -->
-      <HeroBanner v-if="widget.key === 'hero'" :widget="widget" />
+      <HeroBanner v-if="widget.cleanKey === 'hero'" :widget="widget" />
 
       <!-- Featured Products -->
-      <SectionFeaturedProducts v-else-if="widget.key === 'featured'" :widget="widget" />
+      <SectionFeaturedProducts v-else-if="widget.cleanKey === 'featured'" :widget="widget" />
 
       <!-- New Arrivals -->
-      <SectionNewArrivals v-else-if="widget.key === 'new-arrivals'" :widget="widget" />
+      <SectionNewArrivals v-else-if="widget.cleanKey === 'new-arrivals'" :widget="widget" />
 
       <!-- Everyday Comfort Editorial -->
-      <SectionEverydayComfort v-else-if="widget.key === 'everyday-comfort'" :widget="widget" />
+      <SectionEverydayComfort v-else-if="widget.cleanKey === 'everyday-comfort'" :widget="widget" />
 
       <!-- Best Sellers -->
-      <SectionBestSellers v-else-if="widget.key === 'best-sellers'" :widget="widget" />
+      <SectionBestSellers v-else-if="widget.cleanKey === 'best-sellers'" :widget="widget" />
 
       <!-- Trending Now -->
-      <SectionTrendingNow v-else-if="widget.key === 'trending-now'" :widget="widget" />
+      <SectionTrendingNow v-else-if="widget.cleanKey === 'trending-now'" :widget="widget" />
 
       <!-- Shop By Category -->
-      <SectionShopByCategory v-else-if="widget.key === 'categories'" :widget="widget" />
+      <SectionShopByCategory v-else-if="widget.cleanKey === 'categories'" :widget="widget" />
 
       <!-- Customer Reviews -->
-      <SectionCustomerReviews v-else-if="widget.key === 'reviews'" :widget="widget" />
+      <SectionCustomerReviews v-else-if="widget.cleanKey === 'reviews'" :widget="widget" />
 
       <!-- Brand USP -->
-      <SectionBrandUSP v-else-if="widget.key === 'usp'" :widget="widget" />
+      <SectionBrandUSP v-else-if="widget.cleanKey === 'usp'" :widget="widget" />
 
       <!-- Promo Cards Grid -->
       <SectionPromoGrid v-else-if="widget.type === 'promo-grid'" :widget="widget" />
@@ -132,6 +134,9 @@
 
       <!-- 3 Set Carousel -->
       <SectionThreeSetCarousel v-else-if="widget.type === '3-set-carousel'" :widget="widget" />
+
+      <!-- Mobile Category List (circular images, mobile-only) -->
+      <SectionMobileCategoryList v-else-if="widget.type === 'mobile-category-list'" :widget="widget" />
     </div>
     </div>
   </div>
@@ -169,6 +174,10 @@ onMounted(() => {
 const activeWidgets = computed(() => {
   return [...widgets.value]
     .filter(w => w.enabled)
+    .map(w => ({
+      ...w,
+      cleanKey: w.key ? w.key.replace('-mobile', '').replace('-desktop', '') : ''
+    }))
     .sort((a, b) => a.order - b.order)
 })
 
