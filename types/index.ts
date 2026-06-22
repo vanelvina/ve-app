@@ -29,6 +29,7 @@ export interface Product {
   inStock: boolean
   stockCount: number
   sku: string
+  styleId?: string
   deliveryDays: number
   isWishlisted?: boolean
 }

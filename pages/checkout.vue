@@ -160,14 +160,15 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, watch } from 'vue'
 import { formatPrice, isValidPincode, isValidPhone, isValidEmail } from '~/utils/formatters'
-import { generateOrderId } from '~/utils/formatters'
 
 definePageMeta({ layout: 'checkout' })
 
 const router = useRouter()
 const cart = useCartStore()
 const ui = useUIStore()
+const auth = useAuthStore()
 
 const currentStep = ref(0)
 const steps = ['Address', 'Shipping', 'Payment']
@@ -180,6 +181,21 @@ const cardCvv = ref('')
 
 const form = reactive({ fullName: '', phone: '', email: '', line1: '', line2: '', pincode: '', city: '', state: '' })
 const errors = reactive({ fullName: '', phone: '', email: '', line1: '', pincode: '', city: '' })
+
+const prefillForm = () => {
+  if (auth.isLoggedIn && auth.user) {
+    if (!form.fullName) form.fullName = auth.user.name || ''
+    if (!form.email) form.email = auth.user.email || ''
+  }
+}
+
+onMounted(() => {
+  prefillForm()
+})
+
+watch(() => auth.isLoggedIn, () => {
+  prefillForm()
+})
 
 const shippingOptions = [
   { id: 'standard', name: 'Standard Delivery', desc: '3–5 business days', price: cart.subtotal >= 999 ? 0 : 79 },
@@ -217,11 +233,56 @@ const validate = () => {
 const nextStep = () => { if (validate()) currentStep.value = 1 }
 
 const placeOrder = async () => {
+  if (cart.items.length === 0) {
+    ui.addToast('error', 'Your cart is empty.')
+    return
+  }
   placing.value = true
-  await new Promise(r => setTimeout(r, 1500))
-  const orderId = generateOrderId()
-  cart.clearCart()
-  router.push(`/thank-you?order=${orderId}`)
+  try {
+    const orderItems = cart.items.map(item => ({
+      productId: item.productId,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      image: item.product.variants[0]?.images[0] || '',
+      size: item.size || 'Standard'
+    }))
+
+    const shippingAddress = {
+      name: form.fullName.trim(),
+      line1: form.line1.trim(),
+      line2: form.line2.trim() || '',
+      city: form.city.trim(),
+      state: form.state,
+      pincode: form.pincode.trim(),
+      phone: form.phone.trim(),
+    }
+
+    const payload = {
+      items: orderItems,
+      shippingAddress,
+      paymentMethod: selectedPayment.value,
+      shippingMethod: selectedShipping.value,
+      subtotal: cart.subtotal,
+      shippingFee: shippingFee.value,
+      discount: cart.appliedDiscount,
+      total: orderTotal.value,
+    }
+
+    const res = await auth.placeOrder(payload)
+    if (res.success) {
+      cart.clearCart()
+      ui.addToast('success', 'Order placed successfully! 🎉')
+      router.push(`/thank-you?order=${res.orderId}`)
+    } else {
+      throw new Error(res.message || 'Failed to place order')
+    }
+  } catch (err: any) {
+    console.error('Checkout error:', err)
+    ui.addToast('error', err.data?.message || err.message || 'Failed to place order. Please try again.')
+  } finally {
+    placing.value = false
+  }
 }
 
 const indianStates = ['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Delhi','Goa','Gujarat','Haryana','Himachal Pradesh','Jammu & Kashmir','Jharkhand','Karnataka','Kerala','Madhya Pradesh','Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab','Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh','Uttarakhand','West Bengal']

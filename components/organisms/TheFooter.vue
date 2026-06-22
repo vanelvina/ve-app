@@ -46,10 +46,9 @@
         <div class="flex flex-col gap-3">
           <h4 class="font-ui font-bold text-black text-xs uppercase tracking-wider mb-1">Get in Touch</h4>
           <div class="space-y-2 text-xs text-gray-600 font-ui leading-relaxed">
-            <p><span class="font-semibold text-black">Address:</span> Reliance Retail Limited, 3rd Floor, Court House, Lokmanya Tilak Marg, Dhobi Talao, Mumbai - 400 002</p>
-            <p><span class="font-semibold text-black">Phone:</span> 080-40245577 / 080-68305577</p>
-            <p><span class="font-semibold text-black">Email:</span> <a href="mailto:feedback@vanelvina.com" class="hover:text-deep-plum transition-colors">feedback@vanelvina.com</a></p>
-            <p><span class="font-semibold text-black">CIN:</span> U51100MH1985PLC120563</p>
+            <p><span class="font-semibold text-black">Address:</span> 1/1, Motiwala Complex, Nirala Bazar. Aurangabad. 431001 Maharashtra.</p>
+            <p><span class="font-semibold text-black">Phone:</span> +91 87885 66695 | +91 95791 83097</p>
+            <p><span class="font-semibold text-black">Email:</span> <a href="mailto:support@vanelvina.com" class="hover:text-deep-plum transition-colors">support@vanelvina.com</a></p>
           </div>
           <div class="flex items-center gap-2 mt-2">
             <a v-for="social in socials" :key="social.name" :href="social.url" target="_blank" rel="noopener noreferrer"
@@ -132,10 +131,9 @@
             <!-- Contact info -->
             <template v-if="section.contact">
               <div class="space-y-2 text-sm text-gray-600 font-ui leading-relaxed">
-                <p><span class="font-semibold text-black">Address:</span> Reliance Retail Limited, 3rd Floor, Court House, Lokmanya Tilak Marg, Dhobi Talao, Mumbai - 400 002</p>
-                <p><span class="font-semibold text-black">Phone:</span> 080-40245577 / 080-68305577</p>
-                <p><span class="font-semibold text-black">Email:</span> <a href="mailto:feedback@vanelvina.com" class="hover:text-deep-plum transition-colors">feedback@vanelvina.com</a></p>
-                <p><span class="font-semibold text-black">CIN:</span> U51100MH1985PLC120563</p>
+                <p><span class="font-semibold text-black">Address:</span> 1/1, Motiwala Complex, Nirala Bazar. Aurangabad. 431001 Maharashtra.</p>
+                <p><span class="font-semibold text-black">Phone:</span> +91 87885 66695 | +91 95791 83097</p>
+                <p><span class="font-semibold text-black">Email:</span> <a href="mailto:support@vanelvina.com" class="hover:text-deep-plum transition-colors">support@vanelvina.com</a></p>
               </div>
               <div class="flex items-center gap-2 mt-3">
                 <a v-for="social in socials" :key="social.name" :href="social.url" target="_blank" rel="noopener noreferrer"
@@ -195,13 +193,7 @@ const categoriesLinks = [
   { label: 'Activewear', href: '/products?category=activewear' },
   { label: 'Panties', href: '/products?category=panties' },
   { label: 'Shapewear', href: '/products?category=shapewear' },
-  { label: 'Winterwear', href: '/products?category=thermals' },
   { label: 'Maternity Wear', href: '/products?category=maternity' },
-  { label: 'Beauty', href: '#' },
-  { label: 'Van Elvina Girls', href: '#' },
-  { label: 'Lingerie Sale & Offer', href: '/products?badge=sale' },
-  { label: 'Swimwear/Beachwear', href: '#' },
-  { label: 'Top Lingerie Brand', href: '/' },
 ]
 
 const helpLinks = [
@@ -210,31 +202,22 @@ const helpLinks = [
   { label: 'Privacy Policy', href: '/privacy-policy' },
   { label: 'Terms & Conditions', href: '/terms' },
   { label: 'Returns & Exchange Policy', href: '/returns' },
+  { label: 'Refund Policy', href: '/refund-policy' },
   { label: 'Track your Order', href: '/track-order' },
-  { label: 'Discreet Packaging', href: '#' },
-  { label: 'Payment Policy', href: '#' },
+  { label: 'Payment Policy', href: '/payment-policy' },
   { label: 'Customer Support', href: '/contact' },
-  { label: 'Caution Notice', href: '#' },
 ]
 
 const discoverLinks = [
   { label: 'About Van Elvina', href: '/about' },
   { label: 'Blogs', href: '/blogs' },
-  { label: 'Find Your Fit', href: '/size-guide' },
-  { label: 'Bra Size Calculator', href: '/size-guide' },
-  { label: 'Bras By Size', href: '/size-guide' },
-  { label: 'Shop by Sizes', href: '/products' },
-  { label: 'Shop by Colours', href: '/products' },
-  { label: 'Van Elvina Store Locator', href: '/stores' },
-  { label: 'Van Elvina Press', href: '#' },
-  { label: 'Sell on Van Elvina', href: '#' },
-  { label: 'Own A Franchise', href: '#' },
+  { label: 'Find Your Fit', href: '/size-guide#fit-guide' },
+  { label: 'Bra Size Calculator', href: '/size-guide#calculator' },
+  { label: 'Bras By Size', href: '/size-guide#shop-by-size' },
+  { label: 'Shop by Sizes', href: '/size-guide#shop-by-size' },
+  { label: 'Shop by Colours', href: '/size-guide#shop-by-color' },
   { label: 'Van Elvina Reviews', href: '#' },
-  { label: 'Circle of Radiance', href: '#' },
-  { label: 'Careers', href: '/careers' },
-  { label: 'Sitemap', href: '/sitemap' },
   { label: 'FAQs', href: '/faqs' },
-  { label: 'Find a Store', href: '/stores' },
 ]
 
 // Mobile accordion sections

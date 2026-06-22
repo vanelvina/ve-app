@@ -19,7 +19,7 @@
     </main>
 
     <!-- Footer -->
-    <SectionBlogs v-if="!route.path.startsWith('/blogs')" />
+    <SectionBlogs v-if="route.path === '/'" />
     <TheFooter />
 
     <!-- Toast Notifications -->
@@ -31,11 +31,30 @@
     <!-- Profile Sidebar Drawer -->
     <ProfileDrawer />
 
+    <!-- Customer Auth Modal -->
+    <AuthModal />
+
     <!-- Mobile Bottom Tab Bar -->
     <MobileBottomBar />
   </div>
 </template>
 
 <script setup lang="ts">
+import { useWishlistStore } from '~/stores/wishlist'
+import { useCartStore } from '~/stores/cart'
+
 const route = useRoute()
+const auth = useAuthStore()
+const wishlist = useWishlistStore()
+const cart = useCartStore()
+
+onMounted(async () => {
+  auth.init()
+  if (auth.isLoggedIn) {
+    await Promise.all([
+      wishlist.fetchWishlist(),
+      cart.fetchCart()
+    ])
+  }
+})
 </script>

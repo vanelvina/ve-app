@@ -22,15 +22,8 @@
 
         <!-- Right icon tray -->
         <div class="flex items-center gap-1">
-          <!-- Notification -->
-          <button class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Notifications">
-            <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </button>
-
-          <!-- Cart -->
-          <NuxtLink to="/cart" class="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Cart">
+          <!-- Bag -->
+          <NuxtLink to="/bag" class="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Bag">
             <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
@@ -48,8 +41,10 @@
           </NuxtLink>
 
           <!-- Profile -->
-          <button @click="ui.openProfileDrawer" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="My account">
-            <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <button @click="ui.openProfileDrawer" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors overflow-hidden border border-charcoal/10" aria-label="My account">
+            <img v-if="auth.isLoggedIn && auth.user?.avatar" :src="auth.user.avatar" :alt="auth.user.name" class="w-full h-full object-cover" />
+            <span v-else-if="auth.isLoggedIn" class="text-xs font-bold text-deep-plum font-ui">{{ userInitials }}</span>
+            <svg v-else class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </button>
@@ -126,12 +121,14 @@
               </svg>
               <span v-if="wishlist.count > 0" class="absolute -top-1 -right-1 w-4 h-4 bg-dusty-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">{{ wishlist.count }}</span>
             </NuxtLink>
-            <button @click="ui.openProfileDrawer" class="btn-icon hidden sm:flex text-charcoal hover:text-deep-plum" aria-label="My account">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <button @click="ui.openProfileDrawer" class="btn-icon hidden sm:flex text-charcoal hover:text-deep-plum overflow-hidden border border-charcoal/5" aria-label="My account">
+              <img v-if="auth.isLoggedIn && auth.user?.avatar" :src="auth.user.avatar" :alt="auth.user.name" class="w-full h-full object-cover" />
+              <span v-else-if="auth.isLoggedIn" class="text-xs font-bold text-deep-plum font-ui">{{ userInitials }}</span>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </button>
-            <NuxtLink to="/cart" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Shopping cart">
+            <NuxtLink to="/bag" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Shopping bag">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -163,6 +160,12 @@ import categoriesData from '~/data/categories.json'
 const ui = useUIStore()
 const cart = useCartStore()
 const wishlist = useWishlistStore()
+const auth = useAuthStore()
+
+const userInitials = computed(() => {
+  const name = auth.user?.name || ''
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'
+})
 
 const navCategories = categoriesData.slice(0, 5)
 
@@ -217,39 +220,21 @@ const cycleWords = () => {
 const navbarHidden = ref(false)
 let lastScrollY = 0
 let rafId = 0
-let desktopThreshold = 300   // updated on mount after measuring first widget
 
 const isMobile = () => window.innerWidth < 768
-
-const measureDesktopThreshold = () => {
-  // Target the first homepage section (hero/banner widget)
-  const hero = document.querySelector('main section, main > div > div > div') as HTMLElement | null
-  if (hero && hero.clientHeight > 100) {
-    desktopThreshold = hero.clientHeight * 0.5
-  }
-}
 
 const onScroll = () => {
   cancelAnimationFrame(rafId)
   rafId = requestAnimationFrame(() => {
     const y = window.scrollY
 
-    if (isMobile()) {
-      // Direction-based: hide on scroll down, show on scroll up
-      if (y <= 0) {
-        navbarHidden.value = false
-      } else if (y > lastScrollY) {
-        navbarHidden.value = true
-      } else if (y < lastScrollY) {
-        navbarHidden.value = false
-      }
-    } else {
-      // Position-based with hysteresis: hide at 50%, show again at 20%
-      if (y > desktopThreshold) {
-        navbarHidden.value = true
-      } else if (y < desktopThreshold * 0.2) {
-        navbarHidden.value = false
-      }
+    // Hide on scroll down, show on scroll up (both mobile & desktop)
+    if (y <= 50) {
+      navbarHidden.value = false
+    } else if (y > lastScrollY) {
+      navbarHidden.value = true
+    } else if (y < lastScrollY) {
+      navbarHidden.value = false
     }
 
     lastScrollY = y
@@ -260,21 +245,12 @@ onMounted(() => {
   lastScrollY = window.scrollY
   navbarHidden.value = isMobile() ? window.scrollY > 0 : false
 
-  // Measure after widgets have painted
-  nextTick(() => {
-    measureDesktopThreshold()
-    // Fallback if widgets load async
-    setTimeout(measureDesktopThreshold, 800)
-  })
-
   window.addEventListener('scroll', onScroll, { passive: true })
-  window.addEventListener('resize', measureDesktopThreshold, { passive: true })
   cycleWords()
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
-  window.removeEventListener('resize', measureDesktopThreshold)
   cancelAnimationFrame(rafId)
   if (typingTimer) clearTimeout(typingTimer)
 })

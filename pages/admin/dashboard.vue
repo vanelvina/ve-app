@@ -43,6 +43,18 @@
           >
             {{ blogs.length }}
           </span>
+          <span 
+            v-else-if="tab.id === 'users' && users.length"
+            class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
+          >
+            {{ users.length }}
+          </span>
+          <span 
+            v-else-if="tab.id === 'orders' && orders.length"
+            class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
+          >
+            {{ orders.length }}
+          </span>
         </button>
       </nav>
 
@@ -619,6 +631,459 @@
         </div>
       </section>
 
+      <!-- TAB 7: USERS -->
+      <section v-if="activeTab === 'users'" class="space-y-4 animate-fade-in">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="relative w-full md:max-w-xs shadow-soft rounded-xl">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-charcoal/40">🔍</span>
+            <input v-model="searchQueries.users" placeholder="Search users by name, email..." class="w-full pl-9 pr-4 py-2 border border-charcoal/20 bg-white rounded-xl text-xs focus:outline-none focus:border-deep-plum" />
+          </div>
+          <span class="text-xs text-charcoal/50 font-semibold font-ui">{{ filteredUsers.length }} Users Registered</span>
+        </div>
+
+        <div class="bg-white border border-charcoal/20 rounded-2xl shadow-soft overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs font-sans">
+              <thead>
+                <tr class="bg-warm-ivory text-deep-plum border-b border-rose-blush/30 font-semibold">
+                  <th class="p-4">Customer Name</th>
+                  <th class="p-4">Email Address</th>
+                  <th class="p-4">Auth Channel</th>
+                  <th class="p-4">Orders Placed</th>
+                  <th class="p-4">Total Spent</th>
+                  <th class="p-4">Last Active</th>
+                  <th class="p-4">Account Status</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-rose-blush/10">
+                <tr v-if="filteredUsers.length === 0">
+                  <td colspan="8" class="p-8 text-center text-xs text-charcoal/45 italic">No users found.</td>
+                </tr>
+                <tr v-for="user in filteredUsers" :key="user._id" class="hover:bg-warm-ivory/20 transition-colors">
+                  <td class="p-4">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-full bg-rose-blush text-deep-plum font-bold flex items-center justify-center text-xs border border-charcoal/10 overflow-hidden shrink-0">
+                        <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" />
+                        <span v-else>{{ user.name ? user.name.charAt(0).toUpperCase() : 'U' }}</span>
+                      </div>
+                      <div>
+                        <div class="font-bold text-charcoal flex items-center gap-1.5">
+                          <span>{{ user.name || 'Unnamed User' }}</span>
+                          <span v-if="user.isGuest" class="px-1 py-0.5 rounded text-[8px] bg-gray-100 text-charcoal border border-charcoal/20 font-bold uppercase">Guest</span>
+                        </div>
+                        <div class="text-[9px] text-charcoal/40 font-mono mt-0.5">Joined: {{ new Date(user.createdAt).toLocaleDateString('en-IN') }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="p-4 font-medium text-charcoal/85">{{ user.email || 'N/A' }}</td>
+                  <td class="p-4">
+                    <span 
+                      class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border"
+                      :class="user.authMethod === 'google' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-purple-50 text-purple-700 border-purple-200'"
+                    >
+                      {{ user.authMethod || 'email' }}
+                    </span>
+                  </td>
+                  <td class="p-4 font-bold text-charcoal/70">{{ user.orderCount || 0 }} orders</td>
+                  <td class="p-4 font-extrabold text-deep-plum">₹{{ (user.totalSpent || 0).toLocaleString('en-IN') }}</td>
+                  <td class="p-4 text-charcoal/60 font-semibold">
+                    {{ (user.lastLoginAt || user.createdAt) ? new Date(user.lastLoginAt || user.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Never' }}
+                  </td>
+                  <td class="p-4">
+                    <button 
+                      @click="toggleUserStatus(user)"
+                      class="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer shadow-soft border"
+                      :class="user.isActive ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-red-50 text-red-800 border-red-200 hover:bg-red-100'"
+                    >
+                      {{ user.isActive ? 'Active' : 'Suspended' }}
+                    </button>
+                  </td>
+                  <td class="p-4 text-right">
+                    <div class="inline-flex rounded-lg shadow-soft border border-rose-blush overflow-hidden bg-white">
+                      <button @click="inspectUserDetails(user)" class="px-2.5 py-1.5 text-[10px] font-bold text-deep-plum hover:bg-rose-blush/30 transition-colors border-r border-rose-blush">Inspect</button>
+                      <button @click="deleteUser(user._id)" class="px-2.5 py-1.5 text-[10px] font-bold text-red-500 hover:bg-red-50 transition-colors">Revoke</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 8: ORDERS -->
+      <section v-if="activeTab === 'orders'" class="space-y-4 animate-fade-in">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="relative w-full md:max-w-xs shadow-soft rounded-xl">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-charcoal/40">🔍</span>
+            <input v-model="searchQueries.orders" placeholder="Search orders by ID, name, status..." class="w-full pl-9 pr-4 py-2 border border-charcoal/20 bg-white rounded-xl text-xs focus:outline-none focus:border-deep-plum" />
+          </div>
+          <span class="text-xs text-charcoal/50 font-semibold font-ui">{{ filteredOrders.length }} Orders Loaded</span>
+        </div>
+
+        <div class="bg-white border border-charcoal/20 rounded-2xl shadow-soft overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs font-sans">
+              <thead>
+                <tr class="bg-warm-ivory text-deep-plum border-b border-rose-blush/30 font-semibold">
+                  <th class="p-4">Order ID</th>
+                  <th class="p-4">Customer</th>
+                  <th class="p-4">Date Placed</th>
+                  <th class="p-4">Items Count</th>
+                  <th class="p-4">Total Amount</th>
+                  <th class="p-4">Order Status</th>
+                  <th class="p-4">Payment Status</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-rose-blush/10">
+                <tr v-if="filteredOrders.length === 0">
+                  <td colspan="8" class="p-8 text-center text-xs text-charcoal/45 italic">No orders found.</td>
+                </tr>
+                <tr v-for="order in filteredOrders" :key="order._id" class="hover:bg-warm-ivory/20 transition-colors">
+                  <td class="p-4 font-mono font-bold text-deep-plum">{{ order.orderId }}</td>
+                  <td class="p-4">
+                    <div class="font-bold text-charcoal">
+                      {{ order.isGuest ? (order.guestInfo?.name || order.shippingAddress?.name) : (order.userId?.name || order.shippingAddress?.name) }}
+                    </div>
+                    <div class="text-[10px] text-charcoal/50 mt-0.5">
+                      {{ order.isGuest ? 'Guest Checkout' : 'Registered Member' }}
+                    </div>
+                  </td>
+                  <td class="p-4 text-charcoal/60">
+                    {{ new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) }}
+                  </td>
+                  <td class="p-4 font-semibold text-charcoal/70">{{ order.items?.length || 0 }} items</td>
+                  <td class="p-4 font-bold text-charcoal">₹{{ order.total.toLocaleString('en-IN') }}</td>
+                  
+                  <!-- Order Status Dropdown -->
+                  <td class="p-4">
+                    <select 
+                      :value="order.orderStatus"
+                      @change="updateOrderStatus(order._id, ($event.target as HTMLSelectElement).value)"
+                      class="px-2 py-1 rounded bg-rose-blush/50 text-deep-plum border border-rose-blush text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-deep-plum/20"
+                    >
+                      <option value="placed">Placed</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </td>
+
+                  <!-- Payment Status Dropdown -->
+                  <td class="p-4">
+                    <select 
+                      :value="order.paymentStatus || 'pending'"
+                      @change="updatePaymentStatus(order._id, ($event.target as HTMLSelectElement).value)"
+                      class="px-2 py-1 rounded bg-rose-blush/50 text-deep-plum border border-rose-blush text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-deep-plum/20"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="paid">Paid</option>
+                      <option value="failed">Failed</option>
+                    </select>
+                  </td>
+
+                  <td class="p-4 text-right">
+                    <button 
+                      @click="inspectOrderDetails(order)"
+                      class="px-3 py-1.5 text-[11px] font-bold text-deep-plum hover:bg-rose-blush/30 transition-colors border border-rose-blush rounded-lg bg-white shadow-soft"
+                    >
+                      Inspect
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. ORDER INSPECTION MODAL -->
+      <div v-if="inspectedOrder" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
+        <div class="bg-white rounded-3xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] border border-charcoal/20 shadow-modal space-y-5 relative">
+          <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
+          
+          <div class="relative z-10 flex items-center justify-between border-b border-rose-blush/10 pb-3">
+            <h3 class="text-base font-serif text-deep-plum font-bold">Inspect Order: {{ inspectedOrder.orderId }}</h3>
+            <button @click="inspectedOrder = null" class="text-charcoal/45 hover:text-deep-plum text-sm">✕</button>
+          </div>
+
+          <div class="space-y-4 text-xs font-ui relative z-10">
+            
+            <!-- Shipping Address -->
+            <div class="bg-rose-blush/10 border border-rose-blush/30 p-4 rounded-2xl space-y-2">
+              <h4 class="font-bold text-deep-plum">Shipping Address & Contact</h4>
+              <p class="font-semibold">{{ inspectedOrder.shippingAddress?.name }}</p>
+              <p>{{ inspectedOrder.shippingAddress?.line1 }}</p>
+              <p v-if="inspectedOrder.shippingAddress?.line2">{{ inspectedOrder.shippingAddress?.line2 }}</p>
+              <p>{{ inspectedOrder.shippingAddress?.city }}, {{ inspectedOrder.shippingAddress?.state }} - {{ inspectedOrder.shippingAddress?.pincode }}</p>
+              <p class="pt-1 font-semibold text-charcoal/70">Phone: {{ inspectedOrder.shippingAddress?.phone }} | Email: {{ inspectedOrder.guestInfo?.email || inspectedOrder.userId?.email || 'N/A' }}</p>
+            </div>
+
+            <!-- Items list -->
+            <div class="space-y-2">
+              <h4 class="font-bold text-deep-plum">Items Summary</h4>
+              <div class="divide-y divide-rose-blush/20 max-h-[200px] overflow-y-auto pr-1">
+                <div 
+                  v-for="(item, idx) in inspectedOrder.items" 
+                  :key="idx" 
+                  class="py-2.5 flex items-center justify-between"
+                >
+                  <div class="flex items-center gap-3">
+                    <img v-if="item.image" :src="item.image" class="w-10 h-12 object-cover rounded bg-white shadow-soft" />
+                    <div>
+                      <p class="font-bold text-charcoal">{{ item.name }}</p>
+                      <p class="text-[10px] text-charcoal/50">Qty: {{ item.quantity }} · Size: {{ item.size || 'Standard' }}</p>
+                    </div>
+                  </div>
+                  <p class="font-bold text-charcoal">₹{{ (item.price * item.quantity).toLocaleString('en-IN') }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cost Summary -->
+            <div class="border-t border-rose-blush/20 pt-3 flex justify-between items-center text-sm font-serif">
+              <span class="font-bold text-deep-plum text-sm">Grand Total Amount</span>
+              <span class="font-bold text-deep-plum text-lg">₹{{ inspectedOrder.total.toLocaleString('en-IN') }}</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 9: ABOUT US -->
+      <section v-if="activeTab === 'about'" class="space-y-6 animate-fade-in">
+        <!-- Section Header -->
+        <div class="flex items-center justify-between border-b border-rose-blush/30 pb-4">
+          <div>
+            <h2 class="text-xl font-serif text-deep-plum font-bold">Manage About Us Page</h2>
+            <p class="text-xs text-charcoal/50 font-medium">Control the stories, statements, philosophy details, and images displayed on your brand page.</p>
+          </div>
+          <button 
+            @click="saveAboutData" 
+            :disabled="savingAbout"
+            class="px-5 py-2.5 bg-deep-plum hover:bg-deep-plum/95 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-premium flex items-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
+          >
+            <span>{{ savingAbout ? 'Saving...' : 'Save Changes' }}</span>
+          </button>
+        </div>
+
+        <div v-if="!aboutData" class="py-12 text-center text-charcoal/45 italic border border-dashed border-rose-blush/40 rounded-3xl bg-white animate-pulse">
+          Loading About Us content...
+        </div>
+
+        <div v-else class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+          <!-- Left Column: Forms -->
+          <div class="xl:col-span-8 space-y-6">
+            
+            <!-- Section 1: Our Story -->
+            <div class="bg-white rounded-3xl p-6 border border-charcoal/20 shadow-soft space-y-4">
+              <h3 class="font-serif font-bold text-deep-plum text-sm border-b border-rose-blush/10 pb-2">1. Our Story Section</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Story Section Title</label>
+                  <input v-model="aboutData.storyTitle" placeholder="e.g. Our Story" class="w-full px-3.5 py-2 border border-charcoal/20 bg-warm-ivory/10 rounded-xl text-xs focus:outline-none focus:border-deep-plum" />
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Hero Background Image URL</label>
+                  <input v-model="aboutData.storyImage" placeholder="Upload or paste image URL" class="w-full px-3.5 py-2 border border-charcoal/20 bg-warm-ivory/10 rounded-xl text-xs focus:outline-none focus:border-deep-plum" />
+                </div>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Hero Subtitle (Italicized, Multi-line)</label>
+                <textarea v-model="aboutData.storySubtitle" rows="3" placeholder="Enter lines..." class="w-full px-3.5 py-2 border border-charcoal/20 bg-warm-ivory/10 rounded-xl text-xs focus:outline-none focus:border-deep-plum font-serif italic"></textarea>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Main Story Body Copy</label>
+                <textarea v-model="aboutData.storyContent" rows="6" placeholder="Write full brand story details here..." class="w-full px-3.5 py-2 border border-charcoal/20 bg-warm-ivory/10 rounded-xl text-xs focus:outline-none focus:border-deep-plum"></textarea>
+              </div>
+            </div>
+
+            <!-- Section 2: Our Vision -->
+            <div class="bg-white rounded-3xl p-6 border border-charcoal/20 shadow-soft space-y-4">
+              <h3 class="font-serif font-bold text-deep-plum text-sm border-b border-rose-blush/10 pb-2">2. Our Vision Section</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Vision Section Title</label>
+                  <input v-model="aboutData.visionTitle" placeholder="e.g. Our Vision" class="w-full px-3.5 py-2 border border-charcoal/20 bg-warm-ivory/10 rounded-xl text-xs focus:outline-none focus:border-deep-plum" />
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Vision Key Statement</label>
+                  <input v-model="aboutData.visionSubtitle" placeholder="e.g. To Offer Every Woman..." class="w-full px-3.5 py-2 border border-charcoal/20 bg-warm-ivory/10 rounded-xl text-xs focus:outline-none focus:border-deep-plum font-serif italic" />
+                </div>
+              </div>
+
+              <!-- Vision Statements List -->
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Vision Statements / Bullet Points</label>
+                <div v-for="(statement, sIdx) in aboutData.visionContent" :key="sIdx" class="flex gap-2 items-center">
+                  <span class="w-6 h-6 rounded-full bg-rose-blush/20 text-deep-plum font-serif text-[10px] font-bold flex items-center justify-center shrink-0">{{ sIdx + 1 }}</span>
+                  <input v-model="aboutData.visionContent[sIdx]" placeholder="Enter statement..." class="w-full px-3.5 py-1.5 border border-charcoal/20 bg-warm-ivory/10 rounded-xl text-xs focus:outline-none focus:border-deep-plum" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 3: Design Philosophy -->
+            <div class="bg-white rounded-3xl p-6 border border-charcoal/20 shadow-soft space-y-4">
+              <h3 class="font-serif font-bold text-deep-plum text-sm border-b border-rose-blush/10 pb-2">3. Design Philosophy Section</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Philosophy Title</label>
+                  <input v-model="aboutData.philosophyTitle" placeholder="e.g. Our Design Philosophy" class="w-full px-3.5 py-2 border border-charcoal/20 bg-warm-ivory/10 rounded-xl text-xs focus:outline-none focus:border-deep-plum" />
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Philosophy Image URL</label>
+                  <input v-model="aboutData.philosophyImage" placeholder="Upload or paste image URL" class="w-full px-3.5 py-2 border border-charcoal/20 bg-warm-ivory/10 rounded-xl text-xs focus:outline-none focus:border-deep-plum" />
+                </div>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Philosophy Copy</label>
+                <textarea v-model="aboutData.philosophyContent" rows="4" placeholder="Write about design materials, details, fit, sizing etc..." class="w-full px-3.5 py-2 border border-charcoal/20 bg-warm-ivory/10 rounded-xl text-xs focus:outline-none focus:border-deep-plum"></textarea>
+              </div>
+            </div>
+
+            <!-- Section 4: Brand Promises -->
+            <div class="bg-white rounded-3xl p-6 border border-charcoal/20 shadow-soft space-y-4">
+              <h3 class="font-serif font-bold text-deep-plum text-sm border-b border-rose-blush/10 pb-2">4. Our Promises</h3>
+              <div class="grid grid-cols-1 gap-4 divide-y divide-rose-blush/10">
+                <div v-for="(promise, pIdx) in aboutData.promises" :key="pIdx" class="pt-3 first:pt-0 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-deep-plum/70">Promise #{{ pIdx + 1 }} (Icon: {{ promise.icon }})</span>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                      <label class="text-[9px] font-bold text-charcoal/40 uppercase">Promise Header</label>
+                      <input v-model="promise.title" placeholder="Title" class="w-full px-3 py-1.5 border border-charcoal/20 bg-warm-ivory/10 rounded-lg text-xs focus:outline-none focus:border-deep-plum" />
+                    </div>
+                    <div class="space-y-1">
+                      <label class="text-[9px] font-bold text-charcoal/40 uppercase">Short Description</label>
+                      <input v-model="promise.description" placeholder="Description" class="w-full px-3 py-1.5 border border-charcoal/20 bg-warm-ivory/10 rounded-lg text-xs focus:outline-none focus:border-deep-plum" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Live Settings Overview / Mini Preview Card -->
+          <div class="xl:col-span-4 sticky top-6 space-y-6">
+            <div class="bg-white rounded-3xl p-6 border border-charcoal/20 shadow-soft space-y-4 relative overflow-hidden">
+              <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush/30 pointer-events-none" />
+              <h3 class="font-serif font-bold text-deep-plum text-sm relative z-10">Live Page Status</h3>
+              
+              <div class="space-y-3 relative z-10 text-xs font-ui">
+                <div class="flex justify-between border-b border-rose-blush/10 pb-2">
+                  <span class="text-charcoal/50">Story Hero Image</span>
+                  <span class="font-bold text-right max-w-[150px] truncate" :class="aboutData.storyImage ? 'text-emerald-600' : 'text-red-500'">
+                    {{ aboutData.storyImage ? 'Set ✓' : 'Missing ✕' }}
+                  </span>
+                </div>
+                <div class="flex justify-between border-b border-rose-blush/10 pb-2">
+                  <span class="text-charcoal/50">Philosophy Image</span>
+                  <span class="font-bold text-right max-w-[150px] truncate" :class="aboutData.philosophyImage ? 'text-emerald-600' : 'text-red-500'">
+                    {{ aboutData.philosophyImage ? 'Set ✓' : 'Missing ✕' }}
+                  </span>
+                </div>
+                <div class="flex justify-between border-b border-rose-blush/10 pb-2">
+                  <span class="text-charcoal/50">Promises Configured</span>
+                  <span class="font-bold text-deep-plum">{{ aboutData.promises?.length || 0 }} Promises</span>
+                </div>
+              </div>
+
+              <!-- Shortcut Link -->
+              <div class="pt-2 relative z-10">
+                <NuxtLink to="/about" target="_blank" class="w-full text-center block px-4 py-2 bg-warm-ivory hover:bg-rose-blush/20 text-deep-plum font-bold text-xs uppercase tracking-wider rounded-xl border border-rose-blush transition-colors cursor-pointer shadow-soft">
+                  View Live Page ↗
+                </NuxtLink>
+              </div>
+            </div>
+            
+            <!-- Quick Image Link Help -->
+            <div class="bg-rose-blush/10 rounded-3xl p-6 border border-rose-blush/30 text-xs leading-relaxed space-y-2 text-charcoal/80">
+              <h4 class="font-bold text-deep-plum">💡 How to manage images?</h4>
+              <p>For custom graphics, you can upload them under the **Banners** or **Products** sections to generate local media paths, copy their URLs, and paste them here. Or reference high-quality imagery directly from any public CDN or hosting site.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 10: INQUIRIES -->
+      <section v-if="activeTab === 'inquiries'" class="space-y-4 animate-fade-in">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="relative w-full md:max-w-xs shadow-soft rounded-xl">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-charcoal/40">🔍</span>
+            <input v-model="searchQueries.inquiries" placeholder="Search inquiries by customer, email, text..." class="w-full pl-9 pr-4 py-2 border border-charcoal/20 bg-white rounded-xl text-xs focus:outline-none focus:border-deep-plum" />
+          </div>
+          <span class="text-xs text-charcoal/50 font-semibold font-ui">{{ filteredInquiries.length }} Inquiries Loaded</span>
+        </div>
+
+        <div class="bg-white border border-charcoal/20 rounded-2xl shadow-soft overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs font-sans">
+              <thead>
+                <tr class="bg-warm-ivory text-deep-plum border-b border-rose-blush/30 font-semibold">
+                  <th class="p-4">Customer Details</th>
+                  <th class="p-4">Contact Info</th>
+                  <th class="p-4">Query Type</th>
+                  <th class="p-4">Message / feedback</th>
+                  <th class="p-4">Submitted At</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-rose-blush/10">
+                <tr v-if="filteredInquiries.length === 0">
+                  <td colspan="7" class="p-8 text-center text-xs text-charcoal/45 italic">No inquiries found.</td>
+                </tr>
+                <tr v-for="inquiry in filteredInquiries" :key="inquiry._id" class="hover:bg-warm-ivory/20 transition-colors">
+                  <td class="p-4">
+                    <p class="font-bold text-charcoal">{{ inquiry.name }}</p>
+                  </td>
+                  <td class="p-4">
+                    <p class="font-medium text-charcoal/70">{{ inquiry.email }}</p>
+                    <p class="text-[10px] text-charcoal/50 mt-0.5">{{ inquiry.phone }}</p>
+                  </td>
+                  <td class="p-4">
+                    <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-rose-blush/40 text-deep-plum border border-rose-blush/20">
+                      {{ inquiry.queryType }}
+                    </span>
+                  </td>
+                  <td class="p-4 max-w-[280px]">
+                    <p class="text-charcoal/80 whitespace-pre-line leading-relaxed break-words font-medium">{{ inquiry.message }}</p>
+                  </td>
+                  <td class="p-4 text-charcoal/60 font-semibold">
+                    {{ new Date(inquiry.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) }}
+                  </td>
+                  <td class="p-4">
+                    <span 
+                      class="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider"
+                      :class="inquiry.status === 'resolved' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'"
+                    >
+                      {{ inquiry.status }}
+                    </span>
+                  </td>
+                  <td class="p-4 text-right">
+                    <div class="inline-flex rounded-lg shadow-soft border border-rose-blush overflow-hidden bg-white">
+                      <button 
+                        @click="resolveInquiry(inquiry._id)" 
+                        class="px-2.5 py-1.5 text-[10px] font-bold transition-colors border-r border-rose-blush"
+                        :class="inquiry.status === 'resolved' ? 'text-charcoal/50 hover:bg-amber-50 hover:text-amber-800' : 'text-emerald-700 hover:bg-emerald-50'"
+                      >
+                        {{ inquiry.status === 'resolved' ? 'Reopen' : 'Resolve' }}
+                      </button>
+                      <button @click="deleteInquiry(inquiry._id)" class="px-2.5 py-1.5 text-[10px] font-bold text-red-500 hover:bg-red-50 transition-colors">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <!-- 3. BANNER MODAL -->
@@ -779,12 +1244,12 @@
         </div>
 
         <!-- Inner Tabs Selector -->
-        <div class="flex border-b border-rose-blush/20 text-xs relative z-10">
+        <div class="flex flex-wrap border-b border-rose-blush/20 text-xs relative z-10">
           <button 
             type="button" 
             @click="productFormTab = 'general'" 
             class="px-4 py-2 font-bold focus:outline-none transition-colors border-b-2"
-            :class="productFormTab === 'general' ? 'border-deep-plum text-deep-plum' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
+            :class="productFormTab === 'general' ? 'border-deep-plum text-deep-plum font-semibold' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
           >
             General Specs
           </button>
@@ -792,7 +1257,7 @@
             type="button" 
             @click="productFormTab = 'pricing'" 
             class="px-4 py-2 font-bold focus:outline-none transition-colors border-b-2"
-            :class="productFormTab === 'pricing' ? 'border-deep-plum text-deep-plum' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
+            :class="productFormTab === 'pricing' ? 'border-deep-plum text-deep-plum font-semibold' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
           >
             Pricing &amp; Inventory
           </button>
@@ -800,9 +1265,25 @@
             type="button" 
             @click="productFormTab = 'variants'" 
             class="px-4 py-2 font-bold focus:outline-none transition-colors border-b-2"
-            :class="productFormTab === 'variants' ? 'border-deep-plum text-deep-plum' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
+            :class="productFormTab === 'variants' ? 'border-deep-plum text-deep-plum font-semibold' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
           >
             Color Variants
+          </button>
+          <button 
+            type="button" 
+            @click="productFormTab = 'media'" 
+            class="px-4 py-2 font-bold focus:outline-none transition-colors border-b-2"
+            :class="productFormTab === 'media' ? 'border-deep-plum text-deep-plum font-semibold' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
+          >
+            Media &amp; Features
+          </button>
+          <button 
+            type="button" 
+            @click="productFormTab = 'details'" 
+            class="px-4 py-2 font-bold focus:outline-none transition-colors border-b-2"
+            :class="productFormTab === 'details' ? 'border-deep-plum text-deep-plum font-semibold' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
+          >
+            Details &amp; FAQs
           </button>
         </div>
 
@@ -813,7 +1294,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label class="block font-semibold mb-1 text-charcoal/70">Product Name *</label>
-                <input v-model="productModal.form.name" type="text" required placeholder="e.g. Everyday Comfort Bralette" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
+                <div class="relative">
+                  <input v-model="productModal.form.name" type="text" required placeholder="e.g. Everyday Comfort Bralette" class="w-full p-2.5 pr-8 border border-charcoal/20 rounded-xl focus:outline-none focus:border-deep-plum" />
+                  <button v-if="productModal.form.name" type="button" @click="productModal.form.name = ''" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-charcoal/40 hover:text-deep-plum text-sm focus:outline-none" title="Clear Name">✕</button>
+                </div>
               </div>
               <div>
                 <label class="block font-semibold mb-1 text-charcoal/70">Url Slug *</label>
@@ -855,9 +1339,20 @@
               </div>
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold mb-1 text-charcoal/70">SKU ID</label>
+                <input v-model="productModal.form.sku" type="text" class="w-full p-2.5 border border-charcoal/20 rounded-xl" placeholder="e.g. VE-BRA-001" />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1 text-charcoal/70">Style ID</label>
+                <input v-model="productModal.form.styleId" type="text" class="w-full p-2.5 border border-charcoal/20 rounded-xl" placeholder="e.g. VE-STYLE-001" />
+              </div>
+            </div>
+
             <div>
               <label class="block font-semibold mb-1 text-charcoal/70">Product Description</label>
-              <textarea v-model="productModal.form.description" rows="3" placeholder="Describe fit, padding options, and texture qualities..." class="w-full p-2.5 border border-charcoal/20 rounded-xl"></textarea>
+              <textarea v-model="productModal.form.description" rows="4" placeholder="Describe fit, padding options, and texture qualities..." class="w-full p-2.5 border border-charcoal/20 rounded-xl"></textarea>
             </div>
           </div>
 
@@ -899,12 +1394,84 @@
                 </button>
               </div>
             </div>
+
+            <!-- Availability & Sourcing Policies Toggles -->
+            <div class="border-t border-rose-blush/10 pt-4 mt-2">
+              <span class="block text-xs font-bold text-deep-plum uppercase tracking-wider mb-3">Service &amp; Sourcing Policies</span>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                
+                <!-- COD Toggle -->
+                <div class="flex items-center justify-between bg-warm-ivory/30 p-3 rounded-xl border border-rose-blush/10">
+                  <span class="text-charcoal/70 font-semibold">COD Available:</span>
+                  <button
+                    type="button"
+                    @click="productModal.form.isCodAvailable = !productModal.form.isCodAvailable"
+                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                    :class="productModal.form.isCodAvailable ? 'bg-green-600' : 'bg-gray-200'"
+                  >
+                    <span
+                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-soft ring-0 transition duration-200 ease-in-out"
+                      :class="productModal.form.isCodAvailable ? 'translate-x-5' : 'translate-x-0'"
+                    />
+                  </button>
+                </div>
+
+                <!-- Return Toggle -->
+                <div class="flex items-center justify-between bg-warm-ivory/30 p-3 rounded-xl border border-rose-blush/10">
+                  <span class="text-charcoal/70 font-semibold">Returnable:</span>
+                  <button
+                    type="button"
+                    @click="productModal.form.isReturnable = !productModal.form.isReturnable"
+                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                    :class="productModal.form.isReturnable ? 'bg-green-600' : 'bg-gray-200'"
+                  >
+                    <span
+                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-soft ring-0 transition duration-200 ease-in-out"
+                      :class="productModal.form.isReturnable ? 'translate-x-5' : 'translate-x-0'"
+                    />
+                  </button>
+                </div>
+
+                <!-- Exchange Toggle -->
+                <div class="flex items-center justify-between bg-warm-ivory/30 p-3 rounded-xl border border-rose-blush/10">
+                  <span class="text-charcoal/70 font-semibold">Exchangeable:</span>
+                  <button
+                    type="button"
+                    @click="productModal.form.isExchangeable = !productModal.form.isExchangeable"
+                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                    :class="productModal.form.isExchangeable ? 'bg-green-600' : 'bg-gray-200'"
+                  >
+                    <span
+                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-soft ring-0 transition duration-200 ease-in-out"
+                      :class="productModal.form.isExchangeable ? 'translate-x-5' : 'translate-x-0'"
+                    />
+                  </button>
+                </div>
+
+                <!-- Free Shipping Toggle -->
+                <div class="flex items-center justify-between bg-warm-ivory/30 p-3 rounded-xl border border-rose-blush/10">
+                  <span class="text-charcoal/70 font-semibold">Free Shipping:</span>
+                  <button
+                    type="button"
+                    @click="productModal.form.isFreeShipping = !productModal.form.isFreeShipping"
+                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                    :class="productModal.form.isFreeShipping ? 'bg-green-600' : 'bg-gray-200'"
+                  >
+                    <span
+                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-soft ring-0 transition duration-200 ease-in-out"
+                      :class="productModal.form.isFreeShipping ? 'translate-x-5' : 'translate-x-0'"
+                    />
+                  </button>
+                </div>
+
+              </div>
+            </div>
           </div>
 
           <!-- TAB C: DYNAMIC VARIANTS -->
           <div v-show="productFormTab === 'variants'" class="space-y-4 animate-fade-in">
             <div class="flex items-center justify-between border-b border-rose-blush/10 pb-2">
-              <p class="font-bold text-deep-plum">Product Colors &amp; Asset URLs</p>
+              <p class="font-bold text-deep-plum">Product Colors &amp; Variant Specifications</p>
               <button type="button" @click="addProductVariant" class="px-2.5 py-1 bg-rose-blush text-deep-plum rounded-lg text-[10px] font-bold border border-rose-blush hover:bg-deep-plum hover:text-white transition-all">+ Add Color Variant</button>
             </div>
 
@@ -912,7 +1479,7 @@
               No variant mapped. Add at least one color variant to list product.
             </div>
 
-            <div class="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+            <div class="space-y-3 max-h-[340px] overflow-y-auto pr-1">
               <div v-for="(v, vIdx) in productModal.form.variants" :key="vIdx" class="bg-warm-ivory p-3.5 rounded-2xl border border-charcoal/20 space-y-3 relative">
                 <button type="button" @click="productModal.form.variants.splice(vIdx, 1)" class="absolute top-2.5 right-2.5 text-red-500 hover:text-red-700 text-xs font-bold">Remove</button>
                 
@@ -931,8 +1498,20 @@
                 </div>
 
                 <div>
-                  <label class="block text-charcoal/50 font-bold mb-1">Sizes (Comma separated tags, e.g. S, M, L or 32B, 34B)</label>
-                  <input :value="v.sizes.join(', ')" @input="v.sizes = ($event.target as HTMLInputElement).value.split(',').map(s => s.trim())" placeholder="S, M, L" class="w-full p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
+                  <label class="block text-charcoal/50 font-bold mb-1.5">Variant Sizes (Select presets or add custom)</label>
+                  <div class="flex flex-wrap gap-1.5 mb-2">
+                    <button 
+                      v-for="szPreset in ['XS', 'S', 'M', 'L', 'XL', 'XXL', '30B', '32B', '34B', '36B', '38B', '32C', '34C', '36C', '38C', '32D', '34D', '36D']" 
+                      :key="szPreset"
+                      type="button"
+                      @click="toggleSizePreset(v, szPreset)"
+                      class="px-2 py-1 rounded text-[10px] font-bold border transition-colors"
+                      :class="v.sizes.includes(szPreset) ? 'bg-deep-plum text-white border-deep-plum' : 'bg-white text-charcoal/60 border-charcoal/20 hover:border-deep-plum'"
+                    >
+                      {{ szPreset }}
+                    </button>
+                  </div>
+                  <input :value="v.sizes.join(', ')" @input="v.sizes = ($event.target as HTMLInputElement).value.split(',').map(s => s.trim()).filter(Boolean)" placeholder="Comma-separated custom sizes (e.g. 30A, 32A)" class="w-full p-2 border border-charcoal/20 rounded-lg text-xs bg-white font-mono" />
                 </div>
 
                 <div class="border-t border-rose-blush/10 pt-2.5">
@@ -950,6 +1529,140 @@
                       <input v-model="v.images[imgIdx]" placeholder="https://example.com/color-pic.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
                       <button type="button" @click="v.images.splice(imgIdx, 1)" class="text-red-500 text-xs">✕</button>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB D: MEDIA & FEATURES -->
+          <div v-show="productFormTab === 'media'" class="space-y-4 animate-fade-in">
+            <!-- Available Offer -->
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Available Offer Promo Text</label>
+              <input v-model="productModal.form.availableOffer" type="text" placeholder="e.g. Buy 2 Get 1 Free, or Flat 10% Off with code VANELVINA" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
+            </div>
+
+            <!-- YouTube Video URL -->
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">YouTube Video Embed Link / Watch URL</label>
+              <input v-model="productModal.form.videoUrl" type="text" placeholder="e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
+              <div v-if="productModal.form.videoUrl" class="mt-2 aspect-video w-full max-w-sm rounded-xl overflow-hidden border border-rose-blush/20">
+                <iframe :src="getVideoEmbedUrl(productModal.form.videoUrl)" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
+              </div>
+            </div>
+
+            <!-- Top-Level Product Images (Multiple) -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="block font-semibold text-charcoal/70">Product Main Images (Multiple URLs)</label>
+                <button type="button" @click="productModal.form.images.push('')" class="text-deep-plum font-bold text-[10px] hover:underline">+ Add Image URL</button>
+              </div>
+              <div v-if="!productModal.form.images?.length" class="p-3 text-center text-charcoal/40 bg-warm-ivory/20 rounded-xl border border-dashed border-rose-blush/30">
+                No main images added. Click "+ Add Image URL" above.
+              </div>
+              <div class="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                <div v-for="(_, imgIdx) in productModal.form.images" :key="imgIdx" class="flex gap-2 items-center">
+                  <div class="w-8 h-8 rounded bg-white border border-rose-blush flex items-center justify-center overflow-hidden shrink-0 shadow-soft">
+                    <img v-if="productModal.form.images[imgIdx]" :src="productModal.form.images[imgIdx]" class="w-full h-full object-cover" />
+                    <span v-else class="text-[8px] text-charcoal/30">Null</span>
+                  </div>
+                  <input v-model="productModal.form.images[imgIdx]" placeholder="https://example.com/product-main.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
+                  <button type="button" @click="productModal.form.images.splice(imgIdx, 1)" class="text-red-500 text-xs">✕</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Features / Highlights (Multiple) -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="block font-semibold text-charcoal/70">Product Key Features (Multiple Bullets)</label>
+                <button type="button" @click="productModal.form.features.push('')" class="text-deep-plum font-bold text-[10px] hover:underline">+ Add Feature Bullet</button>
+              </div>
+              <div v-if="!productModal.form.features?.length" class="p-3 text-center text-charcoal/40 bg-warm-ivory/20 rounded-xl border border-dashed border-rose-blush/30">
+                No key features added. Click "+ Add Feature Bullet" above.
+              </div>
+              <div class="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                <div v-for="(_, fIdx) in productModal.form.features" :key="fIdx" class="flex gap-2 items-center">
+                  <span class="text-charcoal/40 font-bold">•</span>
+                  <input v-model="productModal.form.features[fIdx]" placeholder="e.g. Ultra-soft seam-free elastic band" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
+                  <button type="button" @click="productModal.form.features.splice(fIdx, 1)" class="text-red-500 text-xs">✕</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB E: DETAILS & FAQS -->
+          <div v-show="productFormTab === 'details'" class="space-y-4 animate-fade-in">
+            <!-- Additional Info -->
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">Additional Information</label>
+              <textarea v-model="productModal.form.additionalInfo" rows="3" placeholder="Fabric composition, care instructions, or certification details..." class="w-full p-2.5 border border-charcoal/20 rounded-xl"></textarea>
+            </div>
+
+            <!-- Product Tags (Comma separated or presets check) -->
+            <div class="space-y-2">
+              <label class="block font-semibold text-charcoal/70">Search Tags (Comma separated or select presets)</label>
+              <div class="flex flex-wrap gap-2 mb-2">
+                <button 
+                  v-for="pTag in ['new arrival', 'bestseller', 'trending', 'comfort', 'premium', 'daily-wear']" 
+                  :key="pTag"
+                  type="button"
+                  @click="togglePresetTag(pTag)"
+                  class="px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-colors font-ui"
+                  :class="productModal.form.tags.includes(pTag) ? 'bg-deep-plum text-white border-deep-plum shadow' : 'bg-white text-charcoal/60 border-charcoal/20 hover:border-deep-plum'"
+                >
+                  {{ pTag }}
+                </button>
+              </div>
+              <input 
+                :value="productModal.form.tags.join(', ')" 
+                @input="productModal.form.tags = ($event.target as HTMLInputElement).value.split(',').map(s => s.trim()).filter(Boolean)" 
+                placeholder="e.g. new arrival, bestseller, trending" 
+                class="w-full p-2.5 border border-charcoal/20 rounded-xl font-mono text-xs"
+              />
+            </div>
+
+            <!-- Descriptive / Lifestyle Images (Multiple) -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="block font-semibold text-charcoal/70">Descriptive / Lifestyle Images (Multiple URLs)</label>
+                <button type="button" @click="productModal.form.descriptiveImages.push('')" class="text-deep-plum font-bold text-[10px] hover:underline">+ Add Lifestyle Image URL</button>
+              </div>
+              <div v-if="!productModal.form.descriptiveImages?.length" class="p-3 text-center text-charcoal/40 bg-warm-ivory/20 rounded-xl border border-dashed border-rose-blush/30">
+                No lifestyle images added. Click "+ Add Lifestyle Image URL" above.
+              </div>
+              <div class="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                <div v-for="(_, imgIdx) in productModal.form.descriptiveImages" :key="imgIdx" class="flex gap-2 items-center">
+                  <div class="w-8 h-8 rounded bg-white border border-rose-blush flex items-center justify-center overflow-hidden shrink-0 shadow-soft">
+                    <img v-if="productModal.form.descriptiveImages[imgIdx]" :src="productModal.form.descriptiveImages[imgIdx]" class="w-full h-full object-cover" />
+                    <span v-else class="text-[8px] text-charcoal/30">Null</span>
+                  </div>
+                  <input v-model="productModal.form.descriptiveImages[imgIdx]" placeholder="https://example.com/lifestyle-pic.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
+                  <button type="button" @click="productModal.form.descriptiveImages.splice(imgIdx, 1)" class="text-red-500 text-xs">✕</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product FAQs (Multiple) -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="block font-semibold text-charcoal/70">Product Specific FAQs (Question &amp; Answer)</label>
+                <button type="button" @click="productModal.form.faqs.push({ question: '', answer: '' })" class="text-deep-plum font-bold text-[10px] hover:underline">+ Add FAQ Pair</button>
+              </div>
+              <div v-if="!productModal.form.faqs?.length" class="p-3 text-center text-charcoal/40 bg-warm-ivory/20 rounded-xl border border-dashed border-rose-blush/30">
+                No product specific FAQs added. Click "+ Add FAQ Pair" above.
+              </div>
+              <div class="space-y-3 max-h-[180px] overflow-y-auto pr-1">
+                <div v-for="(faq, fIdx) in productModal.form.faqs" :key="fIdx" class="bg-warm-ivory/50 p-3 rounded-xl border border-rose-blush/20 space-y-2 relative">
+                  <button type="button" @click="productModal.form.faqs.splice(fIdx, 1)" class="absolute top-2 right-2 text-red-500 text-xs hover:underline">Remove</button>
+                  <div class="space-y-1 pr-12">
+                    <label class="block text-[10px] text-charcoal/45 uppercase font-bold">Question</label>
+                    <input v-model="faq.question" placeholder="e.g. Is this bra padded?" class="w-full p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="block text-[10px] text-charcoal/45 uppercase font-bold">Answer</label>
+                    <textarea v-model="faq.answer" rows="2" placeholder="e.g. Yes, it comes with removable foam pads..." class="w-full p-2 border border-charcoal/20 rounded-lg text-xs bg-white"></textarea>
                   </div>
                 </div>
               </div>
@@ -1371,6 +2084,76 @@
       </div>
     </div>
 
+    <!-- 8. USER INSPECTION MODAL -->
+    <div v-if="inspectedUser" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
+      <div class="bg-white rounded-3xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] border border-charcoal/20 shadow-modal space-y-5 relative">
+        <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
+        
+        <div class="relative z-10 flex items-center justify-between border-b border-rose-blush/10 pb-3">
+          <h3 class="text-base font-serif text-deep-plum font-bold">Inspect Customer: {{ inspectedUser.name || 'Unnamed User' }}</h3>
+          <button @click="inspectedUser = null" class="text-charcoal/45 hover:text-deep-plum text-sm">✕</button>
+        </div>
+
+        <div class="space-y-5 text-xs font-ui relative z-10">
+          
+          <!-- User Info Summary Card -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-rose-blush/15 p-4 rounded-2xl border border-rose-blush/30">
+            <div class="space-y-2">
+              <span class="text-[10px] font-bold text-charcoal/40 tracking-wider uppercase block">Contact Information</span>
+              <p class="font-bold text-deep-plum text-sm">{{ inspectedUser.name || 'Unnamed' }}</p>
+              <p class="font-medium text-charcoal/70">Email: {{ inspectedUser.email }}</p>
+              <p class="text-charcoal/50">Channel: {{ inspectedUser.authMethod || 'email' }} · Status: {{ inspectedUser.isActive ? 'Active' : 'Suspended' }}</p>
+            </div>
+            
+            <div class="space-y-2">
+              <span class="text-[10px] font-bold text-charcoal/40 tracking-wider uppercase block">System Logs</span>
+              <p>Joined: {{ new Date(inspectedUser.createdAt).toLocaleDateString('en-IN', { dateStyle: 'medium' }) }}</p>
+              <p>Last Active: {{ (inspectedUser.lastLoginAt || inspectedUser.createdAt) ? new Date(inspectedUser.lastLoginAt || inspectedUser.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Never' }}</p>
+            </div>
+          </div>
+
+          <!-- Customer Value metrics -->
+          <div class="grid grid-cols-2 gap-4 text-center">
+            <div class="bg-warm-ivory p-4 rounded-2xl border border-charcoal/10 shadow-soft">
+              <span class="text-[10px] font-bold text-charcoal/45 tracking-wider uppercase">Orders Placed</span>
+              <p class="font-serif text-xl font-bold text-deep-plum mt-1">{{ inspectedUser.orderCount || 0 }}</p>
+            </div>
+            <div class="bg-warm-ivory p-4 rounded-2xl border border-charcoal/10 shadow-soft">
+              <span class="text-[10px] font-bold text-charcoal/45 tracking-wider uppercase">Lifetime Spend</span>
+              <p class="font-serif text-xl font-bold text-deep-plum mt-1">₹{{ (inspectedUser.totalSpent || 0).toLocaleString('en-IN') }}</p>
+            </div>
+          </div>
+
+          <!-- Orders list -->
+          <div class="space-y-2.5">
+            <h4 class="font-serif font-bold text-deep-plum text-sm">Customer Purchase History</h4>
+            <div v-if="inspectedUserOrders.length === 0" class="p-6 text-center text-charcoal/45 border border-dashed border-rose-blush/40 rounded-xl">
+              This customer has not placed any orders yet.
+            </div>
+            <div v-else class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+              <div 
+                v-for="order in inspectedUserOrders" 
+                :key="order._id" 
+                class="flex items-center justify-between p-3 bg-light-gray rounded-xl hover:bg-rose-blush/20 transition-all border border-border-gray/30 shadow-soft"
+              >
+                <div>
+                  <p class="font-bold text-deep-plum font-mono text-[11px]">{{ order.orderId }}</p>
+                  <p class="text-[10px] text-charcoal/50 mt-0.5">Placed on {{ new Date(order.createdAt).toLocaleDateString('en-IN') }}</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-rose-blush text-deep-plum">
+                    {{ order.orderStatus }}
+                  </span>
+                  <p class="font-serif font-black text-charcoal">₹{{ order.total.toLocaleString('en-IN') }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -1397,6 +2180,10 @@ const tabs = [
   { id: 'products', name: 'Products Catalog', icon: '🛍️' },
   { id: 'widgets', name: 'Widgets & Layout', icon: '⚙️' },
   { id: 'blogs', name: 'Blogs Management', icon: '📝' },
+  { id: 'users', name: 'Registered Users', icon: '👥' },
+  { id: 'orders', name: 'Customer Orders', icon: '📦' },
+  { id: 'about', name: 'About Us Page', icon: 'ℹ️' },
+  { id: 'inquiries', name: 'Customer Inquiries', icon: '💬' },
 ]
 
 // Base loaded lists
@@ -1405,8 +2192,13 @@ const categories = ref<any[]>([])
 const products = ref<any[]>([])
 const widgets = ref<any[]>([])
 const blogs = ref<any[]>([])
+const users = ref<any[]>([])
+const orders = ref<any[]>([])
+const inquiries = ref<any[]>([])
 
 const loadingData = ref(false)
+const aboutData = ref<any>(null)
+const savingAbout = ref(false)
 
 // Search Queries & Filters
 const searchQueries = ref({
@@ -1414,7 +2206,10 @@ const searchQueries = ref({
   categories: '',
   products: '',
   widgets: '',
-  blogs: ''
+  blogs: '',
+  users: '',
+  orders: '',
+  inquiries: ''
 })
 const productFilterCategory = ref('')
 const productFilterStock = ref('all') // 'all' | 'instock' | 'lowstock' | 'outofstock'
@@ -1475,6 +2270,17 @@ const lowStockProducts = computed(() => {
   return products.value.filter(p => p.stockCount <= 5 && p.stockCount > 0)
 })
 
+const filteredInquiries = computed(() => {
+  const q = searchQueries.value.inquiries.toLowerCase().trim()
+  if (!q) return inquiries.value
+  return inquiries.value.filter(i => 
+    (i.name && i.name.toLowerCase().includes(q)) ||
+    (i.email && i.email.toLowerCase().includes(q)) ||
+    (i.queryType && i.queryType.toLowerCase().includes(q)) ||
+    (i.message && i.message.toLowerCase().includes(q))
+  )
+})
+
 const filteredWidgets = computed(() => {
   let list = widgets.value
   const q = searchQueries.value.widgets.toLowerCase().trim()
@@ -1505,6 +2311,52 @@ const filteredBlogs = computed(() => {
     b.summary.toLowerCase().includes(q)
   )
 })
+
+const filteredUsers = computed(() => {
+  const q = searchQueries.value.users.toLowerCase().trim()
+  if (!q) return users.value
+  return users.value.filter(u => 
+    (u.name && u.name.toLowerCase().includes(q)) || 
+    (u.email && u.email.toLowerCase().includes(q)) ||
+    (u.authMethod && u.authMethod.toLowerCase().includes(q))
+  )
+})
+
+const filteredOrders = computed(() => {
+  const q = searchQueries.value.orders.toLowerCase().trim()
+  if (!q) return orders.value
+  return orders.value.filter(o => 
+    (o.orderId && o.orderId.toLowerCase().includes(q)) ||
+    (o.shippingAddress?.name && o.shippingAddress.name.toLowerCase().includes(q)) ||
+    (o.orderStatus && o.orderStatus.toLowerCase().includes(q)) ||
+    (o.guestInfo?.name && o.guestInfo.name.toLowerCase().includes(q))
+  )
+})
+
+const inspectedOrder = ref<any>(null)
+
+const inspectOrderDetails = (order: any) => {
+  inspectedOrder.value = order
+}
+
+const inspectedUser = ref<any>(null)
+const inspectedUserOrders = computed(() => {
+  if (!inspectedUser.value) return []
+  const userEmail = inspectedUser.value.email?.toLowerCase().trim()
+  return orders.value.filter(o => {
+    const uId = typeof o.userId === 'object' ? o.userId?._id : o.userId
+    if (uId && uId === inspectedUser.value._id) return true
+    if (userEmail) {
+      if (o.guestInfo?.email && o.guestInfo.email.toLowerCase().trim() === userEmail) return true
+      if (o.shippingAddress?.email && o.shippingAddress.email.toLowerCase().trim() === userEmail) return true
+    }
+    return false
+  })
+})
+
+const inspectUserDetails = (user: any) => {
+  inspectedUser.value = user
+}
 
 // Modals states
 const bannerModal = ref({
@@ -1554,7 +2406,21 @@ const productModal = ref({
     deliveryDays: 3,
     stockCount: 10,
     inStock: true,
-    variants: [] as any[]
+    variants: [] as any[],
+    tags: [] as string[],
+    images: [] as string[],
+    videoUrl: '',
+    availableOffer: '',
+    features: [] as string[],
+    additionalInfo: '',
+    descriptiveImages: [] as string[],
+    faqs: [] as { question: string; answer: string }[],
+    isCodAvailable: true,
+    isReturnable: true,
+    isExchangeable: true,
+    isFreeShipping: false,
+    sku: '',
+    styleId: ''
   }
 })
 
@@ -1614,18 +2480,26 @@ const loadAllData = async () => {
   loadingData.value = true
   const config = useRuntimeConfig()
   try {
-    const [bannersData, categoriesData, productsData, widgetsData, blogsData] = await Promise.all([
+    const [bannersData, categoriesData, productsData, widgetsData, blogsData, usersData, ordersData, aboutPageData, inquiriesData] = await Promise.all([
       $fetch<any[]>(`${config.public.apiBase}/banners`),
       $fetch<any[]>(`${config.public.apiBase}/categories`),
       $fetch<any[]>(`${config.public.apiBase}/products`),
       $fetch<any[]>(`${config.public.apiBase}/widgets`),
-      $fetch<any[]>(`${config.public.apiBase}/blogs/admin`, { headers: adminStore.getHeaders() })
+      $fetch<any[]>(`${config.public.apiBase}/blogs/admin`, { headers: adminStore.getHeaders() }),
+      $fetch<any[]>(`${config.public.apiBase}/user-auth/admin/users`, { headers: adminStore.getHeaders() }),
+      $fetch<any>(`${config.public.apiBase}/orders`, { headers: adminStore.getHeaders() }).then(res => res.orders || []),
+      $fetch<any>(`${config.public.apiBase}/about`),
+      $fetch<any[]>(`${config.public.apiBase}/inquiries`, { headers: adminStore.getHeaders() })
     ])
     banners.value = bannersData
     categories.value = categoriesData
     products.value = productsData
     widgets.value = widgetsData
     blogs.value = blogsData
+    users.value = usersData
+    orders.value = ordersData
+    aboutData.value = aboutPageData
+    inquiries.value = inquiriesData
   } catch (error) {
     console.error('Failed to load dashboard data:', error)
     uiStore.addToast('error', 'Error loading database resources')
@@ -1634,9 +2508,129 @@ const loadAllData = async () => {
   }
 }
 
+const saveAboutData = async () => {
+  savingAbout.value = true
+  const config = useRuntimeConfig()
+  try {
+    const res = await $fetch<any>(`${config.public.apiBase}/about`, {
+      method: 'PUT',
+      headers: adminStore.getHeaders(),
+      body: aboutData.value
+    })
+    aboutData.value = res
+    uiStore.addToast('success', 'About Us page content updated successfully!')
+  } catch (err: any) {
+    console.error('Failed to save About Us:', err)
+    uiStore.addToast('error', err.data?.message || 'Failed to save About Us content')
+  } finally {
+    savingAbout.value = false
+  }
+}
+
+const resolveInquiry = async (inquiryId: string) => {
+  const config = useRuntimeConfig()
+  try {
+    const res = await $fetch<any>(`${config.public.apiBase}/inquiries/${inquiryId}/resolve`, {
+      method: 'PUT',
+      headers: adminStore.getHeaders()
+    })
+    const idx = inquiries.value.findIndex(i => i._id === inquiryId)
+    if (idx !== -1) {
+      inquiries.value[idx].status = res.status
+    }
+    uiStore.addToast('success', `Inquiry marked as ${res.status}`)
+  } catch (err: any) {
+    uiStore.addToast('error', err.data?.message || 'Failed to update inquiry status')
+  }
+}
+
+const deleteInquiry = async (inquiryId: string) => {
+  if (!confirm('Are you sure you want to delete this inquiry ticket?')) return
+  const config = useRuntimeConfig()
+  try {
+    await $fetch<any>(`${config.public.apiBase}/inquiries/${inquiryId}`, {
+      method: 'DELETE',
+      headers: adminStore.getHeaders()
+    })
+    inquiries.value = inquiries.value.filter(i => i._id !== inquiryId)
+    uiStore.addToast('success', 'Inquiry deleted successfully')
+  } catch (err: any) {
+    uiStore.addToast('error', err.data?.message || 'Failed to delete inquiry')
+  }
+}
+
 const handleLogout = () => {
   adminStore.logout()
   uiStore.addToast('success', 'Logged out successfully!')
+}
+
+const updateOrderStatus = async (orderId: string, orderStatus: string) => {
+  const config = useRuntimeConfig()
+  try {
+    const data = await $fetch<any>(`${config.public.apiBase}/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: adminStore.getHeaders(),
+      body: { orderStatus }
+    })
+    const idx = orders.value.findIndex(o => o._id === orderId)
+    if (idx !== -1) {
+      orders.value[idx].orderStatus = data.orderStatus
+    }
+    uiStore.addToast('success', `Order status updated to ${orderStatus}`)
+  } catch (err: any) {
+    uiStore.addToast('error', err.data?.message || 'Failed to update order status')
+  }
+}
+
+const updatePaymentStatus = async (orderId: string, paymentStatus: string) => {
+  const config = useRuntimeConfig()
+  try {
+    const data = await $fetch<any>(`${config.public.apiBase}/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: adminStore.getHeaders(),
+      body: { paymentStatus }
+    })
+    const idx = orders.value.findIndex(o => o._id === orderId)
+    if (idx !== -1) {
+      orders.value[idx].paymentStatus = data.paymentStatus
+    }
+    uiStore.addToast('success', `Payment status updated to ${paymentStatus}`)
+  } catch (err: any) {
+    uiStore.addToast('error', err.data?.message || 'Failed to update payment status')
+  }
+}
+
+const toggleUserStatus = async (user: any) => {
+  const newStatus = !user.isActive
+  const config = useRuntimeConfig()
+  try {
+    const data = await $fetch<any>(`${config.public.apiBase}/user-auth/admin/users/${user._id}/status`, {
+      method: 'PUT',
+      headers: adminStore.getHeaders(),
+      body: { isActive: newStatus }
+    })
+    user.isActive = data.isActive
+    uiStore.addToast('success', `User account ${data.isActive ? 'activated' : 'suspended'}`)
+  } catch (err: any) {
+    uiStore.addToast('error', err.data?.message || 'Failed to update user status')
+  }
+}
+
+const deleteUser = async (userId: string) => {
+  if (!confirm('Are you sure you want to permanently remove access for this user? All their orders will be converted to guest checkouts.')) {
+    return
+  }
+  const config = useRuntimeConfig()
+  try {
+    await $fetch<any>(`${config.public.apiBase}/user-auth/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: adminStore.getHeaders()
+    })
+    users.value = users.value.filter(u => u._id !== userId)
+    uiStore.addToast('success', 'User access removed successfully')
+  } catch (err: any) {
+    uiStore.addToast('error', err.data?.message || 'Failed to remove user access')
+  }
 }
 
 // BANNERS CRUD
@@ -1776,7 +2770,21 @@ const openProductModal = (prod: any | null) => {
       deliveryDays: prod.deliveryDays || 3,
       stockCount: prod.stockCount || 0,
       inStock: prod.inStock !== undefined ? prod.inStock : true,
-      variants: prod.variants ? JSON.parse(JSON.stringify(prod.variants)) : []
+      variants: prod.variants ? JSON.parse(JSON.stringify(prod.variants)) : [],
+      tags: prod.tags || [],
+      images: prod.images || [],
+      videoUrl: prod.videoUrl || '',
+      availableOffer: prod.availableOffer || '',
+      features: prod.features || [],
+      additionalInfo: prod.additionalInfo || '',
+      descriptiveImages: prod.descriptiveImages || [],
+      faqs: prod.faqs ? JSON.parse(JSON.stringify(prod.faqs)) : [],
+      isCodAvailable: prod.isCodAvailable !== undefined ? prod.isCodAvailable : true,
+      isReturnable: prod.isReturnable !== undefined ? prod.isReturnable : true,
+      isExchangeable: prod.isExchangeable !== undefined ? prod.isExchangeable : true,
+      isFreeShipping: prod.isFreeShipping !== undefined ? prod.isFreeShipping : false,
+      sku: prod.sku || '',
+      styleId: prod.styleId || ''
     }
   } else {
     productModal.value.isEdit = false
@@ -1801,7 +2809,21 @@ const openProductModal = (prod: any | null) => {
           sizes: ['S', 'M', 'L'],
           images: ['']
         }
-      ]
+      ],
+      tags: [],
+      images: [''],
+      videoUrl: '',
+      availableOffer: '',
+      features: [''],
+      additionalInfo: '',
+      descriptiveImages: [''],
+      faqs: [],
+      isCodAvailable: true,
+      isReturnable: true,
+      isExchangeable: true,
+      isFreeShipping: false,
+      sku: '',
+      styleId: ''
     }
   }
   productModal.value.show = true
@@ -1826,6 +2848,38 @@ const selectedCategorySubcategories = computed(() => {
   return found ? found.subcategories || [] : []
 })
 
+const toggleSizePreset = (variant: any, size: string) => {
+  const idx = variant.sizes.indexOf(size)
+  if (idx === -1) {
+    variant.sizes.push(size)
+  } else {
+    variant.sizes.splice(idx, 1)
+  }
+}
+
+const togglePresetTag = (tag: string) => {
+  const tagsList = productModal.value.form.tags
+  const idx = tagsList.indexOf(tag)
+  if (idx === -1) {
+    tagsList.push(tag)
+  } else {
+    tagsList.splice(idx, 1)
+  }
+}
+
+const getVideoEmbedUrl = (url: string) => {
+  if (!url) return ''
+  if (url.includes('youtube.com/watch?v=')) {
+    const videoId = url.split('v=')[1]?.split('&')[0]
+    return `https://www.youtube.com/embed/${videoId}`
+  }
+  if (url.includes('youtu.be/')) {
+    const videoId = url.split('youtu.be/')[1]?.split('?')[0]
+    return `https://www.youtube.com/embed/${videoId}`
+  }
+  return url
+}
+
 const saveProductItem = async () => {
   const original = productModal.value.form.originalPrice
   const price = productModal.value.form.price
@@ -1836,7 +2890,11 @@ const saveProductItem = async () => {
 
   const payload = {
     ...productModal.value.form,
-    discount
+    discount,
+    images: productModal.value.form.images.filter(img => img.trim() !== ''),
+    features: productModal.value.form.features.filter(f => f.trim() !== ''),
+    descriptiveImages: productModal.value.form.descriptiveImages.filter(img => img.trim() !== ''),
+    faqs: productModal.value.form.faqs.filter(faq => faq.question.trim() !== '' && faq.answer.trim() !== '')
   }
 
   try {

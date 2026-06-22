@@ -99,6 +99,7 @@
             <div class="flex items-center gap-3 flex-wrap">
               <AppRating :rating="product.rating" :count="product.reviewCount" show-count show-value />
               <span class="text-xs text-mid-gray font-ui">SKU: {{ product.sku }}</span>
+              <span v-if="product.styleId" class="text-xs text-mid-gray font-ui">Style ID: {{ product.styleId }}</span>
             </div>
           </div>
 
@@ -109,6 +110,19 @@
             <span v-if="product.discount" class="text-sm font-semibold text-green-600 font-ui mb-0.5">
               You save {{ formatPrice(product.originalPrice - product.price) }}
             </span>
+          </div>
+
+          <!-- Available Offer & Share Link -->
+          <div v-if="product.availableOffer" class="bg-rose-blush/20 border border-rose-blush/50 rounded-2xl p-4.5 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-deep-plum uppercase tracking-wider">🏷️ Available Offer</span>
+              <button @click="copyShareLink" class="text-xs text-dusty-rose hover:text-deep-plum font-semibold flex items-center gap-1 transition-all" title="Share this offer">
+                <span>🔗 Share Offer</span>
+              </button>
+            </div>
+            <p class="text-xs font-ui text-charcoal font-medium leading-relaxed">
+              {{ product.availableOffer }}
+            </p>
           </div>
 
           <!-- Variant / Color -->
@@ -172,14 +186,23 @@
             </div>
           </div>
 
-          <!-- Add to Cart + Wishlist -->
+          <!-- Add to Cart + Buy Now + Wishlist -->
           <div class="flex gap-3 pb-5 border-b border-border-gray">
-            <AppButton size="lg" :full="true" :loading="adding" @click="handleAddToCart">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              Add to Cart
-            </AppButton>
+            <div class="flex-1 flex gap-2">
+              <AppButton size="lg" :full="true" :loading="adding" @click="handleAddToCart" class="flex-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                {{ isAlreadyInBag ? 'Go to Bag' : 'Add to Bag' }}
+              </AppButton>
+              <button 
+                @click="handleBuyNow" 
+                class="flex-1 bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-semibold tracking-wide shadow-premium transition-all py-3 px-4 flex items-center justify-center gap-1.5"
+                :disabled="adding"
+              >
+                ⚡ Buy Now
+              </button>
+            </div>
             <button
               class="w-12 h-12 shrink-0 rounded-xl border-2 border-border-gray flex items-center justify-center hover:border-dusty-rose hover:text-dusty-rose transition-all"
               :class="{ 'border-dusty-rose text-dusty-rose bg-rose-blush': isWishlisted }"
@@ -210,6 +233,40 @@
             <p v-if="deliveryMsg" class="mt-2 text-xs font-ui" :class="deliveryOk ? 'text-green-600' : 'text-red-500'" role="alert">
               {{ deliveryMsg }}
             </p>
+          </div>
+
+          <!-- Store/Product Policy Indicators -->
+          <div class="grid grid-cols-2 gap-2.5 py-1">
+            <div class="flex items-center gap-2 p-2.5 bg-white border border-border-gray rounded-xl shadow-sm">
+              <span class="text-lg">🚚</span>
+              <div>
+                <p class="text-[11px] font-bold text-charcoal leading-tight">Free Shipping</p>
+                <p class="text-[9px] text-mid-gray font-ui leading-none mt-0.5">{{ product.isFreeShipping ? 'Eligible for Free Delivery' : 'Standard Delivery Rates' }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 p-2.5 bg-white border border-border-gray rounded-xl shadow-sm">
+              <span class="text-lg">🔄</span>
+              <div>
+                <p class="text-[11px] font-bold text-charcoal leading-tight">Returns & Exchange</p>
+                <p class="text-[9px] text-mid-gray font-ui leading-none mt-0.5">
+                  {{ (product.isReturnable && product.isExchangeable) ? '7 Days Return & Exchange' : product.isReturnable ? '7 Days Returnable' : product.isExchangeable ? '7 Days Exchangeable' : 'Hygiene Excluded' }}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 p-2.5 bg-white border border-border-gray rounded-xl shadow-sm">
+              <span class="text-lg">💵</span>
+              <div>
+                <p class="text-[11px] font-bold text-charcoal leading-tight">COD Status</p>
+                <p class="text-[9px] text-mid-gray font-ui leading-none mt-0.5">{{ product.isCodAvailable ? 'COD Available (On)' : 'Prepaid Only (Off)' }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 p-2.5 bg-white border border-border-gray rounded-xl shadow-sm">
+              <span class="text-lg">🇮🇳</span>
+              <div>
+                <p class="text-[11px] font-bold text-charcoal leading-tight">Origin</p>
+                <p class="text-[9px] text-mid-gray font-ui leading-none mt-0.5">India 🇮🇳 (Aurangabad)</p>
+              </div>
+            </div>
           </div>
 
           <!-- Highlights -->
@@ -247,10 +304,55 @@
 
         <!-- Tab content -->
         <div class="p-6">
-          <div v-if="activeTab === 'Description'">
+          <div v-if="activeTab === 'Description'" class="space-y-6">
             <p class="text-sm font-ui text-mid-gray leading-relaxed">{{ product.description }}</p>
+
+            <!-- Key Features -->
+            <div v-if="product.features && product.features.length" class="space-y-2 mt-4">
+              <h3 class="font-ui font-semibold text-charcoal text-sm">Key Product Features</h3>
+              <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <li v-for="feature in product.features" :key="feature" class="flex items-start gap-2 text-sm font-ui text-mid-gray">
+                  <span class="text-dusty-rose mt-0.5">•</span>
+                  <span>{{ feature }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Additional Information -->
+            <div v-if="product.additionalInfo" class="space-y-2 mt-4 border-t border-border-gray pt-4">
+              <h3 class="font-ui font-semibold text-charcoal text-sm">Additional Product Information</h3>
+              <p class="text-sm font-ui text-mid-gray leading-relaxed whitespace-pre-line">{{ product.additionalInfo }}</p>
+            </div>
+
+            <!-- YouTube Video Embed -->
+            <div v-if="product.videoUrl" class="mt-6 border-t border-border-gray pt-6">
+              <h3 class="font-ui font-semibold text-charcoal text-sm mb-3.5">Product Showcase Video</h3>
+              <div class="relative aspect-video rounded-2xl overflow-hidden shadow-soft max-w-2xl bg-black">
+                <iframe 
+                  :src="product.videoUrl" 
+                  class="absolute inset-0 w-full h-full" 
+                  frameborder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowfullscreen
+                ></iframe>
+              </div>
+            </div>
+
+            <!-- Descriptive/Lifestyle Images Grid -->
+            <div v-if="product.descriptiveImages && product.descriptiveImages.length" class="mt-6 border-t border-border-gray pt-6">
+              <h3 class="font-ui font-semibold text-charcoal text-sm mb-4">Product Gallery & Lifestyle Details</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <img 
+                  v-for="(descImg, dIdx) in product.descriptiveImages" 
+                  :key="dIdx" 
+                  :src="descImg" 
+                  class="w-full object-cover rounded-2xl shadow-soft hover:scale-[1.02] transition-transform duration-300"
+                  loading="lazy" 
+                />
+              </div>
+            </div>
           </div>
-          <div v-else-if="activeTab === 'Fabric & Care'" class="space-y-4">
+          <div v-else-if="activeTab === 'Fabric, Care & Origin'" class="space-y-4">
             <div>
               <h3 class="font-ui font-semibold text-charcoal text-sm mb-2">Fabric Composition</h3>
               <p class="text-sm text-mid-gray font-ui">{{ product.fabric }}</p>
@@ -262,6 +364,15 @@
                   <span class="text-base" aria-hidden="true">🏷️</span>{{ care }}
                 </li>
               </ul>
+            </div>
+            <div class="border-t border-border-gray pt-4 mt-4">
+              <h3 class="font-ui font-semibold text-charcoal text-sm mb-2">Manufacturer & Brand Details</h3>
+              <div class="text-xs text-mid-gray font-ui space-y-1.5 leading-relaxed">
+                <p><strong>Brand Name:</strong> {{ product.brand || 'Van Elvina' }}</p>
+                <p><strong>Country of Origin:</strong> India 🇮🇳</p>
+                <p><strong>Manufactured & Marketed By:</strong> Van Elvina Private Limited, 1/1, Motiwala Complex, Nirala Bazar, Aurangabad, 431001, Maharashtra, India.</p>
+                <p><strong>Customer Care Support:</strong> support@vanelvina.com | +91 87885 66695 | +91 95791 83097</p>
+              </div>
             </div>
           </div>
           <div v-else-if="activeTab === 'Reviews'">
@@ -284,9 +395,60 @@
             <div class="space-y-4">
               <ReviewCard v-for="review in productReviews" :key="review.id" :review="review" />
             </div>
+
+            <!-- Rate This Product Form -->
+            <div class="border-t border-border-gray pt-6 mt-8">
+              <h3 class="font-ui font-semibold text-charcoal text-sm mb-1">Rate &amp; Review This Product</h3>
+              <p class="text-[11px] text-mid-gray mb-4 font-ui">Your review will help other customers make an informed choice. Required fields are marked *</p>
+              
+              <form @submit.prevent="submitReview" class="space-y-4 max-w-xl">
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-ui text-charcoal font-medium">Your Rating *</span>
+                  <div class="flex gap-1">
+                    <button 
+                      v-for="star in 5" 
+                      :key="star" 
+                      type="button" 
+                      @click="newReviewRating = star"
+                      class="text-xl focus:outline-none transition-transform hover:scale-110"
+                      :class="star <= newReviewRating ? 'text-soft-gold' : 'text-border-gray'"
+                    >
+                      ★
+                    </button>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-[10px] font-semibold text-charcoal/70 mb-1 font-ui">Your Name *</label>
+                    <input v-model="newReviewAuthor" type="text" required placeholder="e.g. Elena Smith" class="w-full p-2 border border-border-gray rounded-xl text-xs font-sans focus:outline-none focus:border-deep-plum bg-white" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-semibold text-charcoal/70 mb-1 font-ui">Review Title *</label>
+                    <input v-model="newReviewTitle" type="text" required placeholder="e.g. Extremely comfortable!" class="w-full p-2 border border-border-gray rounded-xl text-xs font-sans focus:outline-none focus:border-deep-plum bg-white" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[10px] font-semibold text-charcoal/70 mb-1 font-ui">Review Details *</label>
+                  <textarea v-model="newReviewBody" rows="3" required placeholder="Tell others what you liked or disliked about this product..." class="w-full p-2 border border-border-gray rounded-xl text-xs font-sans focus:outline-none focus:border-deep-plum bg-white"></textarea>
+                </div>
+
+                <button 
+                  type="submit" 
+                  class="bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-semibold px-4.5 py-2 shadow-premium transition-all"
+                  :disabled="submittingReview"
+                >
+                  {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
+                </button>
+              </form>
+            </div>
           </div>
           <div v-else-if="activeTab === 'FAQs'">
-            <div v-for="(faq, idx) in faqs" :key="faq.id" class="border-b border-border-gray last:border-0">
+            <div v-if="!productFaqs.length" class="p-6 text-center text-xs text-mid-gray italic">
+              No FAQs configured for this product yet.
+            </div>
+            <div v-else v-for="(faq, idx) in productFaqs" :key="idx" class="border-b border-border-gray last:border-0">
               <button
                 class="w-full flex items-center justify-between py-4 text-left text-sm font-ui font-medium text-charcoal hover:text-deep-plum transition-colors"
                 :aria-expanded="openFaq === idx"
@@ -325,7 +487,7 @@
         <p class="text-xs text-dusty-rose font-ui">{{ formatPrice(product.price) }}</p>
       </div>
       <AppButton size="md" @click="handleAddToCart">
-        {{ selectedSize ? 'Add to Cart' : 'Select Size' }}
+        {{ selectedSize ? (isAlreadyInBag ? 'Go to Bag' : 'Add to Bag') : 'Select Size' }}
       </AppButton>
     </div>
   </div>
@@ -421,6 +583,7 @@
 <script setup lang="ts">
 import { formatPrice, isValidPincode } from '~/utils/formatters'
 import { productSchema, breadcrumbSchema, faqSchema } from '~/utils/schema'
+import { useCartStore } from '~/stores/cart'
 import reviewsData from '~/data/reviews.json'
 import faqsData from '~/data/faqs.json'
 
@@ -429,6 +592,7 @@ const ui = useUIStore()
 const { getBySlug, all, addRecentlyViewed } = useProducts()
 const { addToCart } = useCart()
 const wishlist = useWishlistStore()
+const cart = useCartStore()
 
 const product = computed(() => getBySlug(route.params.slug as string))
 
@@ -504,7 +668,7 @@ onUnmounted(() => {
   }
 })
 
-const tabs = ['Description', 'Fabric & Care', 'Reviews', 'FAQs']
+const tabs = ['Description', 'Fabric, Care & Origin', 'Reviews', 'FAQs']
 const faqs = faqsData.slice(0, 5)
 
 const allImages = computed(() =>
@@ -516,24 +680,121 @@ const isWishlisted = computed(() =>
   product.value ? wishlist.isWishlisted(product.value.id) : false
 )
 
-const productReviews = computed(() =>
-  reviewsData.filter(r => r.productId === product.value?.id).slice(0, 3)
-)
+const newReviewRating = ref(5)
+const newReviewAuthor = ref('')
+const newReviewTitle = ref('')
+const newReviewBody = ref('')
+const submittingReview = ref(false)
+const localReviews = ref<any[]>([])
 
-const similarProducts = computed(() =>
-  all.value
-    .filter(p => p.category === product.value?.category && p.id !== product.value?.id)
+const productReviews = computed(() => {
+  const fileReviews = reviewsData.filter(r => r.productId === product.value?.id)
+  return [...localReviews.value, ...fileReviews]
+})
+
+const productFaqs = computed(() => {
+  if (product.value?.faqs && product.value.faqs.length) {
+    return product.value.faqs
+  }
+  return faqsData.slice(0, 5)
+})
+
+const submitReview = async () => {
+  if (!newReviewAuthor.value || !newReviewTitle.value || !newReviewBody.value) return
+  submittingReview.value = true
+  await new Promise(r => setTimeout(r, 600))
+  
+  const newReview = {
+    id: `local-rev-${Date.now()}`,
+    productId: product.value?.id ?? '',
+    productName: product.value?.name ?? '',
+    author: newReviewAuthor.value,
+    avatar: '',
+    rating: newReviewRating.value,
+    title: newReviewTitle.value,
+    body: newReviewBody.value,
+    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+    verified: true,
+    helpful: 0
+  }
+  
+  localReviews.value.unshift(newReview)
+  ui.addToast('success', 'Thank you! Your review has been submitted.')
+  
+  newReviewAuthor.value = ''
+  newReviewTitle.value = ''
+  newReviewBody.value = ''
+  newReviewRating.value = 5
+  submittingReview.value = false
+}
+
+const copyShareLink = () => {
+  if (typeof window !== 'undefined') {
+    const url = window.location.href
+    navigator.clipboard.writeText(url)
+    ui.addToast('success', 'Product link copied to clipboard! Share it with your friends.')
+  }
+}
+
+const similarProducts = computed(() => {
+  if (!product.value) return []
+  
+  const currentId = product.value.id || (product.value as any)._id
+  const currentCategory = product.value.category
+  const currentSubcategory = product.value.subcategory
+
+  return all.value
+    .filter(p => {
+      const pId = p.id || (p as any)._id
+      return pId !== currentId
+    })
+    .map(p => {
+      let score = 0
+      if (p.category === currentCategory) {
+        score += 2
+      }
+      if (p.subcategory && currentSubcategory && p.subcategory === currentSubcategory) {
+        score += 3
+      }
+      return { product: p, score }
+    })
+    .filter(item => item.score > 0) // Must match at least one attribute
+    .sort((a, b) => b.score - a.score) // Sort highest score first (both matching category & subcategory)
+    .map(item => item.product)
     .slice(0, 6)
-)
+})
+
+const isAlreadyInBag = computed(() => {
+  if (!product.value) return false
+  const pId = product.value.id || (product.value as any)._id
+  return !!cart.findItem(pId, product.value.variants[selectedVariant.value].color, selectedSize.value)
+})
 
 const handleAddToCart = async () => {
   if (!selectedSize.value) { sizeError.value = true; return }
   sizeError.value = false
+  
+  if (isAlreadyInBag.value) {
+    navigateTo('/bag')
+    return
+  }
+
   adding.value = true
   await new Promise(r => setTimeout(r, 400))
   adding.value = false
   if (!product.value) return
   addToCart(product.value, product.value.variants[selectedVariant.value].color, selectedSize.value, qty.value)
+}
+
+const handleBuyNow = async () => {
+  if (!selectedSize.value) { sizeError.value = true; return }
+  sizeError.value = false
+  adding.value = true
+  if (product.value) {
+    addToCart(product.value, product.value.variants[selectedVariant.value].color, selectedSize.value, qty.value)
+    adding.value = false
+    navigateTo('/checkout')
+  }
 }
 
 const checkDelivery = () => {
@@ -564,7 +825,7 @@ watchEffect(() => {
     script: [
       { type: 'application/ld+json', children: JSON.stringify(productSchema(product.value, `https://vanelvina.com/products/${product.value.slug}`)) },
       { type: 'application/ld+json', children: JSON.stringify(breadcrumbSchema([{ name: 'Home', url: 'https://vanelvina.com' }, { name: 'Products', url: 'https://vanelvina.com/products' }, { name: product.value.name, url: `https://vanelvina.com/products/${product.value.slug}` }])) },
-      { type: 'application/ld+json', children: JSON.stringify(faqSchema(faqs)) },
+      { type: 'application/ld+json', children: JSON.stringify(faqSchema(productFaqs.value)) },
     ],
   })
 })

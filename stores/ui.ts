@@ -8,6 +8,7 @@ export const useUIStore = defineStore('ui', {
     sizeGuideOpen: false,
     filterDrawerOpen: false,
     profileDrawerOpen: false,
+    authModalOpen: false,
     toasts: [] as Array<{ id: string; type: 'success' | 'error' | 'info'; message: string }>,
   }),
 
@@ -33,6 +34,9 @@ export const useUIStore = defineStore('ui', {
     closeProfileDrawer() { this.profileDrawerOpen = false },
     toggleProfileDrawer() { this.profileDrawerOpen = !this.profileDrawerOpen },
 
+    openAuthModal() { this.authModalOpen = true },
+    closeAuthModal() { this.authModalOpen = false },
+
     addToast(type: 'success' | 'error' | 'info', message: string) {
       const id = Date.now().toString()
       this.toasts.push({ id, type, message })
@@ -43,3 +47,4 @@ export const useUIStore = defineStore('ui', {
     },
   },
 })
+

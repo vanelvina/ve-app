@@ -30,19 +30,36 @@
           <!-- User Profile Summary Section -->
           <div class="flex items-center gap-4 py-2">
             <!-- Avatar Outer Circle -->
-            <div class="w-14 h-14 rounded-full border border-charcoal/10 flex items-center justify-center bg-warm-ivory shrink-0 shadow-sm">
-              <svg class="w-7 h-7 text-charcoal/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-14 h-14 rounded-full border border-charcoal/10 flex items-center justify-center bg-warm-ivory shrink-0 shadow-sm overflow-hidden">
+              <img v-if="auth.user?.avatar" :src="auth.user.avatar" :alt="auth.user.name" class="w-full h-full object-cover" />
+              <span v-else-if="auth.isLoggedIn" class="text-lg font-bold text-deep-plum font-ui">{{ userInitials }}</span>
+              <svg v-else class="w-7 h-7 text-charcoal/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
             <!-- Name & Subtext -->
-            <div class="min-w-0">
-              <h3 class="font-serif text-lg font-bold text-deep-plum leading-tight">Van Elvina</h3>
-              <p class="text-xs text-mid-gray/80 mt-1 font-ui">
-                <span class="underline decoration-charcoal/30 font-semibold text-charcoal/70 hover:text-deep-plum cursor-pointer">Total Balance 0</span>
-                <span class="mx-1.5 text-charcoal/20">|</span>
-                <span>Base Circle</span>
-              </p>
+            <div class="min-w-0 flex-1">
+              <template v-if="auth.isLoggedIn">
+                <h3 class="font-serif text-lg font-bold text-deep-plum leading-tight truncate">{{ auth.user?.name || 'My Account' }}</h3>
+                <p class="text-xs text-mid-gray/80 mt-0.5 font-ui truncate">{{ auth.user?.email }}</p>
+                <p class="text-xs text-mid-gray/80 mt-1 font-ui">
+                  <span class="underline decoration-charcoal/30 font-semibold text-charcoal/70 hover:text-deep-plum cursor-pointer">Total Balance 0</span>
+                  <span class="mx-1.5 text-charcoal/20">|</span>
+                  <span>Base Circle</span>
+                </p>
+              </template>
+              <template v-else>
+                <h3 class="font-serif text-lg font-bold text-deep-plum leading-tight">Van Elvina</h3>
+                <button
+                  @click="openLogin"
+                  class="mt-1 text-xs font-ui font-bold text-deep-plum underline decoration-dotted hover:text-[#B76E79] transition-colors block text-left"
+                >Sign In / Create Account</button>
+                <p class="text-xs text-mid-gray/80 mt-1 font-ui">
+                  <span class="underline decoration-charcoal/30 font-semibold text-charcoal/70 hover:text-deep-plum cursor-pointer">Total Balance 0</span>
+                  <span class="mx-1.5 text-charcoal/20">|</span>
+                  <span>Base Circle</span>
+                </p>
+              </template>
             </div>
           </div>
 
@@ -53,7 +70,7 @@
               <NuxtLink to="/account/about" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
@@ -78,7 +95,7 @@
               <NuxtLink to="/account/orders" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                     </svg>
                   </div>
@@ -93,7 +110,7 @@
               <NuxtLink to="/wishlist" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group" @click="ui.closeProfileDrawer">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                   </div>
@@ -108,7 +125,7 @@
               <NuxtLink to="/account/cards" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                   </div>
@@ -123,7 +140,7 @@
               <NuxtLink to="/account/fitcode" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </div>
@@ -143,7 +160,7 @@
               <NuxtLink to="/account/loyalty" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5a2 2 0 10-2 2h2zm0 0h4m-4 0H8m12 3a2 2 0 10-4 0v1a2 2 0 004 0v-1zm-12 0a2 2 0 10-4 0v1a2 2 0 004 0v-1z" />
                     </svg>
                   </div>
@@ -158,7 +175,7 @@
               <NuxtLink to="/account/reviews" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.906a1 1 0 00.95-.69l1.519-4.674z" />
                     </svg>
                   </div>
@@ -173,7 +190,7 @@
               <NuxtLink to="/account/referrals" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
-                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                   </div>
@@ -216,17 +233,15 @@
         </div>
 
         <!-- Footer (Logout action) -->
-        <div class="px-5 py-4.5 border-t border-rose-blush/20 bg-warm-ivory/15 flex items-center justify-between shrink-0">
+        <div v-if="auth.isLoggedIn" class="px-5 py-4.5 border-t border-rose-blush/20 bg-warm-ivory/15 flex items-center justify-between shrink-0">
           <button
             @click="handleLogout"
-            class="text-sm font-ui font-extrabold text-charcoal hover:text-red-500 transition-colors flex items-center gap-2 cursor-pointer"
+            class="w-full py-2.5 border border-red-500/10 hover:border-red-500/30 hover:bg-red-50/40 text-red-500 rounded-xl font-ui font-bold text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            Logout
-          </button>
-          <button @click="handleLogout" class="text-charcoal hover:text-red-500 transition-colors" aria-label="Log out">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
+            Sign Out
           </button>
         </div>
       </div>
@@ -236,11 +251,23 @@
 
 <script setup lang="ts">
 const ui = useUIStore()
+const auth = useAuthStore()
 
 const handleLogout = () => {
+  auth.logout()
   ui.addToast('info', 'Successfully logged out.')
   ui.closeProfileDrawer()
 }
+
+const openLogin = () => {
+  ui.closeProfileDrawer()
+  ui.openAuthModal()
+}
+
+const userInitials = computed(() => {
+  const name = auth.user?.name || ''
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?'
+})
 </script>
 
 <style scoped>

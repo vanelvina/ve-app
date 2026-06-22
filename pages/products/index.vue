@@ -147,14 +147,41 @@
 
           <!-- Active filters -->
           <div v-if="hasActiveFilters" class="flex flex-wrap gap-2 mb-4">
+            <!-- Category Chips -->
             <button
               v-for="cat in selectedCategories"
               :key="cat"
               class="filter-chip active flex items-center gap-1.5"
               @click="removeCategory(cat)"
             >
-              {{ cat }}
+              Category: {{ cat }}
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <!-- Size Chips -->
+            <button
+              v-for="sz in store.filters.sizes"
+              :key="sz"
+              class="filter-chip active flex items-center gap-1.5 bg-deep-plum text-white text-xs px-2.5 py-1 rounded-full"
+              @click="removeSize(sz)"
+            >
+              Size: {{ sz }}
+              <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <!-- Color Chips -->
+            <button
+              v-for="col in store.filters.colors"
+              :key="col"
+              class="filter-chip active flex items-center gap-1.5 bg-deep-plum text-white text-xs px-2.5 py-1 rounded-full"
+              @click="removeColor(col)"
+            >
+              Color: {{ col }}
+              <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -260,30 +287,105 @@ const store = useProductsStore()
 const ui = useUIStore()
 const categories = categoriesData
 
-const selectedCategories = ref<string[]>([])
-const priceRange = ref<[number, number]>([0, 2000])
-const selectedRating = ref<number | null>(null)
-const inStockOnly = ref(false)
+const route = useRoute()
+
+const selectedCategories = computed({
+  get: () => store.filters.categories,
+  set: (val) => store.setFilters({ categories: val })
+})
+
+const priceRange = computed({
+  get: () => store.filters.priceRange,
+  set: (val) => store.setFilters({ priceRange: val })
+})
+
+const selectedRating = computed({
+  get: () => store.filters.rating,
+  set: (val) => store.setFilters({ rating: val })
+})
+
+const inStockOnly = computed({
+  get: () => store.filters.inStock,
+  set: (val) => store.setFilters({ inStock: val })
+})
+
 const sortValue = ref<SortOption>('popularity')
 
-const hasActiveFilters = computed(() => selectedCategories.value.length > 0)
+const hasActiveFilters = computed(() => 
+  selectedCategories.value.length > 0 || 
+  store.filters.sizes.length > 0 || 
+  store.filters.colors.length > 0
+)
 
 const removeCategory = (cat: string) => {
   selectedCategories.value = selectedCategories.value.filter(c => c !== cat)
 }
+
 const toggleCategory = (cat: string) => {
-  const idx = selectedCategories.value.indexOf(cat)
-  if (idx === -1) selectedCategories.value.push(cat)
-  else selectedCategories.value.splice(idx, 1)
+  const current = [...selectedCategories.value]
+  const idx = current.indexOf(cat)
+  if (idx === -1) {
+    current.push(cat)
+  } else {
+    current.splice(idx, 1)
+  }
+  selectedCategories.value = current
 }
 
-watch([selectedCategories, priceRange, selectedRating, inStockOnly], () => {
+const removeSize = (sz: string) => {
   store.setFilters({
-    categories: selectedCategories.value,
-    priceRange: priceRange.value,
-    rating: selectedRating.value,
-    inStock: inStockOnly.value,
+    sizes: store.filters.sizes.filter(s => s !== sz)
   })
+}
+
+const removeColor = (col: string) => {
+  store.setFilters({
+    colors: store.filters.colors.filter(c => c !== col)
+  })
+}
+
+const parseRouteQueries = () => {
+  let queryCategory = route.query.category || route.query.categories
+  let categoriesArray: string[] = []
+  if (queryCategory) {
+    const cats = Array.isArray(queryCategory) 
+      ? queryCategory 
+      : String(queryCategory).split(',').map(s => s.trim())
+    categoriesArray = cats.map(c => {
+      const matched = categories.find(cat => cat.name.toLowerCase() === c.toLowerCase())
+      return matched ? matched.name : c
+    })
+  }
+
+  let querySize = route.query.size || route.query.sizes
+  let sizesArray: string[] = []
+  if (querySize) {
+    sizesArray = Array.isArray(querySize) 
+      ? querySize 
+      : String(querySize).split(',').map(s => s.trim())
+  }
+
+  let queryColor = route.query.color || route.query.colors
+  let colorsArray: string[] = []
+  if (queryColor) {
+    colorsArray = Array.isArray(queryColor) 
+      ? queryColor 
+      : String(queryColor).split(',').map(s => s.trim())
+  }
+
+  store.setFilters({
+    categories: categoriesArray,
+    sizes: sizesArray,
+    colors: colorsArray
+  })
+}
+
+onMounted(() => {
+  parseRouteQueries()
+})
+
+watch(() => route.query, () => {
+  parseRouteQueries()
 }, { deep: true })
 
 watch(sortValue, (val) => store.setSort(val))

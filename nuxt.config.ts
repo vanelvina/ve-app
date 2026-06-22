@@ -47,6 +47,9 @@ export default defineNuxtConfig({
           href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap',
         },
       ],
+      script: [
+        { src: 'https://accounts.google.com/gsi/client', async: true, defer: true },
+      ],
     },
     pageTransition: { name: 'page', mode: 'out-in' },
   },
@@ -57,6 +60,7 @@ export default defineNuxtConfig({
       appName: 'Van Elvina',
       appUrl: 'https://vanelvina.com',
       apiBase: 'https://ve-api-8pml.onrender.com/api',
+      googleClientId: '1095271875819-6sh520q88vas8u7g3n4ukrh0o2aihgib.apps.googleusercontent.com',
     },
   },
 

@@ -1,14 +1,28 @@
 <template>
   <div class="bg-warm-ivory min-h-screen">
     <div class="page-container py-8">
-      <h1 class="font-serif text-2xl text-deep-plum font-bold mb-6">Shopping Cart
-        <span class="text-base font-ui font-normal text-mid-gray ml-2">({{ cart.count }} items)</span>
-      </h1>
+      <!-- Page Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 class="font-serif text-2xl text-deep-plum font-bold">Shopping Bag
+            <span class="text-base font-ui font-normal text-mid-gray ml-2">({{ cart.count }} items)</span>
+          </h1>
+        </div>
 
-      <!-- Empty cart -->
+        <div v-if="auth.isLoggedIn" class="flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 text-green-700 rounded-xl text-[10px] font-semibold shadow-soft">
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          <span>Synced with account ({{ auth.user?.email }})</span>
+        </div>
+        <div v-else class="flex items-center gap-2.5 bg-white px-3 py-1.5 border border-rose-blush rounded-xl shadow-soft">
+          <span class="text-[10px] text-charcoal/60">Sign in to save your bag items.</span>
+          <button @click="ui.openAuthModal" class="px-2 py-0.5 bg-rose-blush text-deep-plum hover:bg-deep-plum hover:text-white rounded text-[10px] font-bold transition-all">Sign In</button>
+        </div>
+      </div>
+
+      <!-- Empty bag -->
       <div v-if="cart.isEmpty" class="text-center py-20">
         <div class="text-7xl mb-4" aria-hidden="true">🛍️</div>
-        <h2 class="font-serif text-2xl text-deep-plum mb-2">Your cart is empty</h2>
+        <h2 class="font-serif text-2xl text-deep-plum mb-2">Your bag is empty</h2>
         <p class="text-mid-gray font-ui text-sm mb-8">Looks like you haven't added anything yet. Let's fix that!</p>
         <NuxtLink to="/products" class="btn-primary">Start Shopping</NuxtLink>
       </div>
@@ -153,11 +167,13 @@
 
 <script setup lang="ts">
 import { formatPrice } from '~/utils/formatters'
+import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({ layout: 'default' })
 
 const cart = useCartStore()
 const ui = useUIStore()
+const auth = useAuthStore()
 const couponInput = ref('')
 
 const applyCoupon = () => {
@@ -168,7 +184,7 @@ const applyCoupon = () => {
 }
 
 useSeoMeta({
-  title: 'Shopping Cart – Van Elvina',
-  description: 'Review your cart and proceed to checkout. Free shipping on orders above ₹999.',
+  title: 'Shopping Bag – Van Elvina',
+  description: 'Review your shopping bag and proceed to checkout. Free shipping on orders above ₹999.',
 })
 </script>

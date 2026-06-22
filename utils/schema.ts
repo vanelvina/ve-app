@@ -7,6 +7,7 @@ export const productSchema = (product: Product, url: string) => ({
   name: product.name,
   description: product.description,
   sku: product.sku,
+  mpn: product.styleId,
   brand: {
     '@type': 'Brand',
     name: 'Van Elvina',
