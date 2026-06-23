@@ -2,7 +2,7 @@
   <Transition name="slide-fade">
     <div
       v-if="visible"
-      class="fixed bottom-6 right-6 z-50 w-80 bg-white/95 backdrop-blur-md rounded-2xl shadow-premium border border-rose-blush p-4 flex items-center gap-3"
+      class="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-[100] w-[calc(100vw-32px)] md:w-80 bg-white/95 backdrop-blur-md rounded-2xl shadow-premium border border-rose-blush p-4 flex items-center gap-3"
       role="alert"
       aria-live="polite"
     >

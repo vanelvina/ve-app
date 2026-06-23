@@ -149,9 +149,9 @@
             <p class="text-xs text-green-600 font-ui -mt-1">You save {{ formatPrice(cart.totalSavings) }} on this order</p>
 
             <!-- Checkout CTA -->
-            <NuxtLink to="/checkout" class="btn-primary w-full text-center block">
+            <button @click="proceedToCheckout" class="btn-primary w-full text-center block">
               Proceed to Checkout
-            </NuxtLink>
+            </button>
 
             <!-- Trust badges -->
             <div class="flex items-center justify-center gap-4 pt-2">
@@ -181,6 +181,16 @@ const applyCoupon = () => {
   const result = cart.applyCoupon(couponInput.value.trim())
   ui.addToast(result.success ? 'success' : 'error', result.message)
   if (result.success) couponInput.value = ''
+}
+
+const proceedToCheckout = () => {
+  if (!auth.isLoggedIn) {
+    ui.addToast('error', 'Please log in to proceed to checkout.')
+    ui.setAuthRedirect('/checkout')
+    ui.openAuthModal()
+  } else {
+    navigateTo('/checkout')
+  }
 }
 
 useSeoMeta({

@@ -23,11 +23,11 @@
 /* ── Base ── */
 @layer base {
   :root {
-    --color-primary: #8A4F5A;
-    --color-primary-light: #B76E79;
-    --color-accent: #C5A58E;
-    --color-bg: #FDFBFB;
-    --color-text: #2C2C2C;
+    --color-primary: #2A1B18;
+    --color-primary-light: #CBA39E;
+    --color-accent: #D4AF37;
+    --color-bg: #FCFAF7;
+    --color-text: #2C2523;
     --navbar-height: 64px;
     --transition-fast: 150ms ease;
     --transition-base: 250ms ease;

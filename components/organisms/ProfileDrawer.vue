@@ -52,7 +52,7 @@
                 <h3 class="font-serif text-lg font-bold text-deep-plum leading-tight">Van Elvina</h3>
                 <button
                   @click="openLogin"
-                  class="mt-1 text-xs font-ui font-bold text-deep-plum underline decoration-dotted hover:text-[#B76E79] transition-colors block text-left"
+                  class="mt-1 text-xs font-ui font-bold text-deep-plum underline decoration-dotted hover:text-[#CBA39E] transition-colors block text-left"
                 >Sign In / Create Account</button>
                 <p class="text-xs text-mid-gray/80 mt-1 font-ui">
                   <span class="underline decoration-charcoal/30 font-semibold text-charcoal/70 hover:text-deep-plum cursor-pointer">Total Balance 0</span>
@@ -67,7 +67,7 @@
           <div class="border border-rose-blush/30 rounded-2xl bg-white shadow-sm overflow-hidden">
             <div class="divide-y divide-rose-blush/20">
               <!-- About Myself -->
-              <NuxtLink to="/account/about" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
+              <NuxtLink to="/account" @click="ui.closeProfileDrawer" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@
               </NuxtLink>
 
               <!-- Order History -->
-              <NuxtLink to="/account/orders" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
+              <NuxtLink to="/account" @click="ui.closeProfileDrawer" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

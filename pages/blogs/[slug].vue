@@ -146,7 +146,7 @@ onMounted(() => {
   font-family: Georgia, serif;
   font-size: 1.35rem;
   font-weight: bold;
-  color: #8A4F5A;
+  color: #2A1B18;
   margin-top: 1.85rem;
   margin-bottom: 0.75rem;
 }
@@ -155,14 +155,14 @@ onMounted(() => {
   font-family: Georgia, serif;
   font-size: 1.15rem;
   font-weight: bold;
-  color: #C5A58E;
+  color: #D4AF37;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
 .prose-container :deep(p) {
   margin-bottom: 1.15rem;
-  color: #2C2C2C;
+  color: #2C2523;
   opacity: 0.85;
 }
 
@@ -175,7 +175,7 @@ onMounted(() => {
 
 .prose-container :deep(li) {
   margin-bottom: 0.35rem;
-  color: #2C2C2C;
+  color: #2C2523;
   opacity: 0.85;
 }
 </style>

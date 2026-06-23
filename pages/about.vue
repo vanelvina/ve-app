@@ -64,7 +64,7 @@
     <!-- Our Vision Section -->
     <section class="bg-white border-y border-rose-blush/20 py-20 relative overflow-hidden">
       <!-- Decorative background watermark patterns -->
-      <div class="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#8A4F5A_1px,transparent_1px)] [background-size:16px_16px]"></div>
+      <div class="absolute inset-0 opacity-[0.02] pointer-events-none bg-[radial-gradient(#2A1B18_1px,transparent_1px)] [background-size:16px_16px]"></div>
       
       <div class="max-w-4xl mx-auto px-6 text-center space-y-12 relative z-10">
         <div class="space-y-4">
@@ -204,9 +204,9 @@ const { data: aboutData } = await useFetch<any>(`${config.public.apiBase}/about`
 
 <style scoped>
 .shadow-premium {
-  box-shadow: 0 20px 40px -15px rgba(138, 79, 90, 0.15);
+  box-shadow: 0 20px 40px -15px rgba(42, 27, 24, 0.15);
 }
 .shadow-soft {
-  box-shadow: 0 4px 20px -4px rgba(138, 79, 90, 0.06);
+  box-shadow: 0 4px 20px -4px rgba(42, 27, 24, 0.06);
 }
 </style>

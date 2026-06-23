@@ -110,6 +110,9 @@
               <span class="text-[10px] font-bold font-ui mt-2 text-charcoal/70 uppercase tracking-wider text-center max-w-[70px]">
                 {{ step.label }}
               </span>
+              <span v-if="getStepTimestamp(step.id)" class="text-[8px] font-ui mt-0.5 text-charcoal/50 text-center max-w-[70px]">
+                {{ getStepTimestamp(step.id) }}
+              </span>
             </div>
           </div>
 
@@ -121,6 +124,32 @@
             <div>
               <p class="font-ui font-bold text-sm">Order Cancelled</p>
               <p class="text-xs text-red-700/80 mt-0.5 font-ui">This order has been cancelled and will not be processed further.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Return / Exchange Actions -->
+        <div v-if="isEligibleForReturnOrExchange" class="bg-rose-blush/10 rounded-3xl p-6 shadow-card border border-rose-blush/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 class="font-bold text-deep-plum text-sm uppercase tracking-wide">Return & Exchange Window Open</h3>
+            <p class="text-xs text-charcoal/70 mt-1">You have 7 days from delivery to request a return or exchange for this order.</p>
+          </div>
+          <div class="flex gap-3">
+            <button @click="requestExchange" class="px-5 py-2.5 bg-white border border-rose-blush text-deep-plum font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-rose-blush/20 transition-all shadow-soft">
+              Exchange
+            </button>
+            <button @click="requestReturn" class="px-5 py-2.5 bg-deep-plum text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-deep-plum/90 transition-all shadow-premium">
+              Return
+            </button>
+          </div>
+        </div>
+        
+        <div v-else-if="order.orderStatus === 'return_requested' || order.orderStatus === 'exchange_requested' || order.orderStatus === 'returned' || order.orderStatus === 'exchanged'" class="bg-blue-50 rounded-3xl p-6 shadow-card border border-blue-200">
+          <div class="flex gap-4 items-center text-blue-800">
+            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+              <p class="font-bold text-sm uppercase">{{ order.orderStatus.replace('_', ' ') }}</p>
+              <p class="text-xs mt-0.5 opacity-80">Your request has been received and is currently being processed by our team.</p>
             </div>
           </div>
         </div>
@@ -237,8 +266,10 @@ const error = ref('')
 // ── Timeline steps config ──────────────────────────────────────────────────────
 const timelineSteps = [
   { id: 'placed', label: 'Placed' },
-  { id: 'confirmed', label: 'Confirmed' },
+  { id: 'accepted', label: 'Accepted' },
+  { id: 'packed', label: 'Packed' },
   { id: 'shipped', label: 'Shipped' },
+  { id: 'out_for_delivery', label: 'Out for Delivery' },
   { id: 'delivered', label: 'Delivered' }
 ]
 
@@ -298,15 +329,17 @@ const getStatusClass = (status: string) => {
 // ── Timeline calculations ──────────────────────────────────────────────────────
 const statusLevels: Record<string, number> = {
   'placed': 1,
-  'confirmed': 2,
-  'shipped': 3,
-  'delivered': 4
+  'accepted': 2,
+  'packed': 3,
+  'shipped': 4,
+  'out_for_delivery': 5,
+  'delivered': 6
 }
 
 const getProgressWidth = (status: string) => {
   const s = status ? status.toLowerCase() : 'placed'
   const level = statusLevels[s] || 1
-  return `${((level - 1) / 3) * 100}%`
+  return `${((level - 1) / 5) * 100}%`
 }
 
 const isStepCompleted = (stepId: string) => {
@@ -329,6 +362,56 @@ const getStepClass = (stepId: string) => {
     return 'border-deep-plum bg-white text-deep-plum scale-110 ring-4 ring-deep-plum/10 font-bold'
   } else {
     return 'border-charcoal/15 bg-white text-charcoal/40'
+  }
+}
+
+const getStepTimestamp = (stepId: string) => {
+  if (!order.value?.statusHistory) return ''
+  const entry = order.value.statusHistory.find((h: any) => h.status === stepId)
+  if (!entry) return ''
+  const date = new Date(entry.timestamp)
+  return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+const isEligibleForReturnOrExchange = computed(() => {
+  if (!order.value || order.value.orderStatus !== 'delivered') return false
+  const deliveredEntry = order.value.statusHistory?.slice().reverse().find((h: any) => h.status === 'delivered')
+  const deliveredDate = deliveredEntry ? new Date(deliveredEntry.timestamp).getTime() : new Date(order.value.updatedAt).getTime()
+  const sevenDays = 7 * 24 * 60 * 60 * 1000
+  return (Date.now() - deliveredDate) <= sevenDays
+})
+
+const requestReturn = async () => {
+  const reason = prompt('Please provide a reason for the return:')
+  if (!reason) return
+  
+  try {
+    await $fetch(`${config.public.apiBase}/orders/${order.value._id}/return`, {
+      method: 'POST',
+      headers: auth.getHeaders(),
+      body: { reason }
+    })
+    alert('Return requested successfully.')
+    location.reload()
+  } catch (err: any) {
+    alert(err.data?.message || 'Failed to request return')
+  }
+}
+
+const requestExchange = async () => {
+  const reason = prompt('Please provide a reason for the exchange:')
+  if (!reason) return
+  
+  try {
+    await $fetch(`${config.public.apiBase}/orders/${order.value._id}/exchange`, {
+      method: 'POST',
+      headers: auth.getHeaders(),
+      body: { reason }
+    })
+    alert('Exchange requested successfully.')
+    location.reload()
+  } catch (err: any) {
+    alert(err.data?.message || 'Failed to request exchange')
   }
 }
 </script>

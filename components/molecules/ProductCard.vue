@@ -1,5 +1,5 @@
 <template>
-  <article class="group relative card cursor-pointer flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-premium transition-shadow duration-300 border border-rose-blush/20" :aria-label="product.name">
+  <article class="group relative card cursor-pointer flex flex-col h-full bg-white rounded-none overflow-hidden hover:shadow-premium transition-all duration-300 border border-charcoal/15 hover:border-charcoal/40" :aria-label="product.name">
     <!-- Image Container -->
     <div class="relative overflow-hidden aspect-product bg-warm-ivory">
       <NuxtLink :to="`/products/${product.slug}`" class="block h-full">

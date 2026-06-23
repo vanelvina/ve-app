@@ -28,25 +28,52 @@
           <div v-show="currentStep === 0" class="bg-white rounded-2xl shadow-soft border border-border-gray p-6">
             <h2 class="font-ui font-semibold text-charcoal text-base mb-5">Delivery Address</h2>
             <form class="space-y-4" @submit.prevent="nextStep" novalidate aria-label="Delivery address form">
-              <div class="grid sm:grid-cols-2 gap-4">
-                <AppInput v-model="form.fullName" label="Full Name" placeholder="Priya Sharma" required :error="errors.fullName" />
-                <AppInput v-model="form.phone" label="Phone Number" type="tel" placeholder="9876543210" required :error="errors.phone" />
-              </div>
-              <AppInput v-model="form.email" label="Email Address" type="email" placeholder="priya@email.com" required :error="errors.email" />
-              <AppInput v-model="form.line1" label="Address Line 1" placeholder="House No, Building, Street" required :error="errors.line1" />
-              <AppInput v-model="form.line2" label="Address Line 2 (Optional)" placeholder="Landmark, Area" />
-              <div class="grid sm:grid-cols-3 gap-4">
-                <AppInput v-model="form.pincode" label="PIN Code" placeholder="400001" maxlength="6" required :error="errors.pincode" />
-                <AppInput v-model="form.city" label="City" placeholder="Mumbai" required :error="errors.city" />
-                <div>
-                  <label class="block text-sm font-ui font-medium text-charcoal mb-1.5" for="state-select">State <span class="text-dusty-rose">*</span></label>
-                  <select id="state-select" v-model="form.state" class="input-base" required aria-required="true">
-                    <option value="">Select State</option>
-                    <option v-for="state in indianStates" :key="state" :value="state">{{ state }}</option>
-                  </select>
+              
+              <!-- Saved Addresses -->
+              <div v-if="auth.user?.addresses && auth.user.addresses.length > 0 && !showNewAddressForm" class="space-y-4">
+                <div class="space-y-3">
+                  <label
+                    v-for="addr in auth.user.addresses"
+                    :key="addr._id"
+                    class="flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all"
+                    :class="selectedAddressId === addr._id ? 'border-deep-plum bg-rose-blush/40' : 'border-border-gray hover:border-dusty-rose'"
+                  >
+                    <input type="radio" :value="addr._id" v-model="selectedAddressId" class="mt-1 text-deep-plum" />
+                    <div>
+                      <p class="text-sm font-ui font-semibold text-charcoal">{{ addr.fullName }}</p>
+                      <p class="text-xs text-mid-gray font-ui">{{ addr.line1 }}<span v-if="addr.line2">, {{ addr.line2 }}</span></p>
+                      <p class="text-xs text-mid-gray font-ui">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
+                      <p class="text-xs text-mid-gray font-ui mt-1">Phone: {{ addr.phone }}</p>
+                    </div>
+                  </label>
                 </div>
+                <button type="button" @click="showNewAddressForm = true" class="text-sm font-semibold text-deep-plum hover:underline">+ Add a new address</button>
+                <AppButton type="button" size="lg" :full="true" @click="proceedWithSavedAddress" class="mt-4">Continue to Shipping</AppButton>
               </div>
-              <AppButton type="submit" size="lg" :full="true">Continue to Shipping</AppButton>
+
+              <!-- New Address Form -->
+              <div v-else class="space-y-4">
+                <button v-if="auth.user?.addresses && auth.user.addresses.length > 0" type="button" @click="showNewAddressForm = false" class="text-xs font-semibold text-charcoal/50 hover:text-deep-plum mb-2">← Back to saved addresses</button>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <AppInput v-model="form.fullName" label="Full Name" placeholder="Priya Sharma" required :error="errors.fullName" />
+                  <AppInput v-model="form.phone" label="Phone Number" type="tel" placeholder="9876543210" required :error="errors.phone" />
+                </div>
+                <AppInput v-model="form.email" label="Email Address" type="email" placeholder="priya@email.com" required :error="errors.email" />
+                <AppInput v-model="form.line1" label="Address Line 1" placeholder="House No, Building, Street" required :error="errors.line1" />
+                <AppInput v-model="form.line2" label="Address Line 2 (Optional)" placeholder="Landmark, Area" />
+                <div class="grid sm:grid-cols-3 gap-4">
+                  <AppInput v-model="form.pincode" label="PIN Code" placeholder="400001" maxlength="6" required :error="errors.pincode" />
+                  <AppInput v-model="form.city" label="City" placeholder="Mumbai" required :error="errors.city" />
+                  <div>
+                    <label class="block text-sm font-ui font-medium text-charcoal mb-1.5" for="state-select">State <span class="text-dusty-rose">*</span></label>
+                    <select id="state-select" v-model="form.state" class="input-base" required aria-required="true">
+                      <option value="">Select State</option>
+                      <option v-for="state in indianStates" :key="state" :value="state">{{ state }}</option>
+                    </select>
+                  </div>
+                </div>
+                <AppButton type="submit" size="lg" :full="true" :loading="savingAddress">Save & Continue to Shipping</AppButton>
+              </div>
             </form>
           </div>
 
@@ -78,32 +105,20 @@
             </div>
           </div>
 
-          <!-- Step 3: Payment -->
-          <div v-show="currentStep === 2" class="bg-white rounded-2xl shadow-soft border border-border-gray p-6">
-            <h2 class="font-ui font-semibold text-charcoal text-base mb-5">Payment Method</h2>
-            <div class="space-y-3" role="radiogroup" aria-label="Payment methods">
-              <label
-                v-for="method in paymentMethods"
-                :key="method.id"
-                class="flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all"
-                :class="selectedPayment === method.id ? 'border-deep-plum bg-rose-blush/40' : 'border-border-gray hover:border-dusty-rose'"
-              >
-                <input type="radio" :value="method.id" v-model="selectedPayment" class="text-deep-plum" :aria-label="method.name" />
-                <span class="text-lg" aria-hidden="true">{{ method.icon }}</span>
-                <div>
-                  <p class="text-sm font-ui font-semibold text-charcoal">{{ method.name }}</p>
-                  <p class="text-xs text-mid-gray font-ui">{{ method.desc }}</p>
-                </div>
-              </label>
-            </div>
+          <!-- Step 3: Review -->
+          <div v-show="currentStep === 2" class="bg-white rounded-2xl shadow-soft border border-border-gray p-6 animate-slide-up">
+            <h2 class="font-ui font-semibold text-charcoal text-base mb-5">Review Your Order</h2>
+            
+            <p class="text-sm font-ui text-charcoal/80 mb-6 leading-relaxed">
+              Please take a moment to review your order details and shipping address. When you're ready, click "Proceed to Payment" to securely complete your purchase via Razorpay. All payment methods including UPI, Cards, and Netbanking are supported.
+            </p>
 
-            <!-- Card fields (conditionally shown) -->
-            <div v-if="selectedPayment === 'card'" class="mt-4 space-y-3 p-4 bg-light-gray rounded-xl">
-              <AppInput v-model="cardNumber" label="Card Number" placeholder="1234 5678 9012 3456" maxlength="19" />
-              <div class="grid grid-cols-2 gap-3">
-                <AppInput v-model="cardExpiry" label="Expiry" placeholder="MM/YY" maxlength="5" />
-                <AppInput v-model="cardCvv" label="CVV" placeholder="123" maxlength="3" />
-              </div>
+            <div class="bg-warm-ivory/50 rounded-xl p-4 border border-rose-blush/20 mb-6">
+              <h3 class="text-xs font-bold text-deep-plum uppercase tracking-wider mb-2">Shipping To</h3>
+              <p class="text-sm font-ui text-charcoal">{{ form.fullName }}</p>
+              <p class="text-xs text-mid-gray font-ui mt-1">{{ form.line1 }}<span v-if="form.line2">, {{ form.line2 }}</span></p>
+              <p class="text-xs text-mid-gray font-ui">{{ form.city }}, {{ form.state }} - {{ form.pincode }}</p>
+              <p class="text-xs text-mid-gray font-ui mt-1">Phone: {{ form.phone }}</p>
             </div>
 
             <!-- Trust badges -->
@@ -113,7 +128,7 @@
 
             <div class="flex gap-3 mt-6">
               <AppButton variant="secondary" @click="currentStep = 1">Back</AppButton>
-              <AppButton :full="true" size="lg" :loading="placing" @click="placeOrder">Place Order – {{ formatPrice(orderTotal) }}</AppButton>
+              <AppButton :full="true" size="lg" :loading="placing" @click="placeOrder">Proceed to Payment – {{ formatPrice(orderTotal) }}</AppButton>
             </div>
           </div>
         </div>
@@ -123,7 +138,7 @@
           <div class="bg-white rounded-2xl shadow-soft border border-border-gray p-5 sticky top-24">
             <h2 class="font-ui font-semibold text-charcoal mb-4">Your Order</h2>
             <div class="space-y-3 max-h-64 overflow-y-auto scrollbar-hide">
-              <div v-for="item in cart.items" :key="`${item.productId}-${item.size}`" class="flex gap-3">
+              <div v-for="item in checkoutItems" :key="`${item.productId}-${item.size}`" class="flex gap-3">
                 <img
                   :src="item.product.variants[0]?.images[0]"
                   :alt="item.product.name"
@@ -139,10 +154,10 @@
             </div>
             <div class="border-t border-border-gray mt-4 pt-4 space-y-2 text-sm font-ui">
               <div class="flex justify-between text-mid-gray">
-                <span>Subtotal</span><span>{{ formatPrice(cart.subtotal) }}</span>
+                <span>Subtotal</span><span>{{ formatPrice(checkoutSubtotal) }}</span>
               </div>
-              <div v-if="cart.appliedDiscount" class="flex justify-between text-green-600">
-                <span>Discount</span><span>−{{ formatPrice(cart.appliedDiscount) }}</span>
+              <div v-if="checkoutDiscount" class="flex justify-between text-green-600">
+                <span>Discount</span><span>−{{ formatPrice(checkoutDiscount) }}</span>
               </div>
               <div class="flex justify-between text-mid-gray">
                 <span>Shipping</span>
@@ -169,15 +184,34 @@ const router = useRouter()
 const cart = useCartStore()
 const ui = useUIStore()
 const auth = useAuthStore()
+const route = useRoute()
+
+const isBuyNow = computed(() => route.query.buyNow === 'true')
+const buyNowItem = ref<any>(null)
+
+const checkoutItems = computed(() => {
+  if (isBuyNow.value && buyNowItem.value) return [buyNowItem.value]
+  return cart.items
+})
+
+const checkoutSubtotal = computed(() => {
+  return checkoutItems.value.reduce((sum, item) => sum + (item.product?.price ?? 0) * item.quantity, 0)
+})
+
+const checkoutDiscount = computed(() => {
+  if (isBuyNow.value) return 0
+  return cart.appliedDiscount
+})
 
 const currentStep = ref(0)
-const steps = ['Address', 'Shipping', 'Payment']
+const steps = ['Address', 'Shipping', 'Review']
 const placing = ref(false)
 const selectedShipping = ref('standard')
-const selectedPayment = ref('upi')
-const cardNumber = ref('')
-const cardExpiry = ref('')
-const cardCvv = ref('')
+const selectedPayment = ref('razorpay')
+
+const selectedAddressId = ref('')
+const showNewAddressForm = ref(false)
+const savingAddress = ref(false)
 
 const form = reactive({ fullName: '', phone: '', email: '', line1: '', line2: '', pincode: '', city: '', state: '' })
 const errors = reactive({ fullName: '', phone: '', email: '', line1: '', pincode: '', city: '' })
@@ -186,31 +220,54 @@ const prefillForm = () => {
   if (auth.isLoggedIn && auth.user) {
     if (!form.fullName) form.fullName = auth.user.name || ''
     if (!form.email) form.email = auth.user.email || ''
+    if (!form.phone) form.phone = auth.user.phone || ''
+    
+    if (auth.user.addresses && auth.user.addresses.length > 0) {
+      const defaultAddr = auth.user.addresses.find(a => a.isDefault) || auth.user.addresses[0]
+      selectedAddressId.value = defaultAddr._id
+      showNewAddressForm.value = false
+    } else {
+      showNewAddressForm.value = true
+    }
   }
 }
 
 onMounted(() => {
   prefillForm()
+  if (isBuyNow.value) {
+    try {
+      const stored = sessionStorage.getItem('ve_buy_now_item')
+      if (stored) buyNowItem.value = JSON.parse(stored)
+    } catch (e) {}
+  }
 })
 
 watch(() => auth.isLoggedIn, () => {
   prefillForm()
 })
 
-const shippingOptions = [
-  { id: 'standard', name: 'Standard Delivery', desc: '3–5 business days', price: cart.subtotal >= 999 ? 0 : 79 },
-  { id: 'express', name: 'Express Delivery', desc: '1–2 business days (Metro cities)', price: 149 },
-]
+const allFreeShippingProducts = computed(() => {
+  return checkoutItems.value.length > 0 && checkoutItems.value.every((item: any) => item.product.isFreeShipping === true)
+})
 
-const paymentMethods = [
-  { id: 'upi', icon: '💳', name: 'UPI', desc: 'Google Pay, PhonePe, Paytm, BHIM' },
-  { id: 'card', icon: '🏦', name: 'Credit / Debit Card', desc: 'Visa, Mastercard, RuPay, Amex' },
-  { id: 'netbanking', icon: '🌐', name: 'Net Banking', desc: 'All major Indian banks' },
-  { id: 'cod', icon: '💵', name: 'Cash on Delivery', desc: 'Available in select PIN codes' },
-]
+const shippingOptions = computed(() => [
+  { 
+    id: 'standard', 
+    name: 'Standard Delivery', 
+    desc: '3–5 business days', 
+    price: (checkoutSubtotal.value >= 999 || allFreeShippingProducts.value) ? 0 : 79 
+  },
+  { 
+    id: 'express', 
+    name: 'Express Delivery', 
+    desc: '1–2 business days (Metro cities)', 
+    price: 149 
+  },
+])
 
-const shippingFee = computed(() => shippingOptions.find(o => o.id === selectedShipping.value)?.price ?? 0)
-const orderTotal = computed(() => cart.subtotal - cart.appliedDiscount + shippingFee.value)
+
+const shippingFee = computed(() => shippingOptions.value.find(o => o.id === selectedShipping.value)?.price ?? 0)
+const orderTotal = computed(() => checkoutSubtotal.value - checkoutDiscount.value + shippingFee.value)
 
 const getStepClass = (idx: number) => {
   if (currentStep.value > idx) return 'completed'
@@ -230,16 +287,65 @@ const validate = () => {
   return ok
 }
 
-const nextStep = () => { if (validate()) currentStep.value = 1 }
+const proceedWithSavedAddress = () => {
+  if (!selectedAddressId.value) {
+    ui.addToast('error', 'Please select an address')
+    return
+  }
+  const addr = auth.user?.addresses?.find(a => a._id === selectedAddressId.value)
+  if (addr) {
+    form.fullName = addr.fullName
+    form.email = addr.email || auth.user?.email || ''
+    form.phone = addr.phone
+    form.line1 = addr.line1
+    form.line2 = addr.line2 || ''
+    form.city = addr.city
+    form.state = addr.state
+    form.pincode = addr.pincode
+  }
+  currentStep.value = 1
+}
+
+const nextStep = async () => { 
+  if (validate()) {
+    if (showNewAddressForm.value && auth.isLoggedIn) {
+      try {
+        savingAddress.value = true
+        await auth.addAddress({
+          fullName: form.fullName,
+          email: form.email,
+          phone: form.phone,
+          line1: form.line1,
+          line2: form.line2,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
+        })
+        if (!auth.user?.phone) {
+          await auth.updateProfile({ phone: form.phone })
+        }
+      } catch (err: any) {
+        ui.addToast('error', 'Failed to save address. Proceeding anyway.')
+      } finally {
+        savingAddress.value = false
+      }
+    }
+    currentStep.value = 1 
+  }
+}
 
 const placeOrder = async () => {
-  if (cart.items.length === 0) {
-    ui.addToast('error', 'Your cart is empty.')
+  if (!auth.isLoggedIn) {
+    ui.openAuthModal()
+    return
+  }
+  if (checkoutItems.value.length === 0) {
+    ui.addToast('error', 'Your order is empty.')
     return
   }
   placing.value = true
   try {
-    const orderItems = cart.items.map(item => ({
+    const orderItems = checkoutItems.value.map((item: any) => ({
       productId: item.productId,
       name: item.product.name,
       price: item.product.price,
@@ -263,16 +369,25 @@ const placeOrder = async () => {
       shippingAddress,
       paymentMethod: selectedPayment.value,
       shippingMethod: selectedShipping.value,
-      subtotal: cart.subtotal,
+      subtotal: checkoutSubtotal.value,
       shippingFee: shippingFee.value,
-      discount: cart.appliedDiscount,
+      discount: checkoutDiscount.value,
       total: orderTotal.value,
+      guestInfo: !auth.isLoggedIn ? {
+        name: form.fullName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim()
+      } : undefined
     }
 
     if (selectedPayment.value === 'cod') {
       const res = await auth.placeOrder(payload)
       if (res.success) {
-        cart.clearCart()
+        if (!isBuyNow.value) {
+          cart.clearCart()
+        } else {
+          sessionStorage.removeItem('ve_buy_now_item')
+        }
         ui.addToast('success', 'Order placed successfully! 🎉')
         router.push(`/thank-you?order=${res.orderId}`)
       } else {
@@ -302,7 +417,11 @@ const placeOrder = async () => {
             }
             const res = await auth.verifyPayment(verifyPayload)
             if (res.success) {
-              cart.clearCart()
+              if (!isBuyNow.value) {
+                cart.clearCart()
+              } else {
+                sessionStorage.removeItem('ve_buy_now_item')
+              }
               ui.addToast('success', 'Payment successful! Order placed! 🎉')
               router.push(`/thank-you?order=${res.orderId}`)
             } else {
@@ -318,10 +437,10 @@ const placeOrder = async () => {
         prefill: {
           name: form.fullName.trim(),
           email: form.email.trim() || '',
-          contact: form.phone.trim()
+          contact: form.phone.trim().length === 10 ? '+91' + form.phone.trim() : form.phone.trim()
         },
         theme: {
-          color: "#8A4F5A" // deep-plum
+          color: "#2A1B18" // Deep Cocoa
         },
         modal: {
           ondismiss: function() {

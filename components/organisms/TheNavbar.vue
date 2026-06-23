@@ -22,13 +22,20 @@
 
         <!-- Right icon tray -->
         <div class="flex items-center gap-1">
+          <!-- Search Icon (Conditionally visible) -->
+          <button v-if="isSearchIconOnly" @click="ui.openSearch" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Search">
+            <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+
           <!-- Bag -->
           <NuxtLink to="/bag" class="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Bag">
             <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-deep-plum text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-              {{ cart.count > 0 ? cart.count : 0 }}
+            <span v-if="cart.itemCount > 0" :key="cart.itemCount" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-deep-plum text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+              {{ cart.itemCount }}
             </span>
           </NuxtLink>
 
@@ -37,7 +44,7 @@
             <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-            <span v-if="wishlist.count > 0" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dusty-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ wishlist.count }}</span>
+            <span v-if="wishlist.count > 0" :key="wishlist.count" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dusty-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ wishlist.count }}</span>
           </NuxtLink>
 
           <!-- Profile -->
@@ -53,6 +60,7 @@
 
       <!-- Search bar: always occupies space, only fades in/out -->
       <div
+        v-if="!isSearchIconOnly"
         class="px-4 py-1 search-bar-wrap"
         :class="navbarHidden ? 'search-bar-hidden' : 'search-bar-visible'"
         style="background-color: #FAF6F0;"
@@ -77,7 +85,7 @@
       :class="navbarHidden ? '-translate-y-full' : 'translate-y-0'"
     >
       <!-- Trust Badges Ribbon -->
-      <div class="bg-[#FAF5E4] border-b border-rose-blush/20 py-1.5 px-4 select-none">
+      <div class="bg-[#FAF3E8] border-b border-rose-blush/20 py-1.5 px-4 select-none">
         <div class="page-container">
           <div class="flex flex-wrap items-center gap-3 sm:gap-4 text-[9px] font-ui font-bold tracking-wider text-deep-plum/70">
             <span>FREE SHIPPING</span>
@@ -98,7 +106,7 @@
             <img src="/logo.png" alt="Van Elvina Logo" class="h-9 md:h-11 w-auto object-contain" />
           </NuxtLink>
 
-          <div class="flex items-center flex-1 relative mx-4">
+          <div v-if="!isSearchIconOnly" class="flex items-center flex-1 relative mx-4">
             <button
               class="w-full flex items-center gap-2 px-5 py-2.5 bg-light-gray rounded-full text-xs text-mid-gray font-ui hover:bg-rose-blush/40 transition-colors duration-200 border border-transparent hover:border-dusty-rose/20"
               aria-label="Search products"
@@ -111,7 +119,14 @@
             </button>
           </div>
 
+          <div v-if="isSearchIconOnly" class="flex-1 mx-4"></div>
+
           <div class="flex items-center gap-2 md:gap-3">
+            <button v-if="isSearchIconOnly" @click="ui.openSearch" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Search">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
             <button @click="ui.openSizeGuide" class="inline-flex items-center px-4 py-1.5 bg-[#C59B27] hover:bg-[#A37B1D] text-white text-xs font-semibold rounded-full pulse-fit transition-all duration-300 select-none cursor-pointer">
               Find Your Fit
             </button>
@@ -119,7 +134,7 @@
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              <span v-if="wishlist.count > 0" class="absolute -top-1 -right-1 w-4 h-4 bg-dusty-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-pulse">{{ wishlist.count }}</span>
+              <span v-if="wishlist.count > 0" :key="wishlist.count" class="absolute -top-1 -right-1 w-4 h-4 bg-dusty-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ wishlist.count }}</span>
             </NuxtLink>
             <button @click="ui.openProfileDrawer" class="btn-icon hidden sm:flex text-charcoal hover:text-deep-plum overflow-hidden border border-charcoal/5" aria-label="My account">
               <img v-if="auth.isLoggedIn && auth.user?.avatar" :src="auth.user.avatar" :alt="auth.user.name" class="w-full h-full object-cover" />
@@ -132,7 +147,7 @@
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              <span v-if="cart.count > 0" class="absolute -top-1 -right-1 w-4 h-4 bg-deep-plum text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ cart.count }}</span>
+              <span v-if="cart.itemCount > 0" :key="cart.itemCount" class="absolute -top-1 -right-1 w-4 h-4 bg-deep-plum text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ cart.itemCount }}</span>
             </NuxtLink>
           </div>
         </nav>
@@ -142,11 +157,11 @@
       <div class="border-t border-rose-blush/40 bg-warm-ivory/30 lg:block hidden">
         <div class="page-container py-2 flex items-center justify-center">
           <nav class="flex items-center gap-1.5" aria-label="Category navigation ribbon">
-            <NuxtLink to="/products?badge=new" class="px-4 py-1.5 text-xs font-ui font-extrabold uppercase tracking-wider bg-gradient-to-r from-[#B76E79] to-[#C59B27] bg-clip-text text-transparent hover:opacity-80 transition-all duration-200">New Arrivals</NuxtLink>
-            <NuxtLink to="/products?badge=bestseller" class="px-4 py-1.5 text-xs font-ui font-extrabold uppercase tracking-wider bg-gradient-to-r from-[#B76E79] to-[#C59B27] bg-clip-text text-transparent hover:opacity-80 transition-all duration-200">Bestsellers</NuxtLink>
-            <NuxtLink v-for="cat in navCategories" :key="cat.slug" :to="`/products?category=${cat.slug}`" class="px-4 py-1.5 text-xs font-ui font-semibold uppercase tracking-wider text-charcoal/80 hover:text-deep-plum hover:bg-rose-blush rounded-md transition-all duration-200" active-class="bg-deep-plum text-white hover:bg-deep-plum hover:text-white">{{ cat.name }}</NuxtLink>
-            <NuxtLink to="/products?badge=sale" class="px-4 py-1.5 text-xs font-ui font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 rounded-md transition-all duration-200">Sale</NuxtLink>
-            <NuxtLink to="/products" class="px-4 py-1.5 text-xs font-ui font-semibold uppercase tracking-wider text-deep-plum bg-rose-blush hover:bg-dusty-rose hover:text-white rounded-md transition-all duration-200">3 FOR ₹1099</NuxtLink>
+            <NuxtLink to="/products?badge=new" :class="[route.query.badge === 'new' ? 'opacity-80 scale-105' : 'hover:opacity-80', 'px-4 py-1.5 text-xs font-ui font-extrabold uppercase tracking-wider bg-gradient-to-r from-[#CBA39E] to-[#D4AF37] bg-clip-text text-transparent transition-all duration-200']">New Arrivals</NuxtLink>
+            <NuxtLink to="/products?badge=bestseller" :class="[route.query.badge === 'bestseller' ? 'opacity-80 scale-105' : 'hover:opacity-80', 'px-4 py-1.5 text-xs font-ui font-extrabold uppercase tracking-wider bg-gradient-to-r from-[#CBA39E] to-[#D4AF37] bg-clip-text text-transparent transition-all duration-200']">Bestsellers</NuxtLink>
+            <NuxtLink v-for="cat in navCategories" :key="cat.slug" :to="`/products?category=${cat.slug}`" :class="[route.query.category === cat.slug ? 'bg-deep-plum text-white shadow-sm' : 'text-charcoal/80 hover:text-deep-plum hover:bg-rose-blush', 'px-4 py-1.5 text-xs font-ui font-semibold uppercase tracking-wider rounded-md transition-all duration-200']">{{ cat.name }}</NuxtLink>
+            <NuxtLink to="/products?badge=sale" :class="[route.query.badge === 'sale' ? 'bg-red-500 text-white shadow-sm' : 'text-red-600 hover:bg-red-50', 'px-4 py-1.5 text-xs font-ui font-bold uppercase tracking-wider rounded-md transition-all duration-200']">Sale</NuxtLink>
+            <NuxtLink to="/products" :class="[route.path === '/products' && !route.query.category && !route.query.badge ? 'bg-dusty-rose text-white shadow-sm' : 'text-deep-plum bg-rose-blush hover:bg-dusty-rose hover:text-white', 'px-4 py-1.5 text-xs font-ui font-semibold uppercase tracking-wider rounded-md transition-all duration-200']">3 FOR ₹1099</NuxtLink>
           </nav>
         </div>
       </div>
@@ -161,6 +176,9 @@ const ui = useUIStore()
 const cart = useCartStore()
 const wishlist = useWishlistStore()
 const auth = useAuthStore()
+const route = useRoute()
+
+const isSearchIconOnly = computed(() => ['products', 'products-slug'].includes(route.name as string))
 
 const userInitials = computed(() => {
   const name = auth.user?.name || ''

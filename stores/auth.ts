@@ -6,6 +6,8 @@ interface AuthUser {
   email: string
   avatar: string
   authMethod: 'email' | 'google'
+  phone?: string
+  addresses?: any[]
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -110,6 +112,41 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    // ── Password Auth ──────────────────────────────────────────────
+    async loginWithPassword(email: string, password: string) {
+      this.loading = true
+      const config = useRuntimeConfig()
+      try {
+        const data = await $fetch<any>(`${config.public.apiBase}/user-auth/login`, {
+          method: 'POST',
+          body: { email, password },
+        })
+        this.setAuth(data.token, data.user)
+        return data
+      } catch (err: any) {
+        throw new Error(err.data?.message || 'Login failed')
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async signupWithPassword(name: string, email: string, password: string) {
+      this.loading = true
+      const config = useRuntimeConfig()
+      try {
+        const data = await $fetch<any>(`${config.public.apiBase}/user-auth/signup`, {
+          method: 'POST',
+          body: { name, email, password },
+        })
+        this.setAuth(data.token, data.user)
+        return data
+      } catch (err: any) {
+        throw new Error(err.data?.message || 'Signup failed')
+      } finally {
+        this.loading = false
+      }
+    },
+
     // ── Fetch fresh profile ────────────────────────────────────────
     async fetchProfile() {
       if (!this.token) return
@@ -131,24 +168,59 @@ export const useAuthStore = defineStore('auth', {
       return this.token ? { Authorization: `Bearer ${this.token}` } : {}
     },
 
+    // ── Profile Updates ──────────────────────────────────────────────
+    async updateProfile(payload: { name?: string; phone?: string }) {
+      const config = useRuntimeConfig()
+      const data = await $fetch<any>(`${config.public.apiBase}/user-auth/me`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: payload,
+      })
+      await this.fetchProfile()
+      return data
+    },
+
+    // ── Addresses ───────────────────────────────────────────────────
+    async addAddress(address: any) {
+      const config = useRuntimeConfig()
+      const data = await $fetch<any>(`${config.public.apiBase}/user-auth/addresses`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: address,
+      })
+      await this.fetchProfile()
+      return data
+    },
+
+    async removeAddress(addressId: string) {
+      const config = useRuntimeConfig()
+      const data = await $fetch<any>(`${config.public.apiBase}/user-auth/addresses/${addressId}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      })
+      await this.fetchProfile()
+      return data
+    },
+
+    async updateAddress(addressId: string, address: any) {
+      const config = useRuntimeConfig()
+      const data = await $fetch<any>(`${config.public.apiBase}/user-auth/addresses/${addressId}`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: address,
+      })
+      await this.fetchProfile()
+      return data
+    },
+
     // ── Place an order ─────────────────────────────────────────────
     async placeOrder(orderPayload: any) {
       const config = useRuntimeConfig()
       const body = { ...orderPayload }
-      if (this.isLoggedIn && this.user) {
-        body.userId = this.user.id
-        body.isGuest = false
-      } else {
-        body.isGuest = true
-        body.guestInfo = {
-          name: orderPayload.shippingAddress?.name || '',
-          email: orderPayload.shippingAddress?.email || '',
-          phone: orderPayload.shippingAddress?.phone || '',
-        }
-      }
 
       return $fetch<any>(`${config.public.apiBase}/orders`, {
         method: 'POST',
+        headers: this.getHeaders(),
         body,
       })
     },
@@ -165,28 +237,18 @@ export const useAuthStore = defineStore('auth', {
       const config = useRuntimeConfig()
       return $fetch<any>(`${config.public.apiBase}/orders/create-razorpay-order`, {
         method: 'POST',
+        headers: this.getHeaders(),
         body: { amount },
       })
     },
 
     async verifyPayment(payload: any) {
       const config = useRuntimeConfig()
-      
       const body = { ...payload }
-      if (this.isLoggedIn && this.user) {
-        body.userId = this.user.id
-        body.isGuest = false
-      } else {
-        body.isGuest = true
-        body.guestInfo = {
-          name: payload.shippingAddress?.name || '',
-          email: payload.shippingAddress?.email || '',
-          phone: payload.shippingAddress?.phone || '',
-        }
-      }
 
       return $fetch<any>(`${config.public.apiBase}/orders/verify-payment`, {
         method: 'POST',
+        headers: this.getHeaders(),
         body,
       })
     },

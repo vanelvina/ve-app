@@ -1,6 +1,7 @@
 <template>
   <!-- Mobile Bottom Tab Bar – only on small screens -->
   <nav
+    v-if="!['products', 'products-slug'].includes($route.name as string)"
     class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.08)]"
     aria-label="Mobile bottom navigation"
   >

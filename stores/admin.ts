@@ -219,6 +219,25 @@ export const useAdminStore = defineStore('admin', {
         headers: this.getHeaders(),
         body: formData
       })
+    },
+
+    // Fetch registered users (for custom email dropdown and general admin needs)
+    async fetchUsers() {
+      const config = useRuntimeConfig()
+      return $fetch<any>(`${config.public.apiBase}/user-auth/admin/users`, {
+        method: 'GET',
+        headers: this.getHeaders()
+      })
+    },
+
+    // Custom Emails
+    async sendCustomEmail(emailData: { to: string; subject: string; body: string }) {
+      const config = useRuntimeConfig()
+      return $fetch<any>(`${config.public.apiBase}/user-auth/admin/send-custom-email`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: emailData
+      })
     }
   }
 })

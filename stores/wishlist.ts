@@ -19,6 +19,12 @@ export const useWishlistStore = defineStore('wishlist', {
     async fetchWishlist() {
       const auth = useAuthStore()
       if (!auth.isLoggedIn || !auth.token) {
+        if (import.meta.client) {
+          try {
+            const stored = localStorage.getItem('ve_guest_wishlist')
+            if (stored) this.items = JSON.parse(stored)
+          } catch (err) { }
+        }
         return
       }
 
@@ -74,6 +80,9 @@ export const useWishlistStore = defineStore('wishlist', {
           this.items.push(product)
           ui.addToast('success', `Added to wishlist ♡`)
         }
+        if (import.meta.client) {
+          localStorage.setItem('ve_guest_wishlist', JSON.stringify(this.items))
+        }
       }
     },
 
@@ -99,6 +108,9 @@ export const useWishlistStore = defineStore('wishlist', {
       } else {
         this.items = this.items.filter((p) => (p.id || (p as any)._id) !== targetId)
         ui.addToast('info', `Removed from wishlist`)
+        if (import.meta.client) {
+          localStorage.setItem('ve_guest_wishlist', JSON.stringify(this.items))
+        }
       }
     },
 
@@ -115,6 +127,9 @@ export const useWishlistStore = defineStore('wishlist', {
             headers: { Authorization: `Bearer ${auth.token}` },
             body: { productId: pId }
           }).catch(() => {})
+        }
+        if (import.meta.client) {
+          localStorage.removeItem('ve_guest_wishlist')
         }
         await this.fetchWishlist()
       } catch (err) {

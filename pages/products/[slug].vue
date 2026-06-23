@@ -24,19 +24,22 @@
         <!-- Gallery -->
         <div class="space-y-3">
           <div 
-            class="relative aspect-product bg-light-gray rounded-2xl overflow-hidden cursor-zoom-in group/gallery"
+            class="relative aspect-product bg-light-gray rounded-none overflow-hidden cursor-zoom-in group/gallery"
             @touchstart="onTouchStart"
             @touchmove="onTouchMove"
             @touchend="onTouchEnd"
             @click="openLightbox"
           >
-            <img
-              :src="activeImage"
-              :alt="product.name"
-              class="w-full h-full object-cover transition-all duration-300"
-              width="600" height="800"
-              fetchpriority="high"
-            />
+            <Transition :name="slideDirection">
+              <img
+                :key="activeImage"
+                :src="activeImage"
+                :alt="product.name"
+                class="absolute inset-0 w-full h-full object-cover"
+                width="600" height="800"
+                fetchpriority="high"
+              />
+            </Transition>
             
             <!-- Desktop Arrow Indicators -->
             <div class="absolute inset-y-0 left-0 flex items-center pl-3 opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-300">
@@ -79,11 +82,11 @@
             <button
               v-for="(img, idx) in allImages"
               :key="idx"
-              class="w-16 h-16 shrink-0 rounded-xl overflow-hidden border-2 transition-all duration-200"
+              class="w-16 h-16 shrink-0 rounded-none overflow-hidden border-2 transition-all duration-200"
               :class="activeImageIdx === idx ? 'border-deep-plum' : 'border-transparent hover:border-border-gray'"
               :aria-label="`View image ${idx + 1}`"
               :aria-pressed="activeImageIdx === idx"
-              @click="activeImageIdx = idx"
+              @click.stop="setActiveImageIdx(idx)"
             >
               <img :src="img" :alt="`Product view ${idx + 1}`" class="w-full h-full object-cover" width="64" height="64" loading="lazy" />
             </button>
@@ -139,7 +142,7 @@
                 :style="{ backgroundColor: variant.colorHex }"
                 :aria-label="variant.color"
                 :aria-pressed="selectedVariant === idx"
-                @click="selectedVariant = idx; selectedSize = ''; activeImageIdx = 0"
+                @click="selectedVariant = idx; selectedSize = ''; setActiveImageIdx(0)"
               />
             </div>
           </div>
@@ -189,7 +192,7 @@
           <!-- Add to Cart + Buy Now + Wishlist -->
           <div class="flex gap-3 pb-5 border-b border-border-gray">
             <div class="flex-1 flex gap-2">
-              <AppButton size="lg" :full="true" :loading="adding" @click="handleAddToCart" class="flex-1">
+              <AppButton size="lg" :full="true" :loading="adding" @click="handleAddToCart" class="hidden md:inline-flex flex-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
@@ -371,7 +374,7 @@
                 <p><strong>Brand Name:</strong> {{ product.brand || 'Van Elvina' }}</p>
                 <p><strong>Country of Origin:</strong> India 🇮🇳</p>
                 <p><strong>Manufactured & Marketed By:</strong> Van Elvina Private Limited, 1/1, Motiwala Complex, Nirala Bazar, Aurangabad, 431001, Maharashtra, India.</p>
-                <p><strong>Customer Care Support:</strong> support@vanelvina.com | +91 87885 66695 | +91 95791 83097</p>
+                <p><strong>Customer Care Support:</strong> support@vanelvina.com | +91 87885 66695 | +91 95791 82097</p>
               </div>
             </div>
           </div>
@@ -479,17 +482,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Sticky mobile add-to-cart -->
-    <div class="sticky-add-to-cart md:hidden" aria-label="Add to cart bar">
-      <div class="flex-1">
-        <p class="font-sans font-semibold text-sm text-charcoal line-clamp-1">{{ product.name }}</p>
-        <p class="text-xs text-dusty-rose font-ui">{{ formatPrice(product.price) }}</p>
-      </div>
-      <AppButton size="md" @click="handleAddToCart">
-        {{ selectedSize ? (isAlreadyInBag ? 'Go to Bag' : 'Add to Bag') : 'Select Size' }}
-      </AppButton>
-    </div>
   </div>
 
   <!-- 404 state -->
@@ -577,6 +569,43 @@
       </div>
     </div>
   </Transition>
+
+  <!-- Mobile Sticky Bottom Bar -->
+  <div v-if="product" class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white flex shadow-[0_-4px_16px_rgba(0,0,0,0.1)] h-[60px]">
+    <button 
+      @click="wishlist.toggle(product)" 
+      class="w-[20%] flex items-center justify-center border-r border-border-gray/50 transition-colors bg-white"
+      :class="wishlist.isWishlisted(product.id || product._id) ? 'text-deep-plum' : 'text-mid-gray'"
+      aria-label="Wishlist"
+    >
+      <svg v-if="wishlist.isWishlisted(product.id || product._id)" class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+      <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+      </svg>
+    </button>
+    
+    <button 
+      @click="handleAddToCart" 
+      :disabled="!product.inStock || adding"
+      class="w-[80%] bg-deep-plum text-white font-ui font-bold tracking-wider text-sm hover:bg-[#473021] transition-colors rounded-none flex items-center justify-center gap-2 disabled:opacity-50"
+    >
+      <span v-if="adding" class="flex items-center gap-2">
+        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+        ADDING...
+      </span>
+      <span v-else class="flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+        </svg>
+        ADD TO BAG
+      </span>
+    </button>
+  </div>
   </div>
 </template>
 
@@ -593,6 +622,7 @@ const { getBySlug, all, addRecentlyViewed } = useProducts()
 const { addToCart } = useCart()
 const wishlist = useWishlistStore()
 const cart = useCartStore()
+const auth = useAuthStore()
 
 const product = computed(() => getBySlug(route.params.slug as string))
 
@@ -635,13 +665,22 @@ const onTouchEnd = () => {
   }
 }
 
+const slideDirection = ref('slide-left')
+
+const setActiveImageIdx = (idx: number) => {
+  slideDirection.value = idx > activeImageIdx.value ? 'slide-left' : 'slide-right'
+  activeImageIdx.value = idx
+}
+
 const nextImage = () => {
   if (allImages.value.length === 0) return
+  slideDirection.value = 'slide-left'
   activeImageIdx.value = (activeImageIdx.value + 1) % allImages.value.length
 }
 
 const prevImage = () => {
   if (allImages.value.length === 0) return
+  slideDirection.value = 'slide-right'
   activeImageIdx.value = (activeImageIdx.value - 1 + allImages.value.length) % allImages.value.length
 }
 
@@ -789,12 +828,31 @@ const handleAddToCart = async () => {
 const handleBuyNow = async () => {
   if (!selectedSize.value) { sizeError.value = true; return }
   sizeError.value = false
-  adding.value = true
+
   if (product.value) {
-    addToCart(product.value, product.value.variants[selectedVariant.value].color, selectedSize.value, qty.value)
-    adding.value = false
-    navigateTo('/checkout')
+    const buyNowItem = {
+      productId: product.value.id || (product.value as any)._id,
+      variantColor: product.value.variants[selectedVariant.value].color,
+      size: selectedSize.value,
+      quantity: qty.value,
+      product: product.value
+    }
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('ve_buy_now_item', JSON.stringify(buyNowItem))
+    }
   }
+
+  if (!auth.isLoggedIn) {
+    ui.addToast('error', 'Please log in to purchase.')
+    ui.setAuthRedirect('/checkout?buyNow=true')
+    ui.openAuthModal()
+    return
+  }
+
+  adding.value = true
+  await new Promise(r => setTimeout(r, 400))
+  adding.value = false
+  navigateTo('/checkout?buyNow=true')
 }
 
 const checkDelivery = () => {
@@ -832,6 +890,17 @@ watchEffect(() => {
 </script>
 
 <style scoped>
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 0.3s ease-in-out;
+}
+.slide-left-enter-from { transform: translateX(100%); }
+.slide-left-leave-to { transform: translateX(-100%); }
+.slide-right-enter-from { transform: translateX(-100%); }
+.slide-right-leave-to { transform: translateX(100%); }
+
 .expand-enter-active, .expand-leave-active { transition: all 0.25s ease; overflow: hidden; }
 .expand-enter-from, .expand-leave-to { max-height: 0; opacity: 0; }
 .expand-enter-to, .expand-leave-from { max-height: 300px; opacity: 1; }

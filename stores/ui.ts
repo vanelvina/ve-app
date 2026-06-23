@@ -9,10 +9,12 @@ export const useUIStore = defineStore('ui', {
     filterDrawerOpen: false,
     profileDrawerOpen: false,
     authModalOpen: false,
+    authRedirect: null as string | null,
     toasts: [] as Array<{ id: string; type: 'success' | 'error' | 'info'; message: string }>,
   }),
 
   actions: {
+    setAuthRedirect(path: string | null) { this.authRedirect = path },
     openMobileMenu() { this.mobileMenuOpen = true },
     closeMobileMenu() { this.mobileMenuOpen = false },
     toggleMobileMenu() { this.mobileMenuOpen = !this.mobileMenuOpen },

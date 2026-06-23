@@ -3,8 +3,8 @@
     <!-- Minimal Checkout Navbar -->
     <header class="bg-white border-b border-border-gray shadow-soft">
       <div class="page-container h-14 flex items-center justify-between">
-        <NuxtLink to="/" class="font-serif text-xl text-deep-plum font-semibold tracking-wide">
-          Van Elvina
+        <NuxtLink to="/" class="flex items-center shrink-0" aria-label="Van Elvina – Home">
+          <img src="/logo.png" alt="Van Elvina Logo" class="h-8 md:h-10 w-auto object-contain" />
         </NuxtLink>
         <div class="flex items-center gap-2 text-xs text-mid-gray font-ui">
           <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">

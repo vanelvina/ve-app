@@ -4,7 +4,7 @@
       <!-- Section Header -->
       <div v-if="widget?.title" class="border-b border-gray-200/80 pb-3 mb-8 relative">
         <div class="flex items-center justify-center">
-          <h2 :id="widget?.key ? `square-grid-${widget.key}` : undefined" class="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-[#8A4F5A] text-center">
+          <h2 :id="widget?.key ? `square-grid-${widget.key}` : undefined" class="text-xs md:text-sm font-sans font-bold uppercase tracking-widest text-[#2A1B18] text-center">
             {{ widget.title }}
           </h2>
         </div>

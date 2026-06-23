@@ -13,229 +13,110 @@
       </div>
     </div>
 
-    <div class="page-container py-6">
-      <div class="flex gap-6">
-        <!-- Filter Sidebar (desktop) -->
-        <aside class="hidden lg:block w-64 shrink-0" aria-label="Product filters">
-          <div class="sticky top-24 bg-white rounded-2xl shadow-soft p-5 border border-border-gray">
-            <div class="flex items-center justify-between mb-5">
-              <h2 class="font-ui font-semibold text-charcoal">Filters</h2>
-              <button
-                class="text-xs text-dusty-rose font-ui hover:text-deep-plum"
-                @click="store.resetFilters"
-              >
-                Clear All
-              </button>
-            </div>
-
-            <!-- Category filter -->
-            <div class="mb-6">
-              <h3 class="text-xs font-ui font-semibold text-mid-gray uppercase tracking-wider mb-3">Category</h3>
-              <div class="space-y-2">
-                <label
-                  v-for="cat in categories"
-                  :key="cat.id"
-                  class="flex items-center gap-2.5 cursor-pointer group"
-                >
-                  <input
-                    type="checkbox"
-                    :value="cat.name"
-                    v-model="selectedCategories"
-                    class="w-4 h-4 rounded border-border-gray text-deep-plum focus:ring-dusty-rose"
-                    :aria-label="cat.name"
-                  />
-                  <span class="text-sm font-ui text-charcoal group-hover:text-deep-plum transition-colors">
-                    {{ cat.name }}
-                  </span>
-                  <span class="ml-auto text-xs text-mid-gray">{{ cat.productCount }}</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Price range -->
-            <div class="mb-6">
-              <h3 class="text-xs font-ui font-semibold text-mid-gray uppercase tracking-wider mb-3">
-                Price: ₹{{ priceRange[0] }} – ₹{{ priceRange[1] }}
-              </h3>
-              <input
-                type="range"
-                min="0"
-                max="2000"
-                step="50"
-                v-model="priceRange[1]"
-                class="w-full accent-deep-plum"
-                :aria-label="`Maximum price: ₹${priceRange[1]}`"
-              />
-            </div>
-
-            <!-- Rating filter -->
-            <div class="mb-6">
-              <h3 class="text-xs font-ui font-semibold text-mid-gray uppercase tracking-wider mb-3">Min Rating</h3>
-              <div class="space-y-2">
-                <label
-                  v-for="r in [4, 3, 2]"
-                  :key="r"
-                  class="flex items-center gap-2.5 cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    :value="r"
-                    v-model="selectedRating"
-                    name="rating"
-                    class="w-4 h-4 text-deep-plum"
-                    :aria-label="`${r} stars and above`"
-                  />
-                  <AppRating :rating="r" />
-                  <span class="text-xs text-mid-gray font-ui">& above</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- In stock -->
-            <div>
-              <label class="flex items-center gap-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  v-model="inStockOnly"
-                  class="w-4 h-4 rounded border-border-gray text-deep-plum"
-                  aria-label="In stock only"
-                />
-                <span class="text-sm font-ui text-charcoal">In Stock Only</span>
-              </label>
-            </div>
+    <!-- Category Dynamic PLP Banner -->
+    <div v-if="activeCategoryBanner && (activeCategoryBanner.plpBanner || activeCategoryBanner.plpBannerMobile)" class="w-full bg-rose-blush/10 border-b border-border-gray">
+      <div class="page-container py-4">
+        <div class="relative overflow-hidden rounded-2xl shadow-soft aspect-[21/9] md:aspect-[21/6] bg-warm-ivory border border-border-gray">
+          <!-- Desktop Banner -->
+          <img 
+            v-if="activeCategoryBanner.plpBanner" 
+            :src="activeCategoryBanner.plpBanner" 
+            :alt="`${activeCategoryBanner.name} Banner`" 
+            class="hidden md:block w-full h-full object-cover" 
+          />
+          <!-- Mobile Banner -->
+          <img 
+            v-if="activeCategoryBanner.plpBannerMobile" 
+            :src="activeCategoryBanner.plpBannerMobile" 
+            :alt="`${activeCategoryBanner.name} Banner`" 
+            class="md:hidden w-full h-full object-cover" 
+          />
+          <!-- Elegant Gradient Overlay -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 md:p-10">
+            <h2 class="font-serif text-2xl md:text-4xl text-white font-bold leading-tight drop-shadow-md">{{ activeCategoryBanner.name }}</h2>
+            <p v-if="activeCategoryBanner.description" class="text-white/90 text-xs md:text-sm font-ui mt-1 max-w-lg drop-shadow-sm">{{ activeCategoryBanner.description }}</p>
           </div>
-        </aside>
-
-        <!-- Main content -->
-        <main class="flex-1 min-w-0" id="product-listing">
-          <!-- Sort bar -->
-          <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-            <div class="flex items-center gap-3">
-              <!-- Mobile filter toggle -->
-              <button
-                class="lg:hidden flex items-center gap-2 px-4 py-2 border border-border-gray rounded-lg text-sm font-ui text-charcoal hover:border-dusty-rose hover:text-deep-plum transition-colors"
-                aria-label="Open filters"
-                @click="ui.openFilterDrawer"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 010 2H4a1 1 0 01-1-1zm3 4a1 1 0 011-1h10a1 1 0 010 2H7a1 1 0 01-1-1zm4 4a1 1 0 011-1h2a1 1 0 010 2h-2a1 1 0 01-1-1z" />
-                </svg>
-                Filters
-              </button>
-              <p class="text-sm text-mid-gray font-ui">
-                <span class="font-semibold text-charcoal">{{ store.totalCount }}</span> products
-              </p>
-            </div>
-
-            <!-- Sort dropdown -->
-            <div class="flex items-center gap-2">
-              <label for="sort-select" class="text-sm font-ui text-mid-gray">Sort by:</label>
-              <select
-                id="sort-select"
-                v-model="sortValue"
-                class="px-3 py-2 border border-border-gray rounded-lg text-sm font-ui text-charcoal bg-white focus:outline-none focus:border-dusty-rose"
-              >
-                <option value="popularity">Most Popular</option>
-                <option value="rating">Top Rated</option>
-                <option value="newest">Newest First</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="discount">Best Discount</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Active filters -->
-          <div v-if="hasActiveFilters" class="flex flex-wrap gap-2 mb-4">
-            <!-- Category Chips -->
-            <button
-              v-for="cat in selectedCategories"
-              :key="cat"
-              class="filter-chip active flex items-center gap-1.5"
-              @click="removeCategory(cat)"
-            >
-              Category: {{ cat }}
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <!-- Size Chips -->
-            <button
-              v-for="sz in store.filters.sizes"
-              :key="sz"
-              class="filter-chip active flex items-center gap-1.5 bg-deep-plum text-white text-xs px-2.5 py-1 rounded-full"
-              @click="removeSize(sz)"
-            >
-              Size: {{ sz }}
-              <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <!-- Color Chips -->
-            <button
-              v-for="col in store.filters.colors"
-              :key="col"
-              class="filter-chip active flex items-center gap-1.5 bg-deep-plum text-white text-xs px-2.5 py-1 rounded-full"
-              @click="removeColor(col)"
-            >
-              Color: {{ col }}
-              <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Product grid -->
-          <div class="product-grid">
-            <ProductCard
-              v-for="product in store.paginated"
-              :key="product.id"
-              :product="product"
-            />
-          </div>
-
-          <!-- Empty state -->
-          <div v-if="store.totalCount === 0" class="py-20 text-center">
-            <div class="text-6xl mb-4" aria-hidden="true">🔍</div>
-            <h3 class="font-serif text-xl text-deep-plum mb-2">No products found</h3>
-            <p class="text-mid-gray font-ui text-sm mb-6">Try adjusting your filters.</p>
-            <AppButton @click="store.resetFilters">Clear All Filters</AppButton>
-          </div>
-
-          <!-- Pagination -->
-          <div v-if="store.totalPages > 1" class="mt-10 flex items-center justify-center gap-2">
-            <button
-              class="px-3 py-2 border border-border-gray rounded-lg text-sm font-ui hover:border-dusty-rose disabled:opacity-40"
-              :disabled="store.page === 1"
-              aria-label="Previous page"
-              @click="store.setPage(store.page - 1)"
-            >
-              ‹
-            </button>
-            <button
-              v-for="p in store.totalPages"
-              :key="p"
-              class="w-9 h-9 rounded-lg text-sm font-ui transition-colors"
-              :class="store.page === p ? 'bg-deep-plum text-white' : 'border border-border-gray text-charcoal hover:border-dusty-rose'"
-              :aria-label="`Page ${p}`"
-              :aria-current="store.page === p ? 'page' : undefined"
-              @click="store.setPage(p)"
-            >
-              {{ p }}
-            </button>
-            <button
-              class="px-3 py-2 border border-border-gray rounded-lg text-sm font-ui hover:border-dusty-rose disabled:opacity-40"
-              :disabled="store.page === store.totalPages"
-              aria-label="Next page"
-              @click="store.setPage(store.page + 1)"
-            >
-              ›
-            </button>
-          </div>
-        </main>
+        </div>
       </div>
+    </div>
+
+    <div class="page-container py-6">
+      <!-- Main content -->
+      <main class="w-full" id="product-listing">
+        <!-- Products count header -->
+        <div class="flex items-center justify-between border-b border-border-gray/30 pb-3 mb-6">
+          <p class="text-sm text-mid-gray font-ui">
+            Showing <span class="font-semibold text-charcoal">{{ store.totalCount }}</span> products
+          </p>
+        </div>
+
+        <!-- Product grid -->
+        <div class="product-grid">
+          <ProductCard
+            v-for="product in store.paginated"
+            :key="product.id"
+            :product="product"
+          />
+        </div>
+
+        <!-- Empty state -->
+        <div v-if="store.totalCount === 0" class="py-20 text-center">
+          <div class="text-6xl mb-4" aria-hidden="true">🔍</div>
+          <h3 class="font-serif text-xl text-deep-plum mb-2">No products found</h3>
+          <p class="text-mid-gray font-ui text-sm mb-6">Try adjusting your filters.</p>
+          <AppButton @click="store.resetFilters">Clear All Filters</AppButton>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="store.totalPages > 1" class="mt-10 flex items-center justify-center gap-2">
+          <button
+            class="px-3 py-2 border border-border-gray rounded-lg text-sm font-ui hover:border-dusty-rose disabled:opacity-40"
+            :disabled="store.page === 1"
+            aria-label="Previous page"
+            @click="store.setPage(store.page - 1)"
+          >
+            ‹
+          </button>
+          <button
+            v-for="p in store.totalPages"
+            :key="p"
+            class="w-9 h-9 rounded-lg text-sm font-ui transition-colors"
+            :class="store.page === p ? 'bg-deep-plum text-white' : 'border border-border-gray text-charcoal hover:border-dusty-rose'"
+            :aria-label="`Page ${p}`"
+            :aria-current="store.page === p ? 'page' : undefined"
+            @click="store.setPage(p)"
+          >
+            {{ p }}
+          </button>
+          <button
+            class="px-3 py-2 border border-border-gray rounded-lg text-sm font-ui hover:border-dusty-rose disabled:opacity-40"
+            :disabled="store.page === store.totalPages"
+            aria-label="Next page"
+            @click="store.setPage(store.page + 1)"
+          >
+            ›
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <!-- Mobile Sticky Bottom Bar (Sort, Filter, Size) -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-border-gray flex h-14 shadow-[0_-4px_16px_rgba(0,0,0,0.1)]">
+      <button class="flex-1 flex items-center justify-center gap-2 border-r border-border-gray font-ui text-sm font-semibold text-charcoal hover:bg-gray-50 transition-colors" @click="sortDrawerOpen = true">
+        <svg class="w-4 h-4 text-mid-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
+        Sort
+      </button>
+      <button class="flex-1 flex items-center justify-center gap-2 border-r border-border-gray font-ui text-sm font-semibold text-charcoal hover:bg-gray-50 transition-colors" @click="ui.openFilterDrawer">
+        <svg class="w-4 h-4 text-mid-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 010 2H4a1 1 0 01-1-1zm3 4a1 1 0 011-1h10a1 1 0 010 2H7a1 1 0 01-1-1zm4 4a1 1 0 011-1h2a1 1 0 010 2h-2a1 1 0 01-1-1z"/></svg>
+        Filter
+      </button>
+      <button class="flex-1 flex items-center justify-center gap-2 font-ui text-sm font-semibold text-charcoal hover:bg-gray-50 transition-colors" @click="ui.openSizeGuide">
+        <svg class="w-4 h-4 text-mid-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <rect x="2" y="7" width="20" height="10" rx="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 7v4M10 7v4M14 7v4M18 7v4"/>
+        </svg>
+        Size
+      </button>
     </div>
 
     <!-- Mobile Filter Drawer -->
@@ -263,8 +144,8 @@
           <h3 class="text-xs font-ui font-semibold text-mid-gray uppercase tracking-wider mb-3">Category</h3>
           <div class="flex flex-wrap gap-2">
             <button
-              v-for="cat in categories"
-              :key="cat.id"
+              v-for="cat in categories.filter(c => c.slug !== 'all')"
+              :key="cat._id"
               class="filter-chip"
               :class="{ active: selectedCategories.includes(cat.name) }"
               @click="toggleCategory(cat.name)"
@@ -276,6 +157,43 @@
         <AppButton :full="true" @click="ui.closeFilterDrawer">Apply Filters</AppButton>
       </div>
     </Transition>
+
+    <!-- Mobile Sort Drawer -->
+    <Transition name="fade">
+      <div v-if="sortDrawerOpen" class="overlay-backdrop lg:hidden" @click="sortDrawerOpen = false" aria-hidden="true" />
+    </Transition>
+    <Transition name="slide-up">
+      <div
+        v-if="sortDrawerOpen"
+        class="fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-3xl shadow-modal p-6 max-h-[85vh] overflow-y-auto lg:hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Sort products"
+      >
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="font-ui font-semibold text-charcoal">Sort By</h2>
+          <button class="btn-icon" aria-label="Close sort" @click="sortDrawerOpen = false">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="space-y-1">
+          <button
+            v-for="option in sortOptions"
+            :key="option.value"
+            class="w-full flex items-center justify-between py-3 px-2 text-sm font-ui transition-colors text-charcoal border-b border-border-gray/30 last:border-b-0 hover:bg-rose-blush/10 text-left"
+            :class="{ 'text-deep-plum font-semibold': sortValue === option.value }"
+            @click="selectSortOption(option.value)"
+          >
+            {{ option.label }}
+            <svg v-if="sortValue === option.value" class="w-4 h-4 text-deep-plum" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -285,7 +203,20 @@ import type { SortOption } from '~/types'
 
 const store = useProductsStore()
 const ui = useUIStore()
-const categories = categoriesData
+
+// Dynamic Categories Fetch
+const categories = ref<any[]>(categoriesData)
+const loadCategories = async () => {
+  const config = useRuntimeConfig()
+  try {
+    const data = await $fetch<any[]>(`${config.public.apiBase}/categories`)
+    if (data && data.length) {
+      categories.value = data
+    }
+  } catch (error) {
+    console.error('Failed to load categories:', error)
+  }
+}
 
 const route = useRoute()
 
@@ -310,15 +241,20 @@ const inStockOnly = computed({
 })
 
 const sortValue = ref<SortOption>('popularity')
+const sortDrawerOpen = ref(false)
 
-const hasActiveFilters = computed(() => 
-  selectedCategories.value.length > 0 || 
-  store.filters.sizes.length > 0 || 
-  store.filters.colors.length > 0
-)
+const sortOptions = [
+  { value: 'popularity', label: 'Most Popular' },
+  { value: 'rating', label: 'Top Rated' },
+  { value: 'newest', label: 'Newest First' },
+  { value: 'price-asc', label: 'Price: Low to High' },
+  { value: 'price-desc', label: 'Price: High to Low' },
+  { value: 'discount', label: 'Best Discount' }
+] as const
 
-const removeCategory = (cat: string) => {
-  selectedCategories.value = selectedCategories.value.filter(c => c !== cat)
+const selectSortOption = (val: SortOption) => {
+  sortValue.value = val
+  sortDrawerOpen.value = false
 }
 
 const toggleCategory = (cat: string) => {
@@ -332,17 +268,14 @@ const toggleCategory = (cat: string) => {
   selectedCategories.value = current
 }
 
-const removeSize = (sz: string) => {
-  store.setFilters({
-    sizes: store.filters.sizes.filter(s => s !== sz)
-  })
-}
-
-const removeColor = (col: string) => {
-  store.setFilters({
-    colors: store.filters.colors.filter(c => c !== col)
-  })
-}
+const activeCategoryBanner = computed(() => {
+  const catQuery = route.query.category || route.query.categories
+  if (!catQuery) {
+    return categories.value.find((c: any) => c.slug === 'all') || null
+  }
+  const slugStr = Array.isArray(catQuery) ? catQuery[0] : String(catQuery)
+  return categories.value.find((c: any) => c.slug.toLowerCase() === slugStr.toLowerCase()) || null
+})
 
 const parseRouteQueries = () => {
   let queryCategory = route.query.category || route.query.categories
@@ -352,7 +285,7 @@ const parseRouteQueries = () => {
       ? queryCategory 
       : String(queryCategory).split(',').map(s => s.trim())
     categoriesArray = cats.map(c => {
-      const matched = categories.find(cat => cat.name.toLowerCase() === c.toLowerCase())
+      const matched = categories.value.find((cat: any) => cat.name.toLowerCase() === c.toLowerCase())
       return matched ? matched.name : c
     })
   }
@@ -382,6 +315,7 @@ const parseRouteQueries = () => {
 
 onMounted(() => {
   parseRouteQueries()
+  loadCategories()
 })
 
 watch(() => route.query, () => {

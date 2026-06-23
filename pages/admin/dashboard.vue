@@ -32,6 +32,12 @@
             {{ products.length }}
           </span>
           <span 
+            v-else-if="tab.id === 'plp-banners' && categories.length"
+            class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
+          >
+            {{ categories.length }}
+          </span>
+          <span 
             v-else-if="tab.id === 'widgets' && widgets.length"
             class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
           >
@@ -310,6 +316,7 @@
                 <tr class="bg-warm-ivory text-deep-plum border-b border-rose-blush/30 font-semibold">
                   <th class="p-4">Cover Image</th>
                   <th class="p-4">Category Name</th>
+                  <th class="p-4">PLP Banners</th>
                   <th class="p-4">URL Slug</th>
                   <th class="p-4">Subcategories Nodes</th>
                   <th class="p-4 text-right">Actions</th>
@@ -317,7 +324,7 @@
               </thead>
               <tbody class="divide-y divide-rose-blush/10">
                 <tr v-if="filteredCategories.length === 0">
-                  <td colspan="5" class="p-8 text-center text-xs text-charcoal/45 italic">No categories matching search query.</td>
+                  <td colspan="6" class="p-8 text-center text-xs text-charcoal/45 italic">No categories matching search query.</td>
                 </tr>
                 <tr v-for="cat in filteredCategories" :key="cat._id" class="hover:bg-warm-ivory/20 transition-colors">
                   <td class="p-4">
@@ -326,6 +333,20 @@
                   <td class="p-4">
                     <p class="font-bold text-charcoal">{{ cat.name }}</p>
                     <p class="text-[9px] text-charcoal/50 leading-relaxed max-w-xs truncate" v-if="cat.description">{{ cat.description }}</p>
+                  </td>
+                  <td class="p-4">
+                    <div class="flex flex-col gap-1.5 text-[10px]">
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-charcoal/40 font-semibold">D:</span>
+                        <img v-if="cat.plpBanner" :src="cat.plpBanner" class="w-12 h-6 object-cover rounded border border-rose-blush/20" />
+                        <span v-else class="text-charcoal/40 bg-charcoal/5 px-1 rounded text-[9px]">None</span>
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-charcoal/40 font-semibold">M:</span>
+                        <img v-if="cat.plpBannerMobile" :src="cat.plpBannerMobile" class="w-6 h-6 object-cover rounded border border-rose-blush/20" />
+                        <span v-else class="text-charcoal/40 bg-charcoal/5 px-1 rounded text-[9px]">None</span>
+                      </div>
+                    </div>
                   </td>
                   <td class="p-4 font-mono text-dusty-rose font-semibold bg-rose-blush/25 px-2 py-1 rounded inline-block mt-3 text-[10px]">{{ cat.slug }}</td>
                   <td class="p-4">
@@ -349,6 +370,137 @@
         </div>
       </section>
 
+      <!-- TAB: PLP BANNERS -->
+      <section v-if="activeTab === 'plp-banners'" class="space-y-6 animate-fade-in">
+        <header class="bg-white p-5 rounded-2xl border border-charcoal/20 shadow-soft">
+          <h3 class="font-serif text-lg font-bold text-deep-plum">Product Listing Page (PLP) Banners</h3>
+          <p class="text-xs text-charcoal/60 mt-1">
+            Upload and configure custom banners for the top of each category's listing page. Configure separate images for Desktop (wide layout) and Mobile (portrait aspect ratio) to ensure optimized page loading and design.
+          </p>
+        </header>
+
+        <div class="grid grid-cols-1 gap-6">
+          <!-- All Products Banner Card -->
+          <div 
+            v-if="allProductsCategory"
+            class="bg-[#FAF5E4]/50 p-6 rounded-2xl border-2 border-dashed border-[#C5A58E] shadow-soft space-y-4"
+          >
+            <div class="flex items-center justify-between border-b border-[#C5A58E]/20 pb-3">
+              <h4 class="font-serif text-base font-bold text-deep-plum flex items-center gap-2">
+                <span>🌟</span> General / All Products Banner
+                <span class="text-xs font-mono font-normal text-dusty-rose bg-rose-blush/20 px-2 py-0.5 rounded">/products (No Category Selected)</span>
+              </h4>
+              <span class="text-xs font-semibold text-[#C5A58E]">Default Fallback</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Desktop Banner -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-charcoal/80">Desktop PLP Banner Image URL</label>
+                <div class="flex gap-3">
+                  <div class="w-24 h-12 shrink-0 rounded-xl overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
+                    <img v-if="allProductsCategory.plpBanner" :src="allProductsCategory.plpBanner" class="w-full h-full object-cover" />
+                    <span v-else class="text-[10px] text-charcoal/40">No Banner</span>
+                  </div>
+                  <input 
+                    v-model="allProductsCategory.plpBanner" 
+                    type="text" 
+                    placeholder="https://example.com/all-products-desktop.jpg" 
+                    class="flex-1 p-3 border border-charcoal/20 bg-white rounded-xl text-xs" 
+                  />
+                </div>
+              </div>
+
+              <!-- Mobile Banner -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-charcoal/80">Mobile PLP Banner Image URL</label>
+                <div class="flex gap-3">
+                  <div class="w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
+                    <img v-if="allProductsCategory.plpBannerMobile" :src="allProductsCategory.plpBannerMobile" class="w-full h-full object-cover" />
+                    <span v-else class="text-[10px] text-charcoal/40">No Banner</span>
+                  </div>
+                  <input 
+                    v-model="allProductsCategory.plpBannerMobile" 
+                    type="text" 
+                    placeholder="https://example.com/all-products-mobile.jpg" 
+                    class="flex-1 p-3 border border-charcoal/20 bg-white rounded-xl text-xs" 
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-rose-blush/10">
+              <button 
+                @click="savePLPBanners(allProductsCategory)" 
+                class="px-4 py-2 bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-semibold shadow-premium transition-all"
+              >
+                Save General Banner
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Category Banners -->
+          <div 
+            v-for="cat in categories.filter(c => c.slug !== 'all')" 
+            :key="cat._id" 
+            class="bg-white p-6 rounded-2xl border border-charcoal/20 shadow-soft space-y-4"
+          >
+            <div class="flex items-center justify-between border-b border-rose-blush/20 pb-3">
+              <h4 class="font-serif text-base font-bold text-deep-plum flex items-center gap-2">
+                <span>📁</span> {{ cat.name }}
+                <span class="text-xs font-mono font-normal text-dusty-rose bg-rose-blush/20 px-2 py-0.5 rounded">/products?category={{ cat.slug }}</span>
+              </h4>
+              <span class="text-xs font-semibold text-charcoal/50">{{ cat.productCount || 0 }} Products</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Desktop Banner -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-charcoal/80">Desktop PLP Banner Image URL</label>
+                <div class="flex gap-3">
+                  <div class="w-24 h-12 shrink-0 rounded-xl overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
+                    <img v-if="cat.plpBanner" :src="cat.plpBanner" class="w-full h-full object-cover" />
+                    <span v-else class="text-[10px] text-charcoal/40">No Banner</span>
+                  </div>
+                  <input 
+                    v-model="cat.plpBanner" 
+                    type="text" 
+                    placeholder="https://example.com/desktop-banner.jpg" 
+                    class="flex-1 p-3 border border-charcoal/20 bg-white rounded-xl text-xs" 
+                  />
+                </div>
+              </div>
+
+              <!-- Mobile Banner -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-charcoal/80">Mobile PLP Banner Image URL</label>
+                <div class="flex gap-3">
+                  <div class="w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
+                    <img v-if="cat.plpBannerMobile" :src="cat.plpBannerMobile" class="w-full h-full object-cover" />
+                    <span v-else class="text-[10px] text-charcoal/40">No Banner</span>
+                  </div>
+                  <input 
+                    v-model="cat.plpBannerMobile" 
+                    type="text" 
+                    placeholder="https://example.com/mobile-banner.jpg" 
+                    class="flex-1 p-3 border border-charcoal/20 bg-white rounded-xl text-xs" 
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-rose-blush/10">
+              <button 
+                @click="savePLPBanners(cat)" 
+                class="px-4 py-2 bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-semibold shadow-premium transition-all"
+              >
+                Save Banners for {{ cat.name }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- TAB 4: PRODUCTS -->
       <section v-if="activeTab === 'products'" class="space-y-4 animate-fade-in">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -361,7 +513,7 @@
             
             <select v-model="productFilterCategory" class="w-full p-2 border border-charcoal/20 bg-white rounded-xl text-xs focus:outline-none focus:border-deep-plum shadow-soft">
               <option value="">-- All Categories --</option>
-              <option v-for="cat in categories" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
+              <option v-for="cat in categories.filter(c => c.slug !== 'all')" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
             </select>
 
             <select v-model="productFilterStock" class="w-full p-2 border border-charcoal/20 bg-white rounded-xl text-xs focus:outline-none focus:border-deep-plum shadow-soft">
@@ -765,9 +917,15 @@
                       class="px-2 py-1 rounded bg-rose-blush/50 text-deep-plum border border-rose-blush text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-deep-plum/20"
                     >
                       <option value="placed">Placed</option>
-                      <option value="confirmed">Confirmed</option>
+                      <option value="accepted">Accepted</option>
+                      <option value="packed">Packed</option>
                       <option value="shipped">Shipped</option>
+                      <option value="out_for_delivery">Out for Delivery</option>
                       <option value="delivered">Delivered</option>
+                      <option value="return_requested">Return Req</option>
+                      <option value="exchange_requested">Exchange Req</option>
+                      <option value="returned">Returned</option>
+                      <option value="exchanged">Exchanged</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </td>
@@ -1084,6 +1242,101 @@
         </div>
       </section>
 
+      <!-- TAB 11: CUSTOM EMAILS -->
+      <section v-if="activeTab === 'emails'" class="space-y-6 animate-fade-in">
+        <header class="bg-white p-5 rounded-2xl border border-charcoal/20 shadow-soft">
+          <h3 class="font-serif text-lg font-bold text-deep-plum">Custom Emails Portal</h3>
+          <p class="text-xs text-charcoal/60 mt-1">
+            Generate and send customized emails directly to registered or guest customers. Emails will be beautifully formatted inside the Van Elvina layout template.
+          </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- Send Email Form -->
+          <div class="lg:col-span-8 bg-white p-6 rounded-3xl border border-charcoal/20 shadow-soft relative overflow-hidden">
+            <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
+            <h4 class="font-serif font-bold text-deep-plum text-sm border-b border-rose-blush/10 pb-3 mb-4">Compose Custom Message</h4>
+            
+            <form @submit.prevent="handleSendCustomEmail" class="space-y-4 text-xs font-ui relative z-10">
+              <!-- Recipient Selector & Input -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                  <label class="block font-semibold text-charcoal/70">Select Registered Customer (Optional)</label>
+                  <select 
+                    v-model="selectedUserEmail" 
+                    @change="onCustomerSelect"
+                    class="w-full p-2.5 border border-charcoal/20 bg-white rounded-xl focus:outline-none focus:ring-1 focus:ring-deep-plum/20"
+                  >
+                    <option value="">-- Choose a Customer --</option>
+                    <option v-for="u in users" :key="u._id" :value="u.email">
+                      {{ u.name || 'Unnamed' }} ({{ u.email }})
+                    </option>
+                  </select>
+                </div>
+                
+                <div class="space-y-1">
+                  <label class="block font-semibold text-charcoal/70">Recipient Email Address *</label>
+                  <input 
+                    v-model="emailForm.to" 
+                    type="email" 
+                    required 
+                    placeholder="customer@example.com" 
+                    class="w-full p-2.5 border border-charcoal/20 rounded-xl focus:outline-none focus:ring-1 focus:ring-deep-plum/20" 
+                  />
+                </div>
+              </div>
+
+              <!-- Subject -->
+              <div class="space-y-1">
+                <label class="block font-semibold text-charcoal/70">Email Subject Line *</label>
+                <input 
+                  v-model="emailForm.subject" 
+                  type="text" 
+                  required 
+                  placeholder="e.g., Exciting updates on your Van Elvina account" 
+                  class="w-full p-2.5 border border-charcoal/20 rounded-xl focus:outline-none focus:ring-1 focus:ring-deep-plum/20" 
+                />
+              </div>
+
+              <!-- Body Message -->
+              <div class="space-y-1">
+                <label class="block font-semibold text-charcoal/70">Email Body Copy *</label>
+                <textarea 
+                  v-model="emailForm.body" 
+                  rows="10" 
+                  required 
+                  placeholder="Dear Customer,&#10;&#10;Write the content of the email here..." 
+                  class="w-full p-3 border border-charcoal/20 rounded-xl font-sans focus:outline-none focus:ring-1 focus:ring-deep-plum/20 leading-relaxed"
+                ></textarea>
+              </div>
+
+              <div class="flex justify-end pt-3 border-t border-rose-blush/10">
+                <button 
+                  type="submit" 
+                  :disabled="sendingEmail"
+                  class="px-6 py-3 bg-deep-plum hover:bg-deep-plum/95 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-premium flex items-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
+                >
+                  <span>{{ sendingEmail ? 'Sending Email...' : 'Send Custom Email' }}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Quick Tips Panel -->
+          <div class="lg:col-span-4 space-y-6">
+            <div class="bg-rose-blush/10 rounded-3xl p-6 border border-rose-blush/30 text-xs leading-relaxed space-y-3 text-charcoal/80">
+              <h4 class="font-serif font-bold text-deep-plum text-sm">💡 Email Composer Guidance</h4>
+              <p>When sending administrative announcements, promo gifts, or manual support notifications:</p>
+              <ul class="list-disc pl-4 space-y-1">
+                <li>Double check recipient email syntax prior to delivery.</li>
+                <li>Your customized body copy will be rendered inside our premium, responsive brand template.</li>
+                <li>Formatting line breaks (new lines) will be automatically preserved.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <!-- 3. BANNER MODAL -->
@@ -1206,6 +1459,29 @@
             </div>
           </div>
 
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">PLP Banner (Desktop) URL</label>
+              <div class="flex gap-2">
+                <div class="w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
+                  <img v-if="categoryModal.form.plpBanner" :src="categoryModal.form.plpBanner" class="w-full h-full object-cover" />
+                  <span v-else class="text-[10px] text-charcoal/40">No preview</span>
+                </div>
+                <input v-model="categoryModal.form.plpBanner" type="text" placeholder="https://example.com/plp-desk.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-xl text-xs bg-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block font-semibold mb-1 text-charcoal/70">PLP Banner (Mobile) URL</label>
+              <div class="flex gap-2">
+                <div class="w-10 h-10 shrink-0 rounded-lg overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
+                  <img v-if="categoryModal.form.plpBannerMobile" :src="categoryModal.form.plpBannerMobile" class="w-full h-full object-cover" />
+                  <span v-else class="text-[10px] text-charcoal/40">No preview</span>
+                </div>
+                <input v-model="categoryModal.form.plpBannerMobile" type="text" placeholder="https://example.com/plp-mob.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-xl text-xs bg-white" />
+              </div>
+            </div>
+          </div>
+
           <div class="border-t border-rose-blush/10 pt-3">
             <div class="flex items-center justify-between mb-2">
               <label class="block font-bold text-deep-plum text-xs">Subcategories Nodes</label>
@@ -1310,7 +1586,7 @@
                 <label class="block font-semibold mb-1 text-charcoal/70">Primary Category *</label>
                 <select v-model="productModal.form.category" required class="w-full p-2.5 border border-charcoal/20 rounded-xl" @change="onProductCategoryChange">
                   <option value="">-- Select Category --</option>
-                  <option v-for="cat in categories" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
+                  <option v-for="cat in categories.filter(c => c.slug !== 'all')" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
                 </select>
               </div>
               <div>
@@ -2177,6 +2453,7 @@ const tabs = [
   { id: 'overview', name: 'Dashboard Overview', icon: '📊' },
   { id: 'banners', name: 'Banners Carousel', icon: '🖼️' },
   { id: 'categories', name: 'Categories Selector', icon: '🗂️' },
+  { id: 'plp-banners', name: 'PLP Banners', icon: '🎏' },
   { id: 'products', name: 'Products Catalog', icon: '🛍️' },
   { id: 'widgets', name: 'Widgets & Layout', icon: '⚙️' },
   { id: 'blogs', name: 'Blogs Management', icon: '📝' },
@@ -2184,6 +2461,7 @@ const tabs = [
   { id: 'orders', name: 'Customer Orders', icon: '📦' },
   { id: 'about', name: 'About Us Page', icon: 'ℹ️' },
   { id: 'inquiries', name: 'Customer Inquiries', icon: '💬' },
+  { id: 'emails', name: 'Custom Emails', icon: '✉️' },
 ]
 
 // Base loaded lists
@@ -2199,6 +2477,37 @@ const inquiries = ref<any[]>([])
 const loadingData = ref(false)
 const aboutData = ref<any>(null)
 const savingAbout = ref(false)
+
+// Custom Email state variables
+const selectedUserEmail = ref('')
+const sendingEmail = ref(false)
+const emailForm = ref({
+  to: '',
+  subject: '',
+  body: ''
+})
+
+const onCustomerSelect = () => {
+  if (selectedUserEmail.value) {
+    emailForm.value.to = selectedUserEmail.value
+  }
+}
+
+const handleSendCustomEmail = async () => {
+  sendingEmail.value = true
+  try {
+    await adminStore.sendCustomEmail(emailForm.value)
+    uiStore.addToast('success', 'Custom email dispatched successfully!')
+    // Reset form
+    emailForm.value = { to: '', subject: '', body: '' }
+    selectedUserEmail.value = ''
+  } catch (err: any) {
+    console.error('Failed to send custom email:', err)
+    uiStore.addToast('error', err.message || 'Failed to dispatch custom email')
+  } finally {
+    sendingEmail.value = false
+  }
+}
 
 // Search Queries & Filters
 const searchQueries = ref({
@@ -2235,12 +2544,17 @@ const filteredBanners = computed(() => {
 })
 
 const filteredCategories = computed(() => {
+  const list = categories.value.filter(c => c.slug !== 'all')
   const q = searchQueries.value.categories.toLowerCase().trim()
-  if (!q) return categories.value
-  return categories.value.filter(c => 
+  if (!q) return list
+  return list.filter(c => 
     c.name.toLowerCase().includes(q) || 
     c.slug.toLowerCase().includes(q)
   )
+})
+
+const allProductsCategory = computed(() => {
+  return categories.value.find((c: any) => c.slug === 'all') || null
 })
 
 const filteredProducts = computed(() => {
@@ -2385,6 +2699,8 @@ const categoryModal = ref({
     slug: '',
     description: '',
     image: '',
+    plpBanner: '',
+    plpBannerMobile: '',
     subcategories: [] as { name: string; slug: string }[]
   }
 })
@@ -2493,6 +2809,26 @@ const loadAllData = async () => {
     ])
     banners.value = bannersData
     categories.value = categoriesData
+    
+    // Ensure "All Products" fallback category banner document exists
+    const hasAll = categoriesData.some((c: any) => c.slug === 'all')
+    if (!hasAll) {
+      try {
+        const newCat = await $fetch<any>(`${config.public.apiBase}/categories`, {
+          method: 'POST',
+          headers: adminStore.getHeaders(),
+          body: {
+            name: 'All Products',
+            slug: 'all',
+            description: 'Complete catalog of premium women intimate wear.'
+          }
+        })
+        categories.value.push(newCat)
+      } catch (e) {
+        console.error('Failed to auto-create general banner category:', e)
+      }
+    }
+
     products.value = productsData
     widgets.value = widgetsData
     blogs.value = blogsData
@@ -2704,6 +3040,8 @@ const openCategoryModal = (cat: any | null) => {
       slug: cat.slug,
       description: cat.description || '',
       image: cat.image || '',
+      plpBanner: cat.plpBanner || '',
+      plpBannerMobile: cat.plpBannerMobile || '',
       subcategories: cat.subcategories ? JSON.parse(JSON.stringify(cat.subcategories)) : []
     }
   } else {
@@ -2714,6 +3052,8 @@ const openCategoryModal = (cat: any | null) => {
       slug: '',
       description: '',
       image: '',
+      plpBanner: '',
+      plpBannerMobile: '',
       subcategories: []
     }
   }
@@ -2748,6 +3088,19 @@ const deleteCategoryItem = async (id: string) => {
     loadAllData()
   } catch (error: any) {
     uiStore.addToast('error', error.message || 'Failed to delete category')
+  }
+}
+
+const savePLPBanners = async (cat: any) => {
+  try {
+    await adminStore.updateCategory(cat._id, {
+      plpBanner: cat.plpBanner,
+      plpBannerMobile: cat.plpBannerMobile
+    })
+    uiStore.addToast('success', `${cat.name} banners saved successfully`)
+    loadAllData()
+  } catch (error: any) {
+    uiStore.addToast('error', error.message || 'Failed to save PLP banners')
   }
 }
 
@@ -2922,6 +3275,7 @@ const deleteProductItem = async (id: string) => {
     uiStore.addToast('error', error.message || 'Failed to delete product')
   }
 }
+
 
 // WIDGETS CRUD & SORTING
 const openWidgetModal = (w: any | null) => {

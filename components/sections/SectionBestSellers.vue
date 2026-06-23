@@ -14,7 +14,7 @@
         <!-- Thicker Black Accent Bar (4px) on top of the grey line on the left -->
         <div class="absolute bottom-0 left-0 h-[4px] bg-black w-28 z-10"></div>
         
-        <NuxtLink to="/products" class="group text-xs font-bold text-gray-800 hover:text-[#8A4F5A] flex items-center gap-1 transition-all duration-300">
+        <NuxtLink to="/products" class="group text-xs font-bold text-gray-800 hover:text-[#2A1B18] flex items-center gap-1 transition-all duration-300">
           <span>View All</span>
           <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />

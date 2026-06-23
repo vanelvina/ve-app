@@ -30,7 +30,11 @@ export const useCartStore = defineStore('cart', {
         (sum, item) => sum + (item.product?.price ?? 0) * item.quantity,
         0,
       )
-      return subtotal >= 999 ? 0 : 79
+      if (state.items.length === 0) return 0
+      if (subtotal >= 999) return 0
+      
+      const allFreeShipping = state.items.every(item => item.product?.isFreeShipping === true)
+      return allFreeShipping ? 0 : 79
     },
     grandTotal(): number {
       return this.subtotal - this.appliedDiscount + this.shippingCost
@@ -45,7 +49,15 @@ export const useCartStore = defineStore('cart', {
   actions: {
     async fetchCart() {
       const auth = useAuthStore()
-      if (!auth.isLoggedIn || !auth.token) return
+      if (!auth.isLoggedIn || !auth.token) {
+        if (import.meta.client) {
+          try {
+            const stored = localStorage.getItem('ve_guest_cart')
+            if (stored) this.items = JSON.parse(stored)
+          } catch (err) { }
+        }
+        return
+      }
 
       this.loading = true
       const config = useRuntimeConfig()
@@ -75,7 +87,12 @@ export const useCartStore = defineStore('cart', {
 
     async syncCart() {
       const auth = useAuthStore()
-      if (!auth.isLoggedIn || !auth.token) return
+      if (!auth.isLoggedIn || !auth.token) {
+        if (import.meta.client) {
+          localStorage.setItem('ve_guest_cart', JSON.stringify(this.items))
+        }
+        return
+      }
 
       const config = useRuntimeConfig()
       try {
@@ -157,6 +174,9 @@ export const useCartStore = defineStore('cart', {
             }
           }
           await this.syncCart()
+        }
+        if (import.meta.client) {
+          localStorage.removeItem('ve_guest_cart')
         }
         await this.fetchCart()
       } catch (err) {

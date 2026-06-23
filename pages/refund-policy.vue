@@ -97,7 +97,7 @@
               <div>
                 <span class="block font-bold text-deep-plum uppercase tracking-wider">Phone Lines</span>
                 <p class="font-semibold text-charcoal/80 mt-0.5">+91 87885 66695</p>
-                <p class="font-semibold text-charcoal/80 mt-0.5">+91 95791 83097</p>
+                <p class="font-semibold text-charcoal/80 mt-0.5">+91 95791 82097</p>
                 <p class="text-charcoal/60 mt-1">Operating Hours: 24*7 Availability</p>
               </div>
             </div>

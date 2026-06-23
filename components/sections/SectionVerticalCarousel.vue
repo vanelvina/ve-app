@@ -178,15 +178,15 @@ const objectFit = computed(() => {
 // Frame color rotation matching Clovia/Zivame custom aesthetics
 const getCardBg = (idx: number) => {
   const mod = idx % 3
-  if (mod === 0) return '#FAD2D8' // Pink
-  if (mod === 1) return '#8A4F5A' // Deep Plum Rose
-  return '#F5EAC4' // Cream Yellow
+  if (mod === 0) return '#FAF3E8' // Buttercream
+  if (mod === 1) return '#2A1B18' // Deep Cocoa
+  return '#CBA39E' // Rose Gold
 }
 
 const getCardText = (idx: number) => {
   const mod = idx % 3
-  if (mod === 1) return '#FFFFFF' // White on Plum
-  return '#8A4F5A' // Plum on Pink/Cream
+  if (mod === 1) return '#FFFFFF' // White on Cocoa
+  return '#2A1B18' // Cocoa on Buttercream/Rose Gold
 }
 
 const autoScroll = () => {

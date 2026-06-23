@@ -56,7 +56,7 @@
                 (a) You can cancel orders for Products partially or fully prior to issuing and processing of the invoice in relation to such Products by us. Orders cannot be cancelled once the invoice has been processed and issued.
               </p>
               <p>
-                (b) In case you change your mind in relation to a particular order of the Products, you may cancel the placed purchase order, by referencing the unique tracking identity number (which enables the User in tracking the status of delivery of the purchased Products) received by you from us and requesting us to process a cancellation by sending an email to <a href="mailto:support@vanelvina.com" class="text-deep-plum font-bold hover:underline">support@vanelvina.com</a> or call us at +91 87885 66695 / +91 95791 83097.
+                (b) In case you change your mind in relation to a particular order of the Products, you may cancel the placed purchase order, by referencing the unique tracking identity number (which enables the User in tracking the status of delivery of the purchased Products) received by you from us and requesting us to process a cancellation by sending an email to <a href="mailto:support@vanelvina.com" class="text-deep-plum font-bold hover:underline">support@vanelvina.com</a> or call us at +91 87885 66695 / +91 95791 82097.
               </p>
               <p>
                 (c) On receipt of the cancellation request prior to issuing and processing of the invoice, we shall cancel the order and initiate the refund for the Products within 15 (fifteen) business days from the receipt of the cancellation request from you. The amount shall be refunded to you via credit to your original payment source (such as Credit/Debit Card, Net Banking, UPI, or Wallets). All refunds shall be subject to applicable policies and charges of the User’s bank / financial institution.
@@ -196,7 +196,7 @@
               <div>
                 <span class="block font-bold text-deep-plum uppercase tracking-wider">Support Lines</span>
                 <p class="font-semibold text-charcoal/80 mt-0.5">+91 87885 66695</p>
-                <p class="font-semibold text-charcoal/80 mt-0.5">+91 95791 83097</p>
+                <p class="font-semibold text-charcoal/80 mt-0.5">+91 95791 82097</p>
                 <p class="text-charcoal/60 mt-1">Operating Hours: 24*7 Availability</p>
               </div>
             </div>
