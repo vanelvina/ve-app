@@ -160,5 +160,35 @@ export const useAuthStore = defineStore('auth', {
         headers: this.getHeaders(),
       })
     },
+    // ── Razorpay Integration ───────────────────────────────────────
+    async createRazorpayOrder(amount: number) {
+      const config = useRuntimeConfig()
+      return $fetch<any>(`${config.public.apiBase}/orders/create-razorpay-order`, {
+        method: 'POST',
+        body: { amount },
+      })
+    },
+
+    async verifyPayment(payload: any) {
+      const config = useRuntimeConfig()
+      
+      const body = { ...payload }
+      if (this.isLoggedIn && this.user) {
+        body.userId = this.user.id
+        body.isGuest = false
+      } else {
+        body.isGuest = true
+        body.guestInfo = {
+          name: payload.shippingAddress?.name || '',
+          email: payload.shippingAddress?.email || '',
+          phone: payload.shippingAddress?.phone || '',
+        }
+      }
+
+      return $fetch<any>(`${config.public.apiBase}/orders/verify-payment`, {
+        method: 'POST',
+        body,
+      })
+    },
   },
 })

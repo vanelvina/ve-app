@@ -269,18 +269,79 @@ const placeOrder = async () => {
       total: orderTotal.value,
     }
 
-    const res = await auth.placeOrder(payload)
-    if (res.success) {
-      cart.clearCart()
-      ui.addToast('success', 'Order placed successfully! 🎉')
-      router.push(`/thank-you?order=${res.orderId}`)
+    if (selectedPayment.value === 'cod') {
+      const res = await auth.placeOrder(payload)
+      if (res.success) {
+        cart.clearCart()
+        ui.addToast('success', 'Order placed successfully! 🎉')
+        router.push(`/thank-you?order=${res.orderId}`)
+      } else {
+        throw new Error(res.message || 'Failed to place order')
+      }
+      placing.value = false
     } else {
-      throw new Error(res.message || 'Failed to place order')
+      // Razorpay Flow
+      const config = useRuntimeConfig()
+      const rzpOrder = await auth.createRazorpayOrder(orderTotal.value)
+
+      const options = {
+        key: config.public.razorpayKeyId,
+        amount: Math.round(orderTotal.value * 100),
+        currency: "INR",
+        name: "Van Elvina",
+        description: "Order Payment",
+        order_id: rzpOrder.id,
+        handler: async function (response: any) {
+          try {
+            placing.value = true
+            const verifyPayload = {
+              ...payload,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }
+            const res = await auth.verifyPayment(verifyPayload)
+            if (res.success) {
+              cart.clearCart()
+              ui.addToast('success', 'Payment successful! Order placed! 🎉')
+              router.push(`/thank-you?order=${res.orderId}`)
+            } else {
+              throw new Error(res.message || 'Payment verification failed')
+            }
+          } catch (err: any) {
+            console.error('Verify payment error:', err)
+            ui.addToast('error', err.data?.message || err.message || 'Payment verification failed')
+          } finally {
+            placing.value = false
+          }
+        },
+        prefill: {
+          name: form.fullName.trim(),
+          email: form.email.trim() || '',
+          contact: form.phone.trim()
+        },
+        theme: {
+          color: "#8A4F5A" // deep-plum
+        },
+        modal: {
+          ondismiss: function() {
+            placing.value = false
+            ui.addToast('error', 'Payment was cancelled')
+          }
+        }
+      }
+
+      // @ts-ignore
+      const rzp1 = new window.Razorpay(options)
+      rzp1.on('payment.failed', function (response: any) {
+        placing.value = false
+        ui.addToast('error', response.error?.description || 'Payment failed')
+      })
+      rzp1.open()
     }
   } catch (err: any) {
     console.error('Checkout error:', err)
     ui.addToast('error', err.data?.message || err.message || 'Failed to place order. Please try again.')
-  } finally {
     placing.value = false
   }
 }
