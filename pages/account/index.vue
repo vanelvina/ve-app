@@ -452,6 +452,20 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 
+definePageMeta({
+  middleware: [
+    function (to, from) {
+      const auth = useAuthStore()
+      const ui = useUIStore()
+      if (!auth.isLoggedIn) {
+        ui.openAuthModal(to.fullPath)
+        ui.addToast('warning', 'Please sign in to view your profile.')
+        return navigateTo(`/?auth_trigger=true&redirect=${encodeURIComponent(to.fullPath)}`)
+      }
+    }
+  ]
+})
+
 const auth = useAuthStore()
 const ui = useUIStore()
 const router = useRouter()
@@ -554,11 +568,7 @@ const userInitials = computed(() => {
 
 // ── Authentication Check & Fetching ───────────────────────────────────────────
 onMounted(async () => {
-  if (!auth.isLoggedIn) {
-    ui.addToast('warning', 'Please sign in to view your profile.')
-    ui.openAuthModal()
-    router.replace('/')
-  } else {
+  if (auth.isLoggedIn) {
     loadingOrders.value = true
     try {
       await auth.fetchProfile()

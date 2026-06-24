@@ -158,12 +158,14 @@ export const useCartStore = defineStore('cart', {
           for (const item of serverData) {
             const serverPId = item.productId._id || item.productId.id
             const existing = this.items.find(
-              (i) => i.productId === serverPId && i.variantColor === item.color && i.size === item.size
+              (i) => i.productId === serverPId && i.variantColor === (item.color || item.variantColor) && i.size === item.size
             )
-            if (!existing) {
+            if (existing) {
+              existing.quantity = Math.min(existing.quantity + item.quantity, 10)
+            } else {
               this.items.push({
                 productId: serverPId,
-                variantColor: item.color,
+                variantColor: item.color || item.variantColor,
                 size: item.size,
                 quantity: item.quantity,
                 product: {

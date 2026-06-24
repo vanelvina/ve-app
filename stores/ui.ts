@@ -36,7 +36,17 @@ export const useUIStore = defineStore('ui', {
     closeProfileDrawer() { this.profileDrawerOpen = false },
     toggleProfileDrawer() { this.profileDrawerOpen = !this.profileDrawerOpen },
 
-    openAuthModal() { this.authModalOpen = true },
+    openAuthModal(redirectPath: string | null = null) {
+      this.authModalOpen = true
+      if (redirectPath) {
+        this.authRedirect = redirectPath
+      } else if (import.meta.client) {
+        const currentPath = window.location.pathname + window.location.search
+        if (!this.authRedirect && !currentPath.includes('/auth/')) {
+          this.authRedirect = currentPath
+        }
+      }
+    },
     closeAuthModal() { this.authModalOpen = false },
 
     addToast(type: 'success' | 'error' | 'info', message: string) {

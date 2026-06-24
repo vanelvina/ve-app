@@ -91,8 +91,12 @@ onMounted(() => {
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone
   if (isStandalone) return
 
-  // 3. Detect iOS device profile
+  // 3. Detect mobile device
   const userAgent = window.navigator.userAgent.toLowerCase()
+  const isMobile = /android|webos|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent)
+  
+  if (!isMobile) return // Only show on mobile devices
+
   isIOS.value = /iphone|ipad|ipod/.test(userAgent)
   const isSafari = /safari/.test(userAgent) && !/crios|fxios|chrome|firefox|opera/.test(userAgent)
 
@@ -109,6 +113,12 @@ onMounted(() => {
       showPrompt.value = true
     }, 4000)
   }
+
+  // 6. Listen for successful install to never show again
+  window.addEventListener('appinstalled', () => {
+    localStorage.setItem('pwa_prompt_dismissed', 'true')
+    showPrompt.value = false
+  })
 })
 </script>
 

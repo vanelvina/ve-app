@@ -1,6 +1,11 @@
 <template>
   <div>
-    <section class="relative overflow-hidden bg-white" aria-label="Featured banners">
+    <section 
+      class="relative overflow-hidden bg-white" 
+      aria-label="Featured banners"
+      @touchstart="onTouchStart"
+      @touchend="onTouchEnd"
+    >
       <!-- Slides -->
       <div
         class="flex transition-transform duration-700 ease-in-out"
@@ -93,6 +98,29 @@ const fetchBanners = async () => {
     console.error('Failed to fetch banners:', error)
   } finally {
     loading.value = false
+  }
+}
+
+const touchStartX = ref(0)
+const touchEndX = ref(0)
+
+const onTouchStart = (e: TouchEvent) => {
+  touchStartX.value = e.changedTouches[0].screenX
+}
+
+const onTouchEnd = (e: TouchEvent) => {
+  touchEndX.value = e.changedTouches[0].screenX
+  handleSwipe()
+}
+
+const handleSwipe = () => {
+  const diff = touchStartX.value - touchEndX.value
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) {
+      next() // Swiped left
+    } else {
+      prev() // Swiped right
+    }
   }
 }
 

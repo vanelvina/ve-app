@@ -83,36 +83,75 @@
           <h3 class="text-xs font-bold text-charcoal/40 font-ui tracking-wide uppercase mb-6">Delivery Timeline</h3>
           
           <!-- Standard Status Steps -->
-          <div v-if="order.orderStatus !== 'cancelled'" class="relative flex items-center justify-between">
-            <!-- Background Line -->
-            <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-0.5 bg-rose-blush z-0"></div>
-            <!-- Progress Fill Line -->
-            <div 
-              class="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 bg-deep-plum transition-all duration-500 z-0"
-              :style="{ width: getProgressWidth(order.orderStatus) }"
-            ></div>
-
-            <!-- Steps -->
-            <div 
-              v-for="(step, idx) in timelineSteps" 
-              :key="idx" 
-              class="relative z-10 flex flex-col items-center"
-            >
+          <div v-if="order.orderStatus !== 'cancelled'" class="relative">
+            <!-- Desktop Horizontal Timeline -->
+            <div class="hidden md:flex relative items-center justify-between">
+              <!-- Background Line -->
+              <div class="absolute left-0 right-0 top-4 -translate-y-1/2 h-0.5 bg-rose-blush z-0"></div>
+              <!-- Progress Fill Line -->
               <div 
-                class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
-                :class="getStepClass(step.id)"
+                class="absolute left-0 top-4 -translate-y-1/2 h-0.5 bg-deep-plum transition-all duration-500 z-0"
+                :style="{ width: getProgressWidth(order.orderStatus) }"
+              ></div>
+
+              <!-- Steps -->
+              <div 
+                v-for="(step, idx) in timelineSteps" 
+                :key="'desk-'+idx" 
+                class="relative z-10 flex flex-col items-center"
               >
-                <svg v-if="isStepCompleted(step.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-                <span v-else>{{ idx + 1 }}</span>
+                <div 
+                  class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
+                  :class="getStepClass(step.id)"
+                >
+                  <svg v-if="isStepCompleted(step.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span v-else>{{ idx + 1 }}</span>
+                </div>
+                <span class="text-[10px] font-bold font-ui mt-2 text-charcoal/70 uppercase tracking-wider text-center max-w-[70px]">
+                  {{ step.label }}
+                </span>
+                <span v-if="getStepTimestamp(step.id)" class="text-[8px] font-ui mt-0.5 text-charcoal/50 text-center max-w-[70px]">
+                  {{ getStepTimestamp(step.id) }}
+                </span>
               </div>
-              <span class="text-[10px] font-bold font-ui mt-2 text-charcoal/70 uppercase tracking-wider text-center max-w-[70px]">
-                {{ step.label }}
-              </span>
-              <span v-if="getStepTimestamp(step.id)" class="text-[8px] font-ui mt-0.5 text-charcoal/50 text-center max-w-[70px]">
-                {{ getStepTimestamp(step.id) }}
-              </span>
+            </div>
+
+            <!-- Mobile Vertical Timeline -->
+            <div class="flex md:hidden flex-col space-y-6 relative pl-2">
+              <!-- Background Line -->
+              <div class="absolute left-6 top-2 bottom-4 w-0.5 bg-rose-blush z-0"></div>
+              <!-- Progress Fill Line -->
+              <div 
+                class="absolute left-6 top-2 w-0.5 bg-deep-plum transition-all duration-500 z-0"
+                :style="{ height: getProgressWidth(order.orderStatus) }"
+              ></div>
+
+              <!-- Steps -->
+              <div 
+                v-for="(step, idx) in timelineSteps" 
+                :key="'mob-'+idx" 
+                class="relative z-10 flex items-start gap-4"
+              >
+                <div 
+                  class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
+                  :class="getStepClass(step.id)"
+                >
+                  <svg v-if="isStepCompleted(step.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span v-else>{{ idx + 1 }}</span>
+                </div>
+                <div class="pt-1.5">
+                  <span class="text-[11px] font-bold font-ui text-charcoal/80 uppercase tracking-wider block">
+                    {{ step.label }}
+                  </span>
+                  <span v-if="getStepTimestamp(step.id)" class="text-[10px] font-ui mt-0.5 text-charcoal/50 block">
+                    {{ getStepTimestamp(step.id) }}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -253,6 +292,20 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
+definePageMeta({
+  middleware: [
+    function (to, from) {
+      const auth = useAuthStore()
+      const ui = useUIStore()
+      if (!auth.isLoggedIn) {
+        ui.openAuthModal(to.fullPath)
+        ui.addToast('warning', 'Please sign in to view your order details.')
+        return navigateTo(`/?auth_trigger=true&redirect=${encodeURIComponent(to.fullPath)}`)
+      }
+    }
+  ]
+})
 
 const route = useRoute()
 const config = useRuntimeConfig()

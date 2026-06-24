@@ -70,8 +70,13 @@ onMounted(async () => {
       cart.syncCartAfterLogin()
     ])
     
-    ui.addToast('success', `Welcome, ${auth.user?.name}! 🎉`)
-    router.push('/')
+    ui.addToast('success', `Welcome, ${auth.user?.name || 'Delicate'}! 🎉`)
+    
+    const redirectUrl = sessionStorage.getItem('ve_auth_redirect') || '/'
+    sessionStorage.removeItem('ve_auth_redirect')
+    
+    const safeRedirect = (redirectUrl.includes('/auth') || redirectUrl.includes('/login')) ? '/' : redirectUrl
+    router.push(safeRedirect)
   } catch (err: any) {
     loading.value = false
     errorMsg.value = err.message || 'Failed to authenticate with our servers.'

@@ -47,11 +47,19 @@ const handleBeforeInstallPrompt = (e: Event) => {
 const handleAppInstalled = () => {
   deferredPrompt.value = null
   showPrompt.value = false
+  localStorage.setItem('pwa_prompt_dismissed', 'true')
   console.log('PWA was successfully installed!')
 }
 
 onMounted(() => {
   if (import.meta.client) {
+    const dismissed = localStorage.getItem('pwa_prompt_dismissed') === 'true'
+    if (dismissed) return
+
+    const userAgent = window.navigator.userAgent.toLowerCase()
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent)
+    if (!isMobile) return
+
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone
     if (!isStandalone) {
       window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
@@ -81,6 +89,7 @@ const triggerInstall = async () => {
 
 const dismissPrompt = () => {
   showPrompt.value = false
+  localStorage.setItem('pwa_prompt_dismissed', 'true')
 }
 </script>
 

@@ -120,14 +120,12 @@ export const useWishlistStore = defineStore('wishlist', {
 
       const config = useRuntimeConfig()
       try {
-        for (const item of this.items) {
-          const pId = item.id || (item as any)._id
-          await $fetch<any>(`${config.public.apiBase}/wishlist/toggle`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${auth.token}` },
-            body: { productId: pId }
-          }).catch(() => {})
-        }
+        const productIds = this.items.map(item => item.id || (item as any)._id).filter(Boolean)
+        await $fetch<any>(`${config.public.apiBase}/wishlist/merge`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${auth.token}` },
+          body: { productIds }
+        })
         if (import.meta.client) {
           localStorage.removeItem('ve_guest_wishlist')
         }

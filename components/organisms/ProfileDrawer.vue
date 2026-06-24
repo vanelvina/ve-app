@@ -66,31 +66,6 @@
           <!-- Group Card 1 (Main Profile Options) -->
           <div class="border border-rose-blush/30 rounded-2xl bg-white shadow-sm overflow-hidden">
             <div class="divide-y divide-rose-blush/20">
-              <!-- About Myself -->
-              <NuxtLink to="/account" @click="ui.closeProfileDrawer" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
-                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <span class="text-sm font-ui font-bold text-charcoal/80 group-hover:text-deep-plum transition-colors">About Myself</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <!-- Circular completion badge 88% -->
-                  <div class="relative w-6 h-6 flex items-center justify-center">
-                    <svg class="w-6 h-6 transform -rotate-90">
-                      <circle cx="12" cy="12" r="9" stroke="#E5E7EB" stroke-width="2.2" fill="transparent" />
-                      <circle cx="12" cy="12" r="9" stroke="#F97316" stroke-width="2.2" fill="transparent" stroke-dasharray="56.5" stroke-dashoffset="6.8" />
-                    </svg>
-                    <span class="absolute text-[8px] font-extrabold text-orange-500 font-ui leading-none">88</span>
-                  </div>
-                  <svg class="w-4 h-4 text-charcoal/40 group-hover:text-deep-plum transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </NuxtLink>
-
               <!-- Order History -->
               <NuxtLink to="/account" @click="ui.closeProfileDrawer" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">

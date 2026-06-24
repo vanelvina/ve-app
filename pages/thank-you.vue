@@ -96,7 +96,8 @@ const timeline = [
 ]
 
 const trackOrder = () => {
-  ui.addToast('info', 'Order tracking will be available once dispatched.')
+  const router = useRouter()
+  router.push(`/account/orders/${orderId.value}`)
 }
 
 useSeoMeta({

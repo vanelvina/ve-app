@@ -204,9 +204,11 @@ const handleGoogleLogin = () => {
   const redirectUri = encodeURIComponent(`${window.location.origin}/auth/google/callback`)
   const nonce = Math.random().toString(36).substring(2)
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=id_token&scope=email profile&nonce=${nonce}`
-  if (ui.authRedirect) {
-    sessionStorage.setItem('ve_auth_redirect', ui.authRedirect)
-  }
+  
+  const redirectUrl = ui.authRedirect || (window.location.pathname + window.location.search)
+  const safeRedirect = (redirectUrl.includes('/auth') || redirectUrl.includes('/login')) ? '/' : redirectUrl
+  sessionStorage.setItem('ve_auth_redirect', safeRedirect)
+  
   window.location.href = authUrl
 }
 </script>
