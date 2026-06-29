@@ -1,7 +1,123 @@
 <template>
   <div class="min-h-screen bg-warm-ivory/50 flex flex-col lg:flex-row font-ui">
-    <!-- 1. RESPONSIVE SIDEBAR -->
-    <aside class="w-full lg:w-72 shrink-0 bg-deep-plum text-white lg:sticky lg:top-0 lg:h-screen flex flex-col shadow-premium z-30 transition-all duration-300">
+    <!-- Mobile Top Header Bar -->
+    <header class="lg:hidden flex items-center justify-between px-4 py-3 bg-deep-plum text-white shadow-md z-40 sticky top-0 shrink-0 select-none">
+      <div class="flex items-center gap-2.5">
+        <button 
+          @click="mobileDrawerOpen = true"
+          class="p-2 hover:bg-white/10 rounded-lg text-white transition-colors"
+          aria-label="Toggle Sidebar Menu"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <span class="font-serif text-lg font-bold tracking-tight">Console</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-bold bg-rose-blush text-deep-plum px-3 py-1 rounded-full uppercase tracking-wider">
+          {{ activeTabName }}
+        </span>
+      </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer Overlay Backdrop -->
+    <Transition name="fade">
+      <div 
+        v-if="mobileDrawerOpen" 
+        @click="mobileDrawerOpen = false" 
+        class="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
+      />
+    </Transition>
+
+    <!-- Mobile Navigation Drawer Panel -->
+    <Transition name="slide-left">
+      <aside 
+        v-if="mobileDrawerOpen" 
+        class="fixed top-0 bottom-0 left-0 w-72 bg-deep-plum text-white z-50 lg:hidden flex flex-col shadow-2xl transition-transform duration-300"
+      >
+        <!-- Header -->
+        <div class="p-5 border-b border-white/10 flex items-center justify-between">
+          <div>
+            <h1 class="text-xl font-serif text-white font-bold tracking-wide">Van Elvina</h1>
+            <p class="text-[10px] text-rose-blush/60 uppercase tracking-[0.2em] font-semibold mt-1">Console</p>
+          </div>
+          <button @click="mobileDrawerOpen = false" class="p-2 hover:bg-white/10 rounded-lg text-white text-lg">✕</button>
+        </div>
+
+        <!-- Grouped Navigation in Drawer -->
+        <nav class="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
+          <div v-for="group in tabGroups" :key="group.name" class="space-y-1">
+            <p class="px-3 text-[10px] font-bold text-rose-blush/40 uppercase tracking-widest flex items-center gap-1.5 mb-1.5">
+              <span>{{ group.icon }}</span>
+              <span>{{ group.name }}</span>
+            </p>
+            <div class="space-y-1">
+              <button
+                v-for="tab in group.tabs"
+                :key="tab.id"
+                @click="() => { activeTab = tab.id; mobileDrawerOpen = false; }"
+                class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-[13px] font-semibold transition-all duration-200 group border"
+                :class="activeTab === tab.id
+                  ? 'bg-rose-blush text-deep-plum border-white/10 shadow-sm'
+                  : 'bg-transparent text-white/70 hover:bg-white/5 border-transparent hover:text-white'"
+              >
+                <div class="flex items-center gap-2.5">
+                  <span class="text-sm">{{ tab.icon }}</span>
+                  <span>{{ tab.name }}</span>
+                </div>
+                <!-- counts -->
+                <span 
+                  v-if="tab.id === 'products' && products.length"
+                  class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+                >
+                  {{ products.length }}
+                </span>
+                <span 
+                  v-else-if="tab.id === 'orders' && orders.length"
+                  class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+                >
+                  {{ orders.length }}
+                </span>
+                <span 
+                  v-else-if="tab.id === 'users' && users.length"
+                  class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+                >
+                  {{ users.length }}
+                </span>
+                <span 
+                  v-else-if="tab.id === 'inquiries' && inquiries.length"
+                  class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+                >
+                  {{ inquiries.length }}
+                </span>
+                <span 
+                  v-else-if="tab.id === 'widgets' && widgets.length"
+                  class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+                >
+                  {{ widgets.length }}
+                </span>
+                <span 
+                  v-else-if="tab.id === 'blogs' && blogs.length"
+                  class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+                >
+                  {{ blogs.length }}
+                </span>
+                <span 
+                  v-else-if="tab.id === 'category-page-banners' && categoryPageBannersList.length"
+                  class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+                >
+                  {{ categoryPageBannersList.length }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </nav>
+      </aside>
+    </Transition>
+
+    <!-- 1. DESKTOP SIDEBAR -->
+    <aside class="hidden lg:flex w-72 shrink-0 bg-deep-plum text-white lg:sticky lg:top-0 lg:h-screen flex-col shadow-premium z-30 transition-all duration-300">
       <!-- Sidebar Brand & Pattern Overlay -->
       <div class="p-6 border-b border-white/10 relative overflow-hidden shrink-0">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:2rem_2rem] opacity-[0.03] pointer-events-none" />
@@ -10,58 +126,80 @@
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        <button
-          v-for="tab in tabs"
-          :key="tab.id"
-          @click="activeTab = tab.id"
-          class="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left text-sm font-semibold transition-all duration-200 group border"
-          :class="activeTab === tab.id
-            ? 'bg-rose-blush text-deep-plum border-white/20 shadow-md scale-[1.02]'
-            : 'bg-transparent text-white/80 hover:bg-white/10 border-transparent hover:text-white'"
-        >
-          <div class="flex items-center gap-3.5">
-            <span class="text-lg transition-transform group-hover:scale-110">{{ tab.icon }}</span>
-            <span>{{ tab.name }}</span>
+      <nav class="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
+        <div v-for="group in tabGroups" :key="group.name" class="space-y-1">
+          <p class="px-3 text-[10px] font-bold text-rose-blush/40 uppercase tracking-widest flex items-center gap-1.5 mb-1.5">
+            <span>{{ group.icon }}</span>
+            <span>{{ group.name }}</span>
+          </p>
+
+          <div class="space-y-1">
+            <button
+              v-for="tab in group.tabs"
+              :key="tab.id"
+              @click="activeTab = tab.id"
+              class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-[13px] font-semibold transition-all duration-200 group border"
+              :class="activeTab === tab.id
+                ? 'bg-rose-blush text-deep-plum border-white/10 shadow-sm'
+                : 'bg-transparent text-white/70 hover:bg-white/5 border-transparent hover:text-white'"
+            >
+              <div class="flex items-center gap-2.5">
+                <span class="text-sm">{{ tab.icon }}</span>
+                <span>{{ tab.name }}</span>
+              </div>
+              
+              <!-- Tab Counts (Dynamic badge) -->
+              <span 
+                v-if="tab.id === 'products' && products.length"
+                class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+              >
+                {{ products.length }}
+              </span>
+              <span 
+                v-else-if="tab.id === 'plp-banners' && categories.length"
+                class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+              >
+                {{ categories.length }}
+              </span>
+              <span 
+                v-else-if="tab.id === 'widgets' && widgets.length"
+                class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+              >
+                {{ widgets.length }}
+              </span>
+              <span 
+                v-else-if="tab.id === 'category-page-banners' && categoryPageBannersList.length"
+                class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+              >
+                {{ categoryPageBannersList.length }}
+              </span>
+              <span 
+                v-else-if="tab.id === 'blogs' && blogs.length"
+                class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+              >
+                {{ blogs.length }}
+              </span>
+              <span 
+                v-else-if="tab.id === 'users' && users.length"
+                class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+              >
+                {{ users.length }}
+              </span>
+              <span 
+                v-else-if="tab.id === 'orders' && orders.length"
+                class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+              >
+                {{ orders.length }}
+              </span>
+              <span 
+                v-else-if="tab.id === 'inquiries' && inquiries.length"
+                class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
+              >
+                {{ inquiries.length }}
+              </span>
+            </button>
           </div>
-          <!-- Tiny counts indicator -->
-          <span 
-            v-if="tab.id === 'products' && products.length"
-            class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
-          >
-            {{ products.length }}
-          </span>
-          <span 
-            v-else-if="tab.id === 'plp-banners' && categories.length"
-            class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
-          >
-            {{ categories.length }}
-          </span>
-          <span 
-            v-else-if="tab.id === 'widgets' && widgets.length"
-            class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
-          >
-            {{ widgets.length }}
-          </span>
-          <span 
-            v-else-if="tab.id === 'blogs' && blogs.length"
-            class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
-          >
-            {{ blogs.length }}
-          </span>
-          <span 
-            v-else-if="tab.id === 'users' && users.length"
-            class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
-          >
-            {{ users.length }}
-          </span>
-          <span 
-            v-else-if="tab.id === 'orders' && orders.length"
-            class="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-bold"
-          >
-            {{ orders.length }}
-          </span>
-        </button>
+        </div>
       </nav>
 
       <!-- Sidebar Footer (Admin profile info) -->
@@ -87,6 +225,22 @@
 
     <!-- 2. MAIN CONTAINER -->
     <main class="flex-1 min-w-0 flex flex-col p-4 sm:p-6 lg:p-8 space-y-6">
+      
+      <!-- Horizontal Scrollable Quick Sub-tabs bar -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-3 scrollbar-none shrink-0 select-none border-b border-rose-blush/10">
+        <button
+          v-for="tab in flatTabsList"
+          :key="tab.id"
+          @click="activeTab = tab.id"
+          class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 shrink-0 border flex items-center gap-1.5"
+          :class="activeTab === tab.id
+            ? 'bg-deep-plum text-white border-deep-plum shadow-sm scale-105'
+            : 'bg-white text-charcoal/70 border-charcoal/10 hover:border-deep-plum/30'"
+        >
+          <span>{{ tab.icon }}</span>
+          <span>{{ tab.name }}</span>
+        </button>
+      </div>
       
       <!-- Top header bar -->
       <header class="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-charcoal/20 shadow-soft">
@@ -501,6 +655,122 @@
         </div>
       </section>
 
+      <!-- TAB: CATEGORY BANNERS -->
+      <section v-if="activeTab === 'category-page-banners'" class="space-y-6 animate-fade-in">
+        <header class="bg-white p-5 rounded-2xl border border-charcoal/20 shadow-soft flex items-center justify-between gap-4">
+          <div>
+            <h3 class="font-serif text-lg font-bold text-deep-plum">Category Page Banners</h3>
+            <p class="text-xs text-charcoal/60 mt-1">
+              Configure banners for the Mobile Category Page view. You only need to set the redirect links and separate desktop & mobile image URLs.
+            </p>
+          </div>
+          <button 
+            @click="addCategoryBannerField"
+            class="px-4 py-2 bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-semibold shadow-premium transition-all"
+          >
+            + Add Banner Card
+          </button>
+        </header>
+
+        <div class="space-y-4">
+          <div 
+            v-for="(banner, index) in categoryBannersForm" 
+            :key="index"
+            class="bg-white p-5 rounded-2xl border border-charcoal/20 shadow-soft space-y-4 relative"
+          >
+            <!-- Card header with index + move buttons + delete -->
+            <div class="flex items-center justify-between border-b border-rose-blush/10 pb-3">
+              <span class="font-bold text-xs text-deep-plum uppercase">Banner Card #{{ index + 1 }}</span>
+              <div class="flex items-center gap-1.5">
+                <button 
+                  type="button"
+                  @click="moveCategoryBanner(index, 'up')" 
+                  :disabled="index === 0"
+                  class="w-6 h-6 flex items-center justify-center bg-rose-blush hover:bg-deep-plum hover:text-white rounded text-deep-plum disabled:opacity-20 transition-all font-bold text-xs"
+                >
+                  ▲
+                </button>
+                <button 
+                  type="button"
+                  @click="moveCategoryBanner(index, 'down')" 
+                  :disabled="index === categoryBannersForm.length - 1"
+                  class="w-6 h-6 flex items-center justify-center bg-rose-blush hover:bg-deep-plum hover:text-white rounded text-deep-plum disabled:opacity-20 transition-all font-bold text-xs"
+                >
+                  ▼
+                </button>
+                <button 
+                  type="button"
+                  @click="categoryBannersForm.splice(index, 1)" 
+                  class="ml-2 text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 px-2 py-1 rounded"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            <!-- Form fields: Redirect link, Desktop URL, Mobile URL -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-ui">
+              <div>
+                <label class="block font-semibold mb-1 text-charcoal/70">Redirect Link (e.g. /products?category=bras)</label>
+                <input 
+                  v-model="banner.link" 
+                  type="text" 
+                  required
+                  placeholder="/products?category=..." 
+                  class="w-full p-2.5 border border-charcoal/20 bg-warm-ivory/10 rounded-xl"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1 text-charcoal/70">Desktop Image URL</label>
+                <input 
+                  v-model="banner.image" 
+                  type="text" 
+                  required
+                  placeholder="https://example.com/desktop-version.jpg" 
+                  class="w-full p-2.5 border border-charcoal/20 bg-warm-ivory/10 rounded-xl"
+                />
+              </div>
+              <div>
+                <label class="block font-semibold mb-1 text-charcoal/70">Mobile Image URL</label>
+                <input 
+                  v-model="banner.imageMobile" 
+                  type="text" 
+                  required
+                  placeholder="https://example.com/mobile-version.jpg" 
+                  class="w-full p-2.5 border border-charcoal/20 bg-warm-ivory/10 rounded-xl"
+                />
+              </div>
+            </div>
+
+            <!-- Previews -->
+            <div class="grid grid-cols-2 gap-4 mt-2">
+              <div v-if="banner.image" class="border border-border-gray p-2 rounded-lg bg-warm-ivory/20 flex flex-col items-center">
+                <span class="text-[9px] uppercase tracking-wider text-mid-gray mb-1">Desktop Preview</span>
+                <img :src="banner.image" class="h-20 max-w-full object-contain rounded" />
+              </div>
+              <div v-if="banner.imageMobile" class="border border-border-gray p-2 rounded-lg bg-warm-ivory/20 flex flex-col items-center">
+                <span class="text-[9px] uppercase tracking-wider text-mid-gray mb-1">Mobile Preview</span>
+                <img :src="banner.imageMobile" class="h-20 max-w-full object-contain rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sticky save footer block -->
+        <div v-if="categoryBannersForm.length" class="flex justify-end p-4 bg-white border border-charcoal/20 rounded-2xl shadow-soft">
+          <button 
+            @click="saveCategoryBanners"
+            :disabled="savingCategoryBanners"
+            class="px-6 py-2.5 bg-deep-plum text-white hover:bg-[#1E110F] rounded-xl text-xs font-bold shadow-premium transition-all disabled:opacity-50"
+          >
+            {{ savingCategoryBanners ? 'Saving Changes...' : 'Save Category Banners' }}
+          </button>
+        </div>
+        <div v-else class="text-center p-12 bg-white border border-dashed border-rose-blush/30 rounded-2xl text-charcoal/40 text-sm">
+          No banners configured. Click "+ Add Banner Card" to start building your Category view.
+        </div>
+      </section>
+
       <!-- TAB 4: PRODUCTS -->
       <section v-if="activeTab === 'products'" class="space-y-4 animate-fade-in">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -812,7 +1082,12 @@
                 <tr v-if="filteredUsers.length === 0">
                   <td colspan="8" class="p-8 text-center text-xs text-charcoal/45 italic">No users found.</td>
                 </tr>
-                <tr v-for="user in filteredUsers" :key="user._id" class="hover:bg-warm-ivory/20 transition-colors">
+                <tr 
+                  v-for="user in filteredUsers" 
+                  :key="user._id" 
+                  @click="inspectUserDetails(user)"
+                  class="hover:bg-rose-blush/10 transition-colors cursor-pointer select-none"
+                >
                   <td class="p-4">
                     <div class="flex items-center gap-2.5">
                       <div class="w-8 h-8 rounded-full bg-rose-blush text-deep-plum font-bold flex items-center justify-center text-xs border border-charcoal/10 overflow-hidden shrink-0">
@@ -837,25 +1112,13 @@
                       {{ user.authMethod || 'email' }}
                     </span>
                   </td>
-                  <td class="p-4 font-bold text-charcoal/70">{{ user.orderCount || 0 }} orders</td>
-                  <td class="p-4 font-extrabold text-deep-plum">₹{{ (user.totalSpent || 0).toLocaleString('en-IN') }}</td>
-                  <td class="p-4 text-charcoal/60 font-semibold">
-                    {{ (user.lastLoginAt || user.createdAt) ? new Date(user.lastLoginAt || user.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Never' }}
-                  </td>
-                  <td class="p-4">
-                    <button 
-                      @click="toggleUserStatus(user)"
-                      class="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer shadow-soft border"
-                      :class="user.isActive ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-red-50 text-red-800 border-red-200 hover:bg-red-100'"
-                    >
-                      {{ user.isActive ? 'Active' : 'Suspended' }}
-                    </button>
-                  </td>
+                  <td class="p-4">{{ user.stats?.orderCount || 0 }}</td>
+                  <td class="p-4 font-bold text-charcoal">₹{{ (user.stats?.totalSpent || 0).toLocaleString('en-IN') }}</td>
+                  <td class="p-4 text-[10px] text-charcoal/60">{{ user.lastActive ? new Date(user.lastActive).toLocaleDateString() : 'N/A' }}</td>
                   <td class="p-4 text-right">
-                    <div class="inline-flex rounded-lg shadow-soft border border-rose-blush overflow-hidden bg-white">
-                      <button @click="inspectUserDetails(user)" class="px-2.5 py-1.5 text-[10px] font-bold text-deep-plum hover:bg-rose-blush/30 transition-colors border-r border-rose-blush">Inspect</button>
-                      <button @click="deleteUser(user._id)" class="px-2.5 py-1.5 text-[10px] font-bold text-red-500 hover:bg-red-50 transition-colors">Revoke</button>
-                    </div>
+                    <button @click.stop="toggleUserStatus(user)" class="text-xs font-bold text-deep-plum hover:underline">
+                      {{ user.enabled ? 'Ban' : 'Unban' }}
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -893,7 +1156,12 @@
                 <tr v-if="filteredOrders.length === 0">
                   <td colspan="8" class="p-8 text-center text-xs text-charcoal/45 italic">No orders found.</td>
                 </tr>
-                <tr v-for="order in filteredOrders" :key="order._id" class="hover:bg-warm-ivory/20 transition-colors">
+                <tr 
+                  v-for="order in filteredOrders" 
+                  :key="order._id" 
+                  @click="inspectOrderDetails(order)"
+                  class="hover:bg-rose-blush/10 transition-colors cursor-pointer select-none"
+                >
                   <td class="p-4 font-mono font-bold text-deep-plum">{{ order.orderId }}</td>
                   <td class="p-4">
                     <div class="font-bold text-charcoal">
@@ -908,13 +1176,13 @@
                   </td>
                   <td class="p-4 font-semibold text-charcoal/70">{{ order.items?.length || 0 }} items</td>
                   <td class="p-4 font-bold text-charcoal">₹{{ order.total.toLocaleString('en-IN') }}</td>
-                  
+
                   <!-- Order Status Dropdown -->
                   <td class="p-4">
                     <select 
                       :value="order.orderStatus"
-                      @change="updateOrderStatus(order._id, ($event.target as HTMLSelectElement).value)"
-                      class="px-2 py-1 rounded bg-rose-blush/50 text-deep-plum border border-rose-blush text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-deep-plum/20"
+                      @change.stop="updateOrderStatus(order._id, ($event.target as HTMLSelectElement).value)"
+                      class="px-2 py-1 rounded bg-rose-blush/50 text-deep-plum border border-rose-blush text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-deep-plum/20 cursor-pointer"
                     >
                       <option value="placed">Placed</option>
                       <option value="accepted">Accepted</option>
@@ -922,9 +1190,12 @@
                       <option value="shipped">Shipped</option>
                       <option value="out_for_delivery">Out for Delivery</option>
                       <option value="delivered">Delivered</option>
-                      <option value="return_requested">Return Req</option>
-                      <option value="exchange_requested">Exchange Req</option>
-                      <option value="returned">Returned</option>
+                      <option value="return_requested">Return Requested</option>
+                      <option value="return_picked_up">Return Picked Up</option>
+                      <option value="returned">Return Received</option>
+                      <option value="exchange_requested">Exchange Requested</option>
+                      <option value="exchange_packed">Exchange Packed</option>
+                      <option value="exchange_dispatched">Exchange Dispatched</option>
                       <option value="exchanged">Exchanged</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
@@ -934,8 +1205,8 @@
                   <td class="p-4">
                     <select 
                       :value="order.paymentStatus || 'pending'"
-                      @change="updatePaymentStatus(order._id, ($event.target as HTMLSelectElement).value)"
-                      class="px-2 py-1 rounded bg-rose-blush/50 text-deep-plum border border-rose-blush text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-deep-plum/20"
+                      @change.stop="updatePaymentStatus(order._id, ($event.target as HTMLSelectElement).value)"
+                      class="px-2 py-1 rounded bg-rose-blush/50 text-deep-plum border border-rose-blush text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-deep-plum/20 cursor-pointer"
                     >
                       <option value="pending">Pending</option>
                       <option value="paid">Paid</option>
@@ -945,7 +1216,7 @@
 
                   <td class="p-4 text-right">
                     <button 
-                      @click="inspectOrderDetails(order)"
+                      @click.stop="inspectOrderDetails(order)"
                       class="px-3 py-1.5 text-[11px] font-bold text-deep-plum hover:bg-rose-blush/30 transition-colors border border-rose-blush rounded-lg bg-white shadow-soft"
                     >
                       Inspect
@@ -958,58 +1229,128 @@
         </div>
       </section>
 
-      <!-- 7. ORDER INSPECTION MODAL -->
-      <div v-if="inspectedOrder" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
-        <div class="bg-white rounded-3xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] border border-charcoal/20 shadow-modal space-y-5 relative">
-          <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
-          
-          <div class="relative z-10 flex items-center justify-between border-b border-rose-blush/10 pb-3">
-            <h3 class="text-base font-serif text-deep-plum font-bold">Inspect Order: {{ inspectedOrder.orderId }}</h3>
-            <button @click="inspectedOrder = null" class="text-charcoal/45 hover:text-deep-plum text-sm">✕</button>
-          </div>
+      <!-- TAB 8: ORDERS MODAL/INSPECTOR -->
+      <Transition name="fade">
+        <div v-if="inspectedOrder" class="fixed inset-0 bg-deep-plum/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div @click.stop class="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 shadow-premium relative animate-slide-up">
+            <button @click="inspectedOrder = null" class="absolute top-4 right-4 text-charcoal/50 hover:text-deep-plum text-xl">✕</button>
+            <div class="space-y-6">
+              <div>
+                <h3 class="text-xl font-bold text-deep-plum">Order #{{ inspectedOrder.orderId }}</h3>
+                <p class="text-xs text-charcoal/50 font-medium mt-1">Placed on {{ new Date(inspectedOrder.createdAt).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+              </div>
 
-          <div class="space-y-4 text-xs font-ui relative z-10">
-            
-            <!-- Shipping Address -->
-            <div class="bg-rose-blush/10 border border-rose-blush/30 p-4 rounded-2xl space-y-2">
-              <h4 class="font-bold text-deep-plum">Shipping Address & Contact</h4>
-              <p class="font-semibold">{{ inspectedOrder.shippingAddress?.name }}</p>
-              <p>{{ inspectedOrder.shippingAddress?.line1 }}</p>
-              <p v-if="inspectedOrder.shippingAddress?.line2">{{ inspectedOrder.shippingAddress?.line2 }}</p>
-              <p>{{ inspectedOrder.shippingAddress?.city }}, {{ inspectedOrder.shippingAddress?.state }} - {{ inspectedOrder.shippingAddress?.pincode }}</p>
-              <p class="pt-1 font-semibold text-charcoal/70">Phone: {{ inspectedOrder.shippingAddress?.phone }} | Email: {{ inspectedOrder.guestInfo?.email || inspectedOrder.userId?.email || 'N/A' }}</p>
-            </div>
+              <!-- Direct Controls Panel -->
+              <div class="bg-warm-ivory p-4 rounded-2xl border border-charcoal/10 shadow-soft space-y-3">
+                <span class="text-[10px] font-bold text-charcoal/40 tracking-wider uppercase block">Order & Payment Controls</span>
 
-            <!-- Items list -->
-            <div class="space-y-2">
-              <h4 class="font-bold text-deep-plum">Items Summary</h4>
-              <div class="divide-y divide-rose-blush/20 max-h-[200px] overflow-y-auto pr-1">
-                <div 
-                  v-for="(item, idx) in inspectedOrder.items" 
-                  :key="idx" 
-                  class="py-2.5 flex items-center justify-between"
-                >
-                  <div class="flex items-center gap-3">
-                    <img v-if="item.image" :src="item.image" class="w-10 h-12 object-cover rounded bg-white shadow-soft" />
-                    <div>
-                      <p class="font-bold text-charcoal">{{ item.name }}</p>
-                      <p class="text-[10px] text-charcoal/50">Qty: {{ item.quantity }} · Size: {{ item.size || 'Standard' }}</p>
-                    </div>
+                <!-- Status Updates -->
+                <div class="grid grid-cols-2 gap-4">
+                <!-- Order Status -->
+                <div class="space-y-1">
+                  <label class="block text-[10px] font-bold text-charcoal/50 uppercase">Order Status</label>
+                  <select 
+                    :value="inspectedOrder.orderStatus"
+                    @change="updateOrderStatus(inspectedOrder._id, ($event.target as HTMLSelectElement).value); inspectedOrder.orderStatus = ($event.target as HTMLSelectElement).value"
+                    class="w-full p-2 rounded-xl bg-white text-deep-plum border border-charcoal/20 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-deep-plum/20 cursor-pointer"
+                  >
+                      <option value="placed">Placed</option>
+                      <option value="accepted">Accepted</option>
+                      <option value="packed">Packed</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="out_for_delivery">Out for Delivery</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="return_requested">Return Requested</option>
+                      <option value="return_picked_up">Return Picked Up</option>
+                      <option value="returned">Returned</option>
+                      <option value="exchange_requested">Exchange Requested</option>
+                      <option value="exchange_packed">Exchange Packed</option>
+                      <option value="exchange_dispatched">Exchange Dispatched</option>
+                      <option value="exchanged">Exchanged</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
                   </div>
-                  <p class="font-bold text-charcoal">₹{{ (item.price * item.quantity).toLocaleString('en-IN') }}</p>
+                  <!-- Payment Status -->
+                  <div class="space-y-1">
+                    <label class="block text-[10px] font-bold text-charcoal/50 uppercase">Payment Status</label>
+                    <select 
+                      :value="inspectedOrder.paymentStatus || 'pending'"
+                      @change="updatePaymentStatus(inspectedOrder._id, ($event.target as HTMLSelectElement).value); inspectedOrder.paymentStatus = ($event.target as HTMLSelectElement).value"
+                      class="w-full p-2 rounded-xl bg-white text-deep-plum border border-charcoal/20 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-deep-plum/20 cursor-pointer"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="paid">Paid</option>
+                      <option value="failed">Failed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Admin action shortcuts -->
+                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-charcoal/5">
+                  <button 
+                    v-if="inspectedOrder.orderStatus !== 'cancelled'"
+                    @click="cancelOrderFromModal" 
+                    class="px-3 py-1.5 rounded-lg bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors font-bold text-[10px] uppercase tracking-wider"
+                  >
+                    🚫 Cancel Order
+                  </button>
+                  <button 
+                    v-if="inspectedOrder.paymentStatus !== 'paid'"
+                    @click="markPaidFromModal" 
+                    class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors font-bold text-[10px] uppercase tracking-wider"
+                  >
+                    💳 Mark as Paid
+                  </button>
+                  <button 
+                    @click="contactUser(inspectedOrder.guestInfo?.email || inspectedOrder.userId?.email || inspectedOrder.shippingAddress?.email || '')"
+                    class="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors font-bold text-[10px] uppercase tracking-wider"
+                  >
+                    📧 Email Customer
+                  </button>
                 </div>
               </div>
-            </div>
 
-            <!-- Cost Summary -->
-            <div class="border-t border-rose-blush/20 pt-3 flex justify-between items-center text-sm font-serif">
-              <span class="font-bold text-deep-plum text-sm">Grand Total Amount</span>
-              <span class="font-bold text-deep-plum text-lg">₹{{ inspectedOrder.total.toLocaleString('en-IN') }}</span>
-            </div>
+              <!-- Shipping Address -->
+              <div class="bg-rose-blush/10 border border-rose-blush/30 p-4 rounded-2xl space-y-2">
+                <h4 class="font-bold text-deep-plum">Shipping Address & Contact</h4>
+                <p class="font-semibold">{{ inspectedOrder.shippingAddress?.name }}</p>
+                <p>{{ inspectedOrder.shippingAddress?.line1 }}</p>
+                <p v-if="inspectedOrder.shippingAddress?.line2">{{ inspectedOrder.shippingAddress?.line2 }}</p>
+                <p>{{ inspectedOrder.shippingAddress?.city }}, {{ inspectedOrder.shippingAddress?.state }} - {{ inspectedOrder.shippingAddress?.pincode }}</p>
+                <p class="pt-1 font-semibold text-charcoal/70">Phone: {{ inspectedOrder.shippingAddress?.phone }} | Email: {{ inspectedOrder.guestInfo?.email || inspectedOrder.userId?.email || inspectedOrder.shippingAddress?.email || 'N/A' }}</p>
+              </div>
 
+              <!-- Items list -->
+              <div class="space-y-2">
+                <h4 class="font-bold text-deep-plum">Items Summary</h4>
+                <div class="divide-y divide-rose-blush/20 max-h-[200px] overflow-y-auto pr-1">
+                  <div 
+                    v-for="(item, idx) in inspectedOrder.items" 
+                    :key="idx" 
+                    class="py-2.5 flex items-center justify-between"
+                  >
+                    <div class="flex items-center gap-3">
+                      <img v-if="item.image" :src="item.image" class="w-10 h-12 object-cover rounded bg-white shadow-soft" />
+                      <div>
+                        <p class="font-bold text-charcoal">{{ item.name }}</p>
+                        <p class="text-[10px] text-charcoal/50">Qty: {{ item.quantity }} · Size: {{ item.size || 'Standard' }}</p>
+                      </div>
+                    </div>
+                    <p class="font-bold text-charcoal">₹{{ (item.price * item.quantity).toLocaleString('en-IN') }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cost Summary -->
+              <div class="border-t border-rose-blush/20 pt-3 flex justify-between items-center text-sm font-serif">
+                <span class="font-bold text-deep-plum text-sm">Grand Total Amount</span>
+                <span class="font-bold text-deep-plum text-lg">₹{{ inspectedOrder.total.toLocaleString('en-IN') }}</span>
+              </div>
+
+            </div>
           </div>
         </div>
-      </div>
+      </Transition>
 
       <!-- TAB 9: ABOUT US -->
       <section v-if="activeTab === 'about'" class="space-y-6 animate-fade-in">
@@ -2361,80 +2702,114 @@
     </div>
 
     <!-- 8. USER INSPECTION MODAL -->
-    <div v-if="inspectedUser" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
-      <div class="bg-white rounded-3xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] border border-charcoal/20 shadow-modal space-y-5 relative">
-        <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
-        
-        <div class="relative z-10 flex items-center justify-between border-b border-rose-blush/10 pb-3">
-          <h3 class="text-base font-serif text-deep-plum font-bold">Inspect Customer: {{ inspectedUser.name || 'Unnamed User' }}</h3>
-          <button @click="inspectedUser = null" class="text-charcoal/45 hover:text-deep-plum text-sm">✕</button>
-        </div>
-
-        <div class="space-y-5 text-xs font-ui relative z-10">
+    <Transition name="fade">
+      <div v-if="inspectedUser" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in select-none">
+        <div class="bg-white rounded-3xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] border border-charcoal/20 shadow-modal space-y-5 relative">
+          <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
           
-          <!-- User Info Summary Card -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-rose-blush/15 p-4 rounded-2xl border border-rose-blush/30">
-            <div class="space-y-2">
-              <span class="text-[10px] font-bold text-charcoal/40 tracking-wider uppercase block">Contact Information</span>
-              <p class="font-bold text-deep-plum text-sm">{{ inspectedUser.name || 'Unnamed' }}</p>
-              <p class="font-medium text-charcoal/70">Email: {{ inspectedUser.email }}</p>
-              <p class="text-charcoal/50">Channel: {{ inspectedUser.authMethod || 'email' }} · Status: {{ inspectedUser.isActive ? 'Active' : 'Suspended' }}</p>
-            </div>
+          <div class="relative z-10 flex items-center justify-between border-b border-rose-blush/10 pb-3">
+            <h3 class="text-base font-serif text-deep-plum font-bold">Inspect Customer: {{ inspectedUser.name || 'Unnamed User' }}</h3>
+            <button @click="inspectedUser = null" class="text-charcoal/45 hover:text-deep-plum text-sm">✕</button>
+          </div>
+
+          <div class="space-y-5 text-xs font-ui relative z-10">
             
-            <div class="space-y-2">
-              <span class="text-[10px] font-bold text-charcoal/40 tracking-wider uppercase block">System Logs</span>
-              <p>Joined: {{ new Date(inspectedUser.createdAt).toLocaleDateString('en-IN', { dateStyle: 'medium' }) }}</p>
-              <p>Last Active: {{ (inspectedUser.lastLoginAt || inspectedUser.createdAt) ? new Date(inspectedUser.lastLoginAt || inspectedUser.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Never' }}</p>
+            <!-- User Info Summary Card -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-rose-blush/15 p-4 rounded-2xl border border-rose-blush/30">
+              <div class="space-y-2">
+                <span class="text-[10px] font-bold text-charcoal/40 tracking-wider uppercase block">Contact Information</span>
+                <p class="font-bold text-deep-plum text-sm">{{ inspectedUser.name || 'Unnamed' }}</p>
+                <p class="font-medium text-charcoal/70">Email: {{ inspectedUser.email }}</p>
+                <p class="text-charcoal/50">Channel: {{ inspectedUser.authMethod || 'email' }} · Status: {{ inspectedUser.isActive ? 'Active' : 'Suspended' }}</p>
+              </div>
+              
+              <div class="space-y-2">
+                <span class="text-[10px] font-bold text-charcoal/40 tracking-wider uppercase block">System Logs</span>
+                <p>Joined: {{ new Date(inspectedUser.createdAt).toLocaleDateString('en-IN', { dateStyle: 'medium' }) }}</p>
+                <p>Last Active: {{ (inspectedUser.lastLoginAt || inspectedUser.createdAt) ? new Date(inspectedUser.lastLoginAt || inspectedUser.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Never' }}</p>
+              </div>
             </div>
-          </div>
 
-          <!-- Customer Value metrics -->
-          <div class="grid grid-cols-2 gap-4 text-center">
-            <div class="bg-warm-ivory p-4 rounded-2xl border border-charcoal/10 shadow-soft">
-              <span class="text-[10px] font-bold text-charcoal/45 tracking-wider uppercase">Orders Placed</span>
-              <p class="font-serif text-xl font-bold text-deep-plum mt-1">{{ inspectedUser.orderCount || 0 }}</p>
+            <!-- Options and Profile Controls Panel -->
+            <div class="bg-warm-ivory p-4 rounded-2xl border border-charcoal/10 shadow-soft space-y-2.5">
+              <span class="text-[10px] font-bold text-charcoal/40 tracking-wider uppercase block">Profile Actions & Status</span>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <!-- Suspend / Activate -->
+                <button 
+                  @click="toggleUserStatus(inspectedUser)"
+                  class="px-4 py-2 rounded-xl border font-bold text-[10px] uppercase tracking-wider transition-colors shadow-soft"
+                  :class="inspectedUser.isActive 
+                    ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' 
+                    : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'"
+                >
+                  {{ inspectedUser.isActive ? '🚫 Suspend Account' : '✓ Activate Account' }}
+                </button>
+                <!-- Email customer -->
+                <button 
+                  @click="contactUser(inspectedUser.email)"
+                  class="px-4 py-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 font-bold text-[10px] uppercase tracking-wider transition-colors shadow-soft"
+                >
+                  📧 Email Customer
+                </button>
+                <!-- Revoke access -->
+                <button 
+                  @click="deleteUser(inspectedUser._id)"
+                  class="px-4 py-2 rounded-xl bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 font-bold text-[10px] uppercase tracking-wider transition-colors shadow-soft"
+                >
+                  ⚠️ Delete Profile
+                </button>
+              </div>
             </div>
-            <div class="bg-warm-ivory p-4 rounded-2xl border border-charcoal/10 shadow-soft">
-              <span class="text-[10px] font-bold text-charcoal/45 tracking-wider uppercase">Lifetime Spend</span>
-              <p class="font-serif text-xl font-bold text-deep-plum mt-1">₹{{ (inspectedUser.totalSpent || 0).toLocaleString('en-IN') }}</p>
-            </div>
-          </div>
 
-          <!-- Orders list -->
-          <div class="space-y-2.5">
-            <h4 class="font-serif font-bold text-deep-plum text-sm">Customer Purchase History</h4>
-            <div v-if="inspectedUserOrders.length === 0" class="p-6 text-center text-charcoal/45 border border-dashed border-rose-blush/40 rounded-xl">
-              This customer has not placed any orders yet.
+            <!-- Customer Value metrics -->
+            <div class="grid grid-cols-2 gap-4 text-center">
+              <div class="bg-[#FAF3E8]/60 p-4 rounded-2xl border border-charcoal/10 shadow-soft">
+                <span class="text-[10px] font-bold text-charcoal/45 tracking-wider uppercase">Orders Placed</span>
+                <p class="font-serif text-xl font-bold text-deep-plum mt-1">{{ inspectedUser.orderCount || 0 }}</p>
+              </div>
+              <div class="bg-[#FAF3E8]/60 p-4 rounded-2xl border border-charcoal/10 shadow-soft">
+                <span class="text-[10px] font-bold text-charcoal/45 tracking-wider uppercase">Lifetime Spend</span>
+                <p class="font-serif text-xl font-bold text-deep-plum mt-1">₹{{ (inspectedUser.totalSpent || 0).toLocaleString('en-IN') }}</p>
+              </div>
             </div>
-            <div v-else class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-              <div 
-                v-for="order in inspectedUserOrders" 
-                :key="order._id" 
-                class="flex items-center justify-between p-3 bg-light-gray rounded-xl hover:bg-rose-blush/20 transition-all border border-border-gray/30 shadow-soft"
-              >
-                <div>
-                  <p class="font-bold text-deep-plum font-mono text-[11px]">{{ order.orderId }}</p>
-                  <p class="text-[10px] text-charcoal/50 mt-0.5">Placed on {{ new Date(order.createdAt).toLocaleDateString('en-IN') }}</p>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-rose-blush text-deep-plum">
-                    {{ order.orderStatus }}
-                  </span>
-                  <p class="font-serif font-black text-charcoal">₹{{ order.total.toLocaleString('en-IN') }}</p>
+
+            <!-- Orders list -->
+            <div class="space-y-2.5">
+              <h4 class="font-serif font-bold text-deep-plum text-sm">Customer Purchase History (Click row to inspect order)</h4>
+              <div v-if="inspectedUserOrders.length === 0" class="p-6 text-center text-charcoal/45 border border-dashed border-rose-blush/40 rounded-xl">
+                This customer has not placed any orders yet.
+              </div>
+              <div v-else class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                <div 
+                  v-for="order in inspectedUserOrders" 
+                  :key="order._id" 
+                  @click="viewOrderFromUser(order)"
+                  class="flex items-center justify-between p-3 bg-light-gray rounded-xl hover:bg-rose-blush/20 transition-all border border-border-gray/30 shadow-soft cursor-pointer"
+                >
+                  <div>
+                    <p class="font-bold text-deep-plum font-mono text-[11px]">{{ order.orderId }}</p>
+                    <p class="text-[10px] text-charcoal/50 mt-0.5">Placed on {{ new Date(order.createdAt).toLocaleDateString('en-IN') }}</p>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-rose-blush text-deep-plum">
+                      {{ order.orderStatus }}
+                    </span>
+                    <p class="font-serif font-black text-charcoal">₹{{ order.total.toLocaleString('en-IN') }}</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAdminStore } from '~/stores/admin'
 import { useUIStore } from '~/stores/ui'
 
@@ -2448,11 +2823,13 @@ const uiStore = useUIStore()
 const activeTab = ref('overview')
 const productFormTab = ref('general')
 const widgetDeviceTab = ref('desktop')
+const mobileDrawerOpen = ref(false)
 
 const tabs = [
   { id: 'overview', name: 'Dashboard Overview', icon: '📊' },
   { id: 'banners', name: 'Banners Carousel', icon: '🖼️' },
   { id: 'categories', name: 'Categories Selector', icon: '🗂️' },
+  { id: 'category-page-banners', name: 'Category Banners', icon: '📱' },
   { id: 'plp-banners', name: 'PLP Banners', icon: '🎏' },
   { id: 'products', name: 'Products Catalog', icon: '🛍️' },
   { id: 'widgets', name: 'Widgets & Layout', icon: '⚙️' },
@@ -2463,6 +2840,95 @@ const tabs = [
   { id: 'inquiries', name: 'Customer Inquiries', icon: '💬' },
   { id: 'emails', name: 'Custom Emails', icon: '✉️' },
 ]
+
+const tabGroups = [
+  {
+    name: 'Analytics & Management',
+    icon: '📊',
+    tabs: [
+      { id: 'overview', name: 'Console Overview', icon: '📈' },
+      { id: 'orders', name: 'Customer Orders', icon: '📦' },
+      { id: 'users', name: 'Registered Customers', icon: '👥' },
+      { id: 'inquiries', name: 'Customer Queries', icon: '💬' }
+    ]
+  },
+  {
+    name: 'Store Catalog',
+    icon: '🛍️',
+    tabs: [
+      { id: 'products', name: 'Products Catalog', icon: '🏷️' },
+      { id: 'categories', name: 'Categories Selector', icon: '🗂️' },
+      { id: 'blogs', name: 'Blogs & Articles', icon: '📝' }
+    ]
+  },
+  {
+    name: 'Storefront Layout',
+    icon: '🎨',
+    tabs: [
+      { id: 'banners', name: 'Homepage Banners', icon: '🖼️' },
+      { id: 'category-page-banners', name: 'Category Banners', icon: '📱' },
+      { id: 'plp-banners', name: 'PLP Header Banners', icon: '🎏' },
+      { id: 'widgets', name: 'Widgets & Layout', icon: '⚙️' },
+      { id: 'about', name: 'About Us Content', icon: 'ℹ️' }
+    ]
+  },
+  {
+    name: 'Marketing & Comms',
+    icon: '✉️',
+    tabs: [
+      { id: 'emails', name: 'Send Custom Emails', icon: '📧' }
+    ]
+  }
+]
+
+const activeTabName = computed(() => {
+  for (const group of tabGroups) {
+    const found = group.tabs.find(t => t.id === activeTab.value)
+    if (found) return found.name
+  }
+  return 'Dashboard'
+})
+
+const flatTabsList = computed(() => {
+  return tabGroups.flatMap(group => group.tabs)
+})
+
+const contactUser = (email: string) => {
+  inspectedUser.value = null
+  inspectedOrder.value = null
+  activeTab.value = 'emails'
+  selectedUserEmail.value = email
+  emailForm.value.to = email
+  mobileDrawerOpen.value = false
+  uiStore.addToast('info', `Prefilled composer for: ${email}`)
+}
+
+const viewOrderFromUser = (order: any) => {
+  inspectedUser.value = null
+  inspectedOrder.value = order
+}
+
+const cancelOrderFromModal = async () => {
+  if (!inspectedOrder.value) return
+  if (confirm('Are you sure you want to cancel this order?')) {
+    try {
+      await updateOrderStatus(inspectedOrder.value._id, 'cancelled')
+      inspectedOrder.value.orderStatus = 'cancelled'
+    } catch {
+      // toast is handled in updateOrderStatus
+    }
+  }
+}
+
+const markPaidFromModal = async () => {
+  if (!inspectedOrder.value) return
+  try {
+    await updatePaymentStatus(inspectedOrder.value._id, 'paid')
+    inspectedOrder.value.paymentStatus = 'paid'
+  } catch {
+    // toast is handled in updatePaymentStatus
+  }
+}
 
 // Base loaded lists
 const banners = ref<any[]>([])
@@ -2774,6 +3240,70 @@ const blogModal = ref({
     content: ''
   }
 })
+
+const categoryPageBannersWidget = computed(() => {
+  return widgets.value.find((w: any) => w.key === 'category-page-banners') || null
+})
+
+const categoryPageBannersList = computed(() => {
+  if (categoryPageBannersWidget.value && categoryPageBannersWidget.value.items) {
+    return Array.isArray(categoryPageBannersWidget.value.items) ? categoryPageBannersWidget.value.items : []
+  }
+  return []
+})
+
+const categoryBannersForm = ref<{ image: string; imageMobile: string; link: string }[]>([])
+const savingCategoryBanners = ref(false)
+
+watch(() => activeTab.value, (newTab) => {
+  if (newTab === 'category-page-banners') {
+    categoryBannersForm.value = JSON.parse(JSON.stringify(categoryPageBannersList.value))
+  }
+})
+
+const addCategoryBannerField = () => {
+  categoryBannersForm.value.push({
+    image: '',
+    imageMobile: '',
+    link: '/products'
+  })
+}
+
+const moveCategoryBanner = (index: number, direction: 'up' | 'down') => {
+  const targetIndex = direction === 'up' ? index - 1 : index + 1
+  if (targetIndex < 0 || targetIndex >= categoryBannersForm.value.length) return
+  const temp = categoryBannersForm.value[index]
+  categoryBannersForm.value[index] = categoryBannersForm.value[targetIndex]
+  categoryBannersForm.value[targetIndex] = temp
+}
+
+const saveCategoryBanners = async () => {
+  savingCategoryBanners.value = true
+  try {
+    const payload = {
+      key: 'category-page-banners',
+      name: 'Category Page Banners List',
+      type: 'category-page-banners',
+      device: 'mobile',
+      enabled: true,
+      order: 99,
+      title: 'Category Banners',
+      items: categoryBannersForm.value
+    }
+    
+    if (categoryPageBannersWidget.value) {
+      await adminStore.updateWidget(categoryPageBannersWidget.value._id, payload)
+    } else {
+      await adminStore.createWidget(payload)
+    }
+    uiStore.addToast('success', 'Category banners updated successfully!')
+    await loadAllData()
+  } catch (err: any) {
+    uiStore.addToast('error', err.message || 'Failed to update category banners')
+  } finally {
+    savingCategoryBanners.value = false
+  }
+}
 
 onMounted(async () => {
   adminStore.init()
