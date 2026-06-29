@@ -98,6 +98,14 @@ onMounted(async () => {
       const data = await $fetch<any>(`${config.public.apiBase}/orders/${orderId.value}`)
       if (data) {
         customerName.value = data.shippingAddress?.name || data.guestInfo?.name || auth.user?.name || 'Customer'
+        
+        // Track successful checkout completed event
+        trackCheckout(
+          data.orderId || data.id || orderId.value,
+          data.total || 0,
+          data.items?.length || 0,
+          data.items || []
+        )
       }
     } catch (err) {
       console.error('Failed to fetch order details for confirmation page:', err)

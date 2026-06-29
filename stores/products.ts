@@ -25,7 +25,10 @@ export const useProductsStore = defineStore('products', {
 
       // Category filter
       if (state.filters.categories.length > 0) {
-        result = result.filter((p) => state.filters.categories.includes(p.category))
+        result = result.filter((p) => {
+          const productCats = (p.category || '').split(',').map(s => s.trim().toLowerCase())
+          return state.filters.categories.some(c => productCats.includes(c.toLowerCase()))
+        })
       }
 
       // Size filter

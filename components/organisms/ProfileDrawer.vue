@@ -182,6 +182,38 @@
             </div>
           </div>
 
+          <!-- Notifications Center inside Profile Drawer -->
+          <div class="border border-rose-blush/30 rounded-2xl bg-white shadow-sm overflow-hidden p-4 space-y-3">
+            <div class="flex items-center justify-between border-b border-rose-blush/20 pb-2">
+              <h4 class="font-ui font-extrabold text-charcoal text-xs flex items-center gap-1.5 uppercase tracking-wide">
+                <span>🔔</span> Inbox Messages
+              </h4>
+              <span v-if="unreadUserNotificationsCount > 0" class="px-2 py-0.5 bg-deep-plum text-white text-[9px] font-bold rounded-full">
+                {{ unreadUserNotificationsCount }} new
+              </span>
+            </div>
+            
+            <div class="space-y-2.5 max-h-[220px] overflow-y-auto pr-1 no-scrollbar">
+              <div v-if="userNotifications.length === 0" class="py-4 text-center text-[10px] text-charcoal/40 italic">
+                All caught up! No notifications.
+              </div>
+              <NuxtLink 
+                v-for="notif in userNotifications" 
+                :key="notif.id"
+                :to="notif.link"
+                @click="ui.closeProfileDrawer"
+                class="flex items-start gap-2.5 p-2 rounded-xl hover:bg-[#FAF6F0] transition-colors text-[11px] block"
+              >
+                <span class="text-xs p-1.5 rounded shrink-0 font-ui" :class="notif.color">{{ notif.icon }}</span>
+                <div class="flex-1 min-w-0">
+                  <p class="font-bold text-charcoal truncate">{{ notif.title }}</p>
+                  <p class="text-charcoal/60 text-[10px] leading-snug mt-0.5">{{ notif.detail }}</p>
+                  <span class="text-[8px] text-charcoal/40 font-ui mt-1 block">{{ notif.time }}</span>
+                </div>
+              </NuxtLink>
+            </div>
+          </div>
+
           <!-- Group Card 3 (Policy & Support text links) -->
           <div class="border border-rose-blush/30 rounded-2xl bg-white shadow-sm p-4 space-y-3.5 font-ui">
             <div>
@@ -205,9 +237,6 @@
             <div>
               <NuxtLink to="/terms" class="block text-xs font-bold text-charcoal/80 hover:text-deep-plum transition-colors tracking-wider uppercase" @click="ui.closeProfileDrawer">TERMS OF USE</NuxtLink>
             </div>
-            <div>
-              <NuxtLink to="/notifications" class="block text-xs font-bold text-charcoal/80 hover:text-deep-plum transition-colors tracking-wider uppercase" @click="ui.closeProfileDrawer">NOTIFICATION</NuxtLink>
-            </div>
           </div>
         </div>
 
@@ -229,8 +258,134 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue'
+import { useCartStore } from '~/stores/cart'
+
 const ui = useUIStore()
 const auth = useAuthStore()
+const cart = useCartStore()
+
+const userOrders = ref<any[]>([])
+
+const fetchUserOrders = async () => {
+  if (!auth.isLoggedIn || !auth.token) return
+  const config = useRuntimeConfig()
+  try {
+    const res = await $fetch<any>(`${config.public.apiBase}/orders`, {
+      headers: { Authorization: `Bearer ${auth.token}` }
+    })
+    userOrders.value = res.orders || []
+  } catch (err) {}
+}
+
+const userNotifications = computed(() => {
+  const list: any[] = []
+
+  // 1. Welcome notification
+  list.push({
+    id: 'welcome',
+    title: 'Welcome to Van Elvina ✨',
+    detail: 'Explore our latest collection of premium bras, panties, activewear, and shapewear.',
+    link: '/products',
+    icon: '✨',
+    color: 'text-yellow-600 bg-yellow-50',
+    time: 'Just now'
+  })
+
+  // 2. Cart Items waiting
+  if (cart.itemCount > 0) {
+    list.push({
+      id: 'cart-waiting',
+      title: 'Items waiting in your bag 🛍️',
+      detail: `You have ${cart.itemCount} items waiting in your bag. Finish your checkout to secure them!`,
+      link: '/bag',
+      icon: '🛍️',
+      color: 'text-deep-plum bg-rose-blush/20',
+      time: 'Attention needed'
+    })
+  }
+
+  // 3. Orders notifications
+  userOrders.value.slice(0, 3).forEach(order => {
+    let title = ''
+    let detail = ''
+    let icon = '📦'
+    let color = 'text-blue-600 bg-blue-50'
+    const status = order.orderStatus
+
+    if (status === 'placed') {
+      title = 'Order Placed'
+      detail = `Order #${order.orderId} placed successfully. We will accept it shortly!`
+      icon = '📥'
+    } else if (['accepted', 'confirmed'].includes(status)) {
+      title = 'Order Accepted'
+      detail = `Order #${order.orderId} is accepted. Preparation started.`
+      icon = '✓'
+      color = 'text-green-600 bg-green-50'
+    } else if (status === 'label_created') {
+      title = 'Label Created'
+      detail = `Shipping label created for Order #${order.orderId}.`
+      icon = '🏷️'
+    } else if (['packed', 'ready_to_ship'].includes(status)) {
+      title = 'Ready to Ship'
+      detail = `Order #${order.orderId} is packed and ready for carrier pickup.`
+      icon = '📦'
+      color = 'text-orange-600 bg-orange-50'
+    } else if (status === 'shipped') {
+      title = 'Order Shipped'
+      detail = `Order #${order.orderId} has been shipped! Track details in account.`
+      icon = '🚚'
+      color = 'text-indigo-600 bg-indigo-50'
+    } else if (['out_for_delivery', 'in_transit'].includes(status)) {
+      title = 'Out for Delivery'
+      detail = `Order #${order.orderId} is out for delivery. Keep phone handy!`
+      icon = '⚡'
+      color = 'text-purple-600 bg-purple-50'
+    } else if (status === 'delivered') {
+      title = 'Order Delivered'
+      detail = `Order #${order.orderId} delivered! Thank you for shopping with us.`
+      icon = '✅'
+      color = 'text-emerald-600 bg-emerald-50'
+    }
+
+    list.push({
+      id: `order-${order._id}`,
+      title,
+      detail,
+      link: `/account/orders/${order._id || order.id}`,
+      icon,
+      color,
+      time: new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+    })
+  })
+
+  return list
+})
+
+const unreadUserNotificationsCount = computed(() => {
+  return userNotifications.value.length
+})
+
+watch(() => auth.isLoggedIn, (loggedIn) => {
+  if (loggedIn) {
+    fetchUserOrders()
+  } else {
+    userOrders.value = []
+  }
+})
+
+// Trigger fetch when drawer opens
+watch(() => ui.profileDrawerOpen, (isOpen) => {
+  if (isOpen) {
+    fetchUserOrders()
+  }
+})
+
+onMounted(() => {
+  if (ui.profileDrawerOpen) {
+    fetchUserOrders()
+  }
+})
 
 const handleLogout = () => {
   auth.logout()

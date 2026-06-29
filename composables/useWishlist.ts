@@ -7,12 +7,7 @@ export const useWishlist = () => {
   const ui = useUIStore()
 
   const toggle = (product: Product) => {
-    const wasWishlisted = wishlist.isWishlisted(product.id)
     wishlist.toggle(product)
-    ui.addToast(
-      wasWishlisted ? 'info' : 'success',
-      wasWishlisted ? `Removed from wishlist` : `Added to wishlist ♡`,
-    )
   }
 
   return {

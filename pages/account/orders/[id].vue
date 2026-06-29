@@ -104,7 +104,7 @@
                   class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
                   :class="getStepClass(step.id)"
                 >
-                  <svg v-if="isStepCompleted(step.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="isStepCompleted(step.id)" class="w-4 h-4" :class="step.id === normalizeStatus(order.orderStatus) ? 'text-deep-plum' : 'text-white'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                   </svg>
                   <span v-else>{{ idx + 1 }}</span>
@@ -138,7 +138,7 @@
                   class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
                   :class="getStepClass(step.id)"
                 >
-                  <svg v-if="isStepCompleted(step.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="isStepCompleted(step.id)" class="w-4 h-4" :class="step.id === normalizeStatus(order.orderStatus) ? 'text-deep-plum' : 'text-white'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                   </svg>
                   <span v-else>{{ idx + 1 }}</span>
@@ -320,9 +320,10 @@ const error = ref('')
 const timelineSteps = [
   { id: 'placed', label: 'Placed' },
   { id: 'accepted', label: 'Accepted' },
-  { id: 'packed', label: 'Packed' },
+  { id: 'label_created', label: 'Label Created' },
+  { id: 'ready_to_ship', label: 'Ready to Ship' },
   { id: 'shipped', label: 'Shipped' },
-  { id: 'out_for_delivery', label: 'Out for Delivery' },
+  { id: 'in_transit', label: 'In Transit' },
   { id: 'delivered', label: 'Delivered' }
 ]
 
@@ -379,25 +380,35 @@ const getStatusClass = (status: string) => {
   }
 }
 
+// Helper to map and normalize old/raw status names for levels matching
+const normalizeStatus = (status: string) => {
+  const s = status ? status.toLowerCase() : 'placed'
+  if (s === 'packed') return 'ready_to_ship'
+  if (s === 'out_for_delivery') return 'in_transit'
+  if (s === 'confirmed') return 'accepted'
+  return s
+}
+
 // ── Timeline calculations ──────────────────────────────────────────────────────
 const statusLevels: Record<string, number> = {
   'placed': 1,
   'accepted': 2,
-  'packed': 3,
-  'shipped': 4,
-  'out_for_delivery': 5,
-  'delivered': 6
+  'label_created': 3,
+  'ready_to_ship': 4,
+  'shipped': 5,
+  'in_transit': 6,
+  'delivered': 7
 }
 
 const getProgressWidth = (status: string) => {
-  const s = status ? status.toLowerCase() : 'placed'
+  const s = normalizeStatus(status)
   const level = statusLevels[s] || 1
-  return `${((level - 1) / 5) * 100}%`
+  return `${((level - 1) / 6) * 100}%`
 }
 
 const isStepCompleted = (stepId: string) => {
   if (!order.value) return false
-  const currentStatus = order.value.orderStatus.toLowerCase()
+  const currentStatus = normalizeStatus(order.value.orderStatus)
   const stepLevel = statusLevels[stepId]
   const currentLevel = statusLevels[currentStatus] || 1
   return stepLevel <= currentLevel
@@ -405,7 +416,7 @@ const isStepCompleted = (stepId: string) => {
 
 const getStepClass = (stepId: string) => {
   if (!order.value) return 'border-charcoal/20 bg-white text-charcoal/40'
-  const currentStatus = order.value.orderStatus.toLowerCase()
+  const currentStatus = normalizeStatus(order.value.orderStatus)
   const stepLevel = statusLevels[stepId]
   const currentLevel = statusLevels[currentStatus] || 1
 

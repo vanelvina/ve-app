@@ -106,6 +106,9 @@ export const useAuthStore = defineStore('auth', {
         })
         this.setAuth(data.token, data.user)
         await this.fetchProfile()
+        if (data.user) {
+          trackLogin(data.user.email, data.user.name)
+        }
         return data
       } catch (err: any) {
         throw new Error(err.data?.message || 'Google login failed')
@@ -125,6 +128,9 @@ export const useAuthStore = defineStore('auth', {
         })
         this.setAuth(data.token, data.user)
         await this.fetchProfile()
+        if (data.user) {
+          trackLogin(data.user.email, data.user.name)
+        }
         return data
       } catch (err: any) {
         throw new Error(err.data?.message || 'Login failed')
@@ -143,6 +149,9 @@ export const useAuthStore = defineStore('auth', {
         })
         this.setAuth(data.token, data.user)
         await this.fetchProfile()
+        if (data.user) {
+          trackLogin(data.user.email, data.user.name)
+        }
         return data
       } catch (err: any) {
         throw new Error(err.data?.message || 'Signup failed')

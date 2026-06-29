@@ -119,6 +119,17 @@ export const useCartStore = defineStore('cart', {
           product,
         })
       }
+      
+      // Track add to cart event
+      trackAddToCart(
+        product.id || (product as any)._id,
+        product.name,
+        product.price,
+        variantColor,
+        size,
+        quantity
+      )
+
       await this.syncCart()
     },
 

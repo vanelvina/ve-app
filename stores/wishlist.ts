@@ -11,7 +11,10 @@ export const useWishlistStore = defineStore('wishlist', {
 
   getters: {
     count: (state) => state.items.length,
-    isWishlisted: (state) => (productId: string) => state.items.some((p) => p.id === productId || (p as any)._id === productId),
+    isWishlisted: (state) => (productId: string) => {
+      if (!productId) return false
+      return state.items.some((p) => p.id === productId || (p as any)._id === productId)
+    },
     isEmpty: (state) => state.items.length === 0,
   },
 

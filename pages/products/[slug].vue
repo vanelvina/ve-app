@@ -98,7 +98,22 @@
           <!-- Category & Name -->
           <div>
             <p class="text-[11px] text-dusty-rose font-ui font-semibold uppercase tracking-widest mb-1">{{ product.category }}</p>
-            <h1 class="font-serif text-xl md:text-3xl text-deep-plum font-bold leading-snug mb-1.5">{{ product.name }}</h1>
+            <div class="flex items-start justify-between gap-4 mb-1.5">
+              <h1 class="font-serif text-xl md:text-3xl text-deep-plum font-bold leading-snug">{{ product.name }}</h1>
+              <button 
+                @click="handleShare" 
+                class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-rose-blush/20 text-charcoal/60 hover:text-deep-plum transition-all cursor-pointer shrink-0" 
+                aria-label="Share this product"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="18" cy="5" r="3"/>
+                  <circle cx="6" cy="12" r="3"/>
+                  <circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+              </button>
+            </div>
             <div class="flex items-center gap-2 flex-wrap">
               <AppRating :rating="product.rating" :count="product.reviewCount" show-count show-value />
               <span class="text-[11px] text-mid-gray font-ui">SKU: {{ product.sku }}</span>
@@ -795,8 +810,8 @@ const similarProducts = computed(() => {
   if (!product.value) return []
   
   const currentId = product.value.id || (product.value as any)._id
-  const currentCategory = product.value.category
-  const currentSubcategory = product.value.subcategory
+  const currentCats = (product.value.category || '').split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
+  const currentSubs = (product.value.subcategory || '').split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
 
   return all.value
     .filter(p => {
@@ -805,12 +820,18 @@ const similarProducts = computed(() => {
     })
     .map(p => {
       let score = 0
-      if (p.category === currentCategory) {
-        score += 2
-      }
-      if (p.subcategory && currentSubcategory && p.subcategory === currentSubcategory) {
-        score += 3
-      }
+      
+      const pCats = (p.category || '').split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
+      const pSubs = (p.subcategory || '').split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
+      
+      // Calculate category intersection score
+      const matchingCats = pCats.filter(c => currentCats.includes(c))
+      score += matchingCats.length * 2
+      
+      // Calculate subcategory intersection score
+      const matchingSubs = pSubs.filter(s => currentSubs.includes(s))
+      score += matchingSubs.length * 3
+      
       return { product: p, score }
     })
     .filter(item => item.score > 0) // Must match at least one attribute
@@ -855,7 +876,17 @@ const checkDelivery = () => {
 
 watch(selectedSize, () => { if (selectedSize.value) sizeError.value = false })
 
-onMounted(() => { if (product.value) addRecentlyViewed(product.value) })
+onMounted(() => {
+  if (product.value) {
+    addRecentlyViewed(product.value)
+    trackProductImpression(
+      product.value.id || product.value._id,
+      product.value.name,
+      product.value.category,
+      product.value.price
+    )
+  }
+})
 
 // SEO
 watchEffect(() => {

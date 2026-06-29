@@ -1,0 +1,22 @@
+# Tasks
+
+- [x] Implement backend Hono routes for analytics events in `ve-api/supabase/functions/api/routes/inquiries.ts`
+- [x] Create `utils/analytics.ts` in `ve-app` containing the auto-imported tracking functions
+- [x] Integrate visit tracking in `plugins/analytics.client.ts`
+- [x] Integrate product click tracking in `components/molecules/ProductCard.vue`
+- [x] Integrate product impression tracking in `pages/products/[slug].vue`
+- [x] Integrate add to cart tracking in `stores/cart.ts`
+- [x] Integrate checkout tracking in `pages/thank-you.vue`
+- [x] Update user order details `pages/account/orders/[id].vue` (timeline styling fix, status levels mapping, check icon fix)
+- [x] Refactor admin `pages/admin/dashboard.vue` (SVG charts, units sold list, user/product clicks table, Kanban order pipeline tabs, grouped return/exchange stage tabs)
+- [x] Implement swipeable product card images and optimize card responsiveness, spacing, padding, and add to cart button size on mobile views
+- [x] Fix wishlist highlighting bug that affected all product cards by resolving property ID fallback and adding a defensive check in the Pinia store
+- [x] Resolve overlap between wishlist button and "% OFF" discount label on product cards by grouping status badges in a vertical flex stack on the top-left
+- [x] Remove duplicate header (notification bell, wishlist, and bag icons) on mobile view of the Category page to ensure consistent layout navbar navigation
+- [x] Implement multi-category and multi-subcategory product configuration inside the admin dashboard, and adjust storefront filtering, counting, and similarity recommendation algorithms to support it
+- [x] Build activity notification center for admins in the admin dashboard (visits, add-to-carts, logins, orders alerts) and personal notifications inbox for users in the storefront navbar (abandoned cart, milestones updates, welcome alerts)
+- [x] Implement native Web Push Notifications (PWA push service worker, public/sw-push.js, plugins/push-notifications.client.ts, VAPID key pairs, and inquiries push subscription storage) for both admins (activity updates) and customers (milestone updates and abandoned cart checkout reminders)
+- [x] Restrict share button visibility inside the navbar to display exclusively on the Product Description Page (PDP), resolving the PLP page leakage
+- [x] Transfer the customer notifications bell from the global navbar to the sliding profile drawer component, and update the navbar profile button with a modern outline SVG icon matching the exact style of other navbar icons
+- [x] Resolve duplicate wishlist toast notifications by removing the redundant toast trigger from the useWishlist composable wrapper, leaving the store to handle it centrally
+- [x] Relocate the product share button from the global navbar header controls directly to the right-most side of the product title area on the Product Description Page (PDP)

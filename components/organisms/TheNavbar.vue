@@ -39,16 +39,7 @@
             </span>
           </NuxtLink>
 
-          <!-- Share (PDP only) -->
-          <button v-if="isSearchIconOnly" @click="handleNavShare" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Share this product">
-            <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="18" cy="5" r="3"/>
-              <circle cx="6" cy="12" r="3"/>
-              <circle cx="18" cy="19" r="3"/>
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-            </svg>
-          </button>
+
 
           <!-- Wishlist -->
           <NuxtLink to="/wishlist" class="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Wishlist">
@@ -59,11 +50,10 @@
           </NuxtLink>
 
           <!-- Profile -->
-          <button @click="ui.openProfileDrawer" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors overflow-hidden border border-charcoal/10" aria-label="My account">
-            <img v-if="auth.isLoggedIn && auth.user?.avatar" :src="auth.user.avatar" :alt="auth.user.name" class="w-full h-full object-cover" />
-            <span v-else-if="auth.isLoggedIn" class="text-xs font-bold text-deep-plum font-ui">{{ userInitials }}</span>
-            <svg v-else class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <button @click="ui.openProfileDrawer" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors text-charcoal/60 hover:text-deep-plum" aria-label="My account">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
             </svg>
           </button>
         </div>
@@ -140,11 +130,12 @@
               </svg>
               <span v-if="wishlist.count > 0" :key="wishlist.count" class="absolute -top-1 -right-1 w-4 h-4 bg-dusty-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ wishlist.count }}</span>
             </NuxtLink>
-            <button @click="ui.openProfileDrawer" class="btn-icon hidden sm:flex text-charcoal hover:text-deep-plum overflow-hidden border border-charcoal/5" aria-label="My account">
-              <img v-if="auth.isLoggedIn && auth.user?.avatar" :src="auth.user.avatar" :alt="auth.user.name" class="w-full h-full object-cover" />
-              <span v-else-if="auth.isLoggedIn" class="text-xs font-bold text-deep-plum font-ui">{{ userInitials }}</span>
-              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+
+            <!-- Profile -->
+            <button @click="ui.openProfileDrawer" class="btn-icon flex text-charcoal hover:text-deep-plum" aria-label="My account">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
               </svg>
             </button>
             <NuxtLink to="/bag" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Shopping bag">
@@ -184,17 +175,7 @@ const route = useRoute()
 
 const isSearchIconOnly = computed(() => ['products', 'products-slug'].includes(route.name as string))
 
-const handleNavShare = async () => {
-  if (typeof window === 'undefined') return
-  const url = window.location.href
-  const title = document.title
-  if (navigator.share) {
-    try { await navigator.share({ title, url }) } catch { /* dismissed */ }
-  } else {
-    await navigator.clipboard.writeText(url)
-    ui.addToast('success', 'Link copied! Share it with your friends. 🔗')
-  }
-}
+
 
 const userInitials = computed(() => {
   const name = auth.user?.name || ''
