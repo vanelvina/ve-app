@@ -55,6 +55,13 @@ export default defineNuxtConfig({
     pageTransition: { name: 'page', mode: 'out-in' },
   },
 
+  // Route Cache Control Rules (Bypass CDNs and browser cache for SW)
+  routeRules: {
+    '/sw.js': { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' } },
+    '/_payload.json': { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' } },
+    '/manifest.webmanifest': { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' } },
+  },
+
   // Runtime config
   runtimeConfig: {
     public: {
@@ -97,6 +104,8 @@ export default defineNuxtConfig({
       navigateFallback: null,
       globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
       importScripts: ['/sw-push.js'],
+      skipWaiting: true,
+      clientsClaim: true,
       runtimeCaching: [
         {
           urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
