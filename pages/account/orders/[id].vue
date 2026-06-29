@@ -7,15 +7,15 @@
         <nav class="flex text-xs font-ui text-charcoal/50" aria-label="Breadcrumb">
           <NuxtLink to="/" class="hover:text-deep-plum transition-colors">Home</NuxtLink>
           <span class="mx-2">/</span>
-          <NuxtLink to="/account" class="hover:text-deep-plum transition-colors">My Account</NuxtLink>
+          <NuxtLink to="/myorders" class="hover:text-deep-plum transition-colors">My Orders</NuxtLink>
           <span class="mx-2">/</span>
           <span class="text-charcoal font-semibold">Order Details</span>
         </nav>
         <NuxtLink
-          to="/account"
+          to="/myorders"
           class="inline-flex items-center text-xs font-bold text-deep-plum hover:underline font-ui self-start sm:self-auto"
         >
-          ← Back to Account
+          ← Back to Orders
         </NuxtLink>
       </div>
 
@@ -39,7 +39,7 @@
         <h2 class="font-serif text-xl font-bold text-deep-plum">Failed to Load Order</h2>
         <p class="text-xs text-charcoal/50 max-w-sm mx-auto font-ui">{{ error }}</p>
         <NuxtLink
-          to="/account"
+          to="/myorders"
           class="inline-block px-6 py-2.5 bg-deep-plum text-white font-ui font-semibold text-xs tracking-wider uppercase rounded-xl hover:bg-[#7a3e4a] transition-all"
         >
           View All Orders

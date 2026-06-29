@@ -15,7 +15,7 @@
         </div>
         <div v-else class="flex items-center gap-2.5 bg-white px-3 py-1.5 border border-rose-blush rounded-xl shadow-soft">
           <span class="text-[10px] text-charcoal/60">Sign in to save your bag items.</span>
-          <button @click="ui.openAuthModal" class="px-2 py-0.5 bg-rose-blush text-deep-plum hover:bg-deep-plum hover:text-white rounded text-[10px] font-bold transition-all">Sign In</button>
+          <button @click="ui.openAuthModal()" class="px-2 py-0.5 bg-rose-blush text-deep-plum hover:bg-deep-plum hover:text-white rounded text-[10px] font-bold transition-all">Sign In</button>
         </div>
       </div>
 

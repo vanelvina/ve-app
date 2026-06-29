@@ -76,12 +76,34 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '~/stores/auth'
+
 const route = useRoute()
 const ui = useUIStore()
+const auth = useAuthStore()
 const { bestSellers } = useProducts()
 
 const orderId = computed(() => route.query.order as string || 'VE000000000')
-const customerName = 'Priya'
+const customerName = ref('Customer')
+
+onMounted(async () => {
+  if (auth.user?.name) {
+    customerName.value = auth.user.name
+  }
+  
+  if (orderId.value && orderId.value !== 'VE000000000') {
+    try {
+      const config = useRuntimeConfig()
+      const data = await $fetch<any>(`${config.public.apiBase}/orders/${orderId.value}`)
+      if (data) {
+        customerName.value = data.shippingAddress?.name || data.guestInfo?.name || auth.user?.name || 'Customer'
+      }
+    } catch (err) {
+      console.error('Failed to fetch order details for confirmation page:', err)
+    }
+  }
+})
 
 const today = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
 const deliveryDate = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })

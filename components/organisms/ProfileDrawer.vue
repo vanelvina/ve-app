@@ -30,18 +30,22 @@
           <!-- User Profile Summary Section -->
           <div class="flex items-center gap-4 py-2">
             <!-- Avatar Outer Circle -->
-            <div class="w-14 h-14 rounded-full border border-charcoal/10 flex items-center justify-center bg-warm-ivory shrink-0 shadow-sm overflow-hidden">
+            <NuxtLink v-if="auth.isLoggedIn" to="/myaccount" @click="ui.closeProfileDrawer" class="w-14 h-14 rounded-full border border-charcoal/10 flex items-center justify-center bg-warm-ivory shrink-0 shadow-sm overflow-hidden hover:opacity-85 transition-all">
               <img v-if="auth.user?.avatar" :src="auth.user.avatar" :alt="auth.user.name" class="w-full h-full object-cover" />
-              <span v-else-if="auth.isLoggedIn" class="text-lg font-bold text-deep-plum font-ui">{{ userInitials }}</span>
-              <svg v-else class="w-7 h-7 text-charcoal/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span v-else class="text-lg font-bold text-deep-plum font-ui">{{ userInitials }}</span>
+            </NuxtLink>
+            <div v-else class="w-14 h-14 rounded-full border border-charcoal/10 flex items-center justify-center bg-warm-ivory shrink-0 shadow-sm overflow-hidden">
+              <svg class="w-7 h-7 text-charcoal/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
             <!-- Name & Subtext -->
             <div class="min-w-0 flex-1">
               <template v-if="auth.isLoggedIn">
-                <h3 class="font-serif text-lg font-bold text-deep-plum leading-tight truncate">{{ auth.user?.name || 'My Account' }}</h3>
-                <p class="text-xs text-mid-gray/80 mt-0.5 font-ui truncate">{{ auth.user?.email }}</p>
+                <NuxtLink to="/myaccount" @click="ui.closeProfileDrawer" class="block group/name text-left">
+                  <h3 class="font-serif text-lg font-bold text-deep-plum leading-tight truncate group-hover/name:text-[#CBA39E] transition-colors">{{ auth.user?.name || 'My Account' }}</h3>
+                  <p class="text-xs text-mid-gray/80 mt-0.5 font-ui truncate">{{ auth.user?.email }}</p>
+                </NuxtLink>
                 <p class="text-xs text-mid-gray/80 mt-1 font-ui">
                   <span class="underline decoration-charcoal/30 font-semibold text-charcoal/70 hover:text-deep-plum cursor-pointer">Total Balance 0</span>
                   <span class="mx-1.5 text-charcoal/20">|</span>
@@ -67,7 +71,7 @@
           <div class="border border-rose-blush/30 rounded-2xl bg-white shadow-sm overflow-hidden">
             <div class="divide-y divide-rose-blush/20">
               <!-- Order History -->
-              <NuxtLink to="/account" @click="ui.closeProfileDrawer" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
+              <NuxtLink to="/myorders" @click="ui.closeProfileDrawer" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

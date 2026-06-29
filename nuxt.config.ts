@@ -60,11 +60,14 @@ export default defineNuxtConfig({
     public: {
       appName: 'Van Elvina',
       appUrl: 'https://vanelvina.com',
-      apiBase: 'https://ve-api-8pml.onrender.com/api',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || (process.env.NODE_ENV === 'development' ? '/api' : 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api'),
       googleClientId: '1095271875819-6sh520q88vas8u7g3n4ukrh0o2aihgib.apps.googleusercontent.com',
       razorpayKeyId: process.env.NUXT_PUBLIC_RAZORPAY_KEY_ID || 'TEST_KEY_ID',
+      gaMeasurementId: process.env.NUXT_PUBLIC_GA_MEASUREMENT_ID || '',
     },
   },
+
+
 
   // PWA Configuration
   pwa: {
@@ -92,6 +95,7 @@ export default defineNuxtConfig({
     },
     workbox: {
       navigateFallback: '/',
+      navigateFallbackDenylist: [/^\/auth/, /^\/api/],
       globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
       runtimeCaching: [
         {
@@ -118,7 +122,7 @@ export default defineNuxtConfig({
       installPrompt: true,
     },
     devOptions: {
-      enabled: true,
+      enabled: false,
       type: 'module',
     },
   },
@@ -129,6 +133,12 @@ export default defineNuxtConfig({
     prerender: {
       routes: ['/'],
     },
+    devProxy: {
+      '/api': {
+        target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api',
+        changeOrigin: true,
+      }
+    }
   },
 
   // TypeScript

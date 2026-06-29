@@ -24,10 +24,8 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '~/stores/auth'
 import { useUIStore } from '~/stores/ui'
 import { useWishlistStore } from '~/stores/wishlist'
@@ -44,11 +42,38 @@ const loading = ref(true)
 const errorMsg = ref('')
 
 onMounted(async () => {
-  // Google's implicit flow returns the response in the URL hash fragment
-  const hash = route.hash.substring(1) // remove the '#'
-  const params = new URLSearchParams(hash)
-  const idToken = params.get('id_token')
-  const error = params.get('error')
+  // Clear any active service worker to prevent caching or token parsing issues
+  if (import.meta.client && 'serviceWorker' in navigator) {
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      for (const reg of registrations) {
+        await reg.unregister()
+        console.log('Cleaned service worker registration for auth route.')
+      }
+    } catch (e) {
+      console.warn('Failed to unregister service worker:', e)
+    }
+  }
+
+  // Google's implicit flow returns the response in the URL hash fragment, but fallback to query
+  let idToken: string | null = null
+  let error: string | null = null
+
+  if (typeof window !== 'undefined') {
+    const hashStr = window.location.hash || route.hash || ''
+    const hashClean = hashStr.startsWith('#') ? hashStr.substring(1) : hashStr
+    if (hashClean) {
+      const hashParams = new URLSearchParams(hashClean)
+      idToken = hashParams.get('id_token')
+      error = hashParams.get('error')
+    }
+
+    if (!idToken) {
+      const queryParams = new URLSearchParams(window.location.search)
+      idToken = queryParams.get('id_token') || (route.query.id_token as string)
+      error = error || queryParams.get('error') || (route.query.error as string)
+    }
+  }
 
   if (error) {
     loading.value = false
@@ -76,7 +101,7 @@ onMounted(async () => {
     sessionStorage.removeItem('ve_auth_redirect')
     
     const safeRedirect = (redirectUrl.includes('/auth') || redirectUrl.includes('/login')) ? '/' : redirectUrl
-    router.push(safeRedirect)
+    navigateTo(safeRedirect)
   } catch (err: any) {
     loading.value = false
     errorMsg.value = err.message || 'Failed to authenticate with our servers.'

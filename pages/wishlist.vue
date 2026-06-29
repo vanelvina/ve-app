@@ -22,7 +22,7 @@
             <p class="text-[10px] text-charcoal/60">Sign in to sync your saved items across your devices.</p>
           </div>
           <button 
-            @click="ui.openAuthModal" 
+            @click="ui.openAuthModal()" 
             class="px-3.5 py-1.5 bg-rose-blush text-deep-plum hover:bg-deep-plum hover:text-white rounded-xl text-xs font-bold transition-all shadow-soft shrink-0 self-start sm:self-auto"
           >
             Sign In

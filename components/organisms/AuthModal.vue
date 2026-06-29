@@ -148,12 +148,12 @@ const handleLogin = async () => {
       wishlist.syncWishlistAfterLogin(),
       cart.syncCartAfterLogin()
     ])
+    const redirectPath = ui.authRedirect
     ui.closeAuthModal()
     ui.addToast('success', `Welcome back${auth.user?.name ? `, ${auth.user.name}` : ''}! 🎉`)
     
-    if (ui.authRedirect) {
-      navigateTo(ui.authRedirect)
-      ui.setAuthRedirect(null)
+    if (redirectPath) {
+      navigateTo(redirectPath)
     }
   } catch (err: any) {
     errorMsg.value = err.message || 'Login failed'
@@ -179,12 +179,12 @@ const handleSignup = async () => {
       wishlist.syncWishlistAfterLogin(),
       cart.syncCartAfterLogin()
     ])
+    const redirectPath = ui.authRedirect
     ui.closeAuthModal()
     ui.addToast('success', `Welcome${auth.user?.name ? `, ${auth.user.name}` : ''}! 🎉`)
     
-    if (ui.authRedirect) {
-      navigateTo(ui.authRedirect)
-      ui.setAuthRedirect(null)
+    if (redirectPath) {
+      navigateTo(redirectPath)
     }
   } catch (err: any) {
     errorMsg.value = err.message || 'Signup failed'

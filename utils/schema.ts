@@ -66,9 +66,9 @@ export const organizationSchema = () => ({
   url: 'https://vanelvina.com',
   logo: 'https://vanelvina.com/icons/icon-512x512.png',
   sameAs: [
-    'https://instagram.com/vanelvina',
-    'https://facebook.com/vanelvina',
-    'https://twitter.com/vanelvina',
+    'https://www.instagram.com/van_elvina_official?igsh=Nmp2OWc3Yjg0MDhy',
+    'https://www.facebook.com/share/1CgGsR3nV2/',
+    'https://x.com/VanElvinaX',
   ],
   contactPoint: {
     '@type': 'ContactPoint',

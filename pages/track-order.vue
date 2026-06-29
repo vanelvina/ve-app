@@ -37,8 +37,8 @@
       
       <div v-if="auth.isLoggedIn" class="mt-6 pt-6 border-t border-rose-blush/20">
         <p class="text-xs text-charcoal/50 font-ui mb-3">Or view all your past orders</p>
-        <NuxtLink to="/account" class="text-sm font-bold text-deep-plum hover:underline font-ui">
-          Go to My Account
+        <NuxtLink to="/myorders" class="text-sm font-bold text-deep-plum hover:underline font-ui">
+          Go to My Orders
         </NuxtLink>
       </div>
     </div>

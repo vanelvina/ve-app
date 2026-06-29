@@ -38,6 +38,15 @@ export const slugToTitle = (slug: string): string => {
     .join(' ')
 }
 
+// Capitalize first letter of each word
+export const capitalizeWords = (str: string): string => {
+  if (!str) return ''
+  return str
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 // Truncate text
 export const truncate = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text

@@ -11,9 +11,18 @@ export const useUIStore = defineStore('ui', {
     authModalOpen: false,
     authRedirect: null as string | null,
     toasts: [] as Array<{ id: string; type: 'success' | 'error' | 'info'; message: string }>,
+    activeRequests: 0,
   }),
 
+  getters: {
+    apiLoading: (state) => state.activeRequests > 0,
+  },
+
   actions: {
+    incrementActiveRequests() { this.activeRequests++ },
+    decrementActiveRequests() {
+      if (this.activeRequests > 0) this.activeRequests--
+    },
     setAuthRedirect(path: string | null) { this.authRedirect = path },
     openMobileMenu() { this.mobileMenuOpen = true },
     closeMobileMenu() { this.mobileMenuOpen = false },
@@ -36,18 +45,23 @@ export const useUIStore = defineStore('ui', {
     closeProfileDrawer() { this.profileDrawerOpen = false },
     toggleProfileDrawer() { this.profileDrawerOpen = !this.profileDrawerOpen },
 
-    openAuthModal(redirectPath: string | null = null) {
+    openAuthModal(redirectPath: any = null) {
       this.authModalOpen = true
-      if (redirectPath) {
+      if (redirectPath && typeof redirectPath === 'string') {
         this.authRedirect = redirectPath
       } else if (import.meta.client) {
         const currentPath = window.location.pathname + window.location.search
-        if (!this.authRedirect && !currentPath.includes('/auth/')) {
+        if (!currentPath.includes('/auth/')) {
           this.authRedirect = currentPath
+        } else {
+          this.authRedirect = '/'
         }
       }
     },
-    closeAuthModal() { this.authModalOpen = false },
+    closeAuthModal() {
+      this.authModalOpen = false
+      this.authRedirect = null
+    },
 
     addToast(type: 'success' | 'error' | 'info', message: string) {
       const id = Date.now().toString()

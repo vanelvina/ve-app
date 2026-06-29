@@ -53,12 +53,51 @@ const ui = useUIStore()
 
 onMounted(async () => {
   auth.init()
-  if (auth.isLoggedIn) {
-    await Promise.all([
-      wishlist.fetchWishlist(),
-      cart.fetchCart()
-    ])
-  } else {
+
+  // Google Login URL hash interception (fail-safe for any page redirect)
+  let googleLoginCompleted = false
+  if (import.meta.client && typeof window !== 'undefined') {
+    const hashStr = window.location.hash || ''
+    const hashClean = hashStr.startsWith('#') ? hashStr.substring(1) : hashStr
+    if (hashClean) {
+      const hashParams = new URLSearchParams(hashClean)
+      const idToken = hashParams.get('id_token')
+      if (idToken) {
+        // Clear hash immediately so it doesn't linger in URL
+        window.history.replaceState(null, '', window.location.pathname + window.location.search)
+        
+        ui.incrementActiveRequests()
+        try {
+          await auth.loginWithGoogle(idToken)
+          await Promise.all([
+            wishlist.syncWishlistAfterLogin(),
+            cart.syncCartAfterLogin()
+          ])
+          ui.addToast('success', `Welcome, ${auth.user?.name || 'Delicate'}! 🎉`)
+          googleLoginCompleted = true
+          
+          const redirectUrl = sessionStorage.getItem('ve_auth_redirect') || '/'
+          sessionStorage.removeItem('ve_auth_redirect')
+          const safeRedirect = (redirectUrl.includes('/auth') || redirectUrl.includes('/login')) ? '/' : redirectUrl
+          if (safeRedirect !== window.location.pathname) {
+            navigateTo(safeRedirect)
+          }
+        } catch (err: any) {
+          ui.addToast('error', err.message || 'Google authentication failed.')
+          console.error('Global Google callback error:', err)
+        } finally {
+          ui.decrementActiveRequests()
+        }
+      }
+    }
+  }
+
+  await Promise.all([
+    wishlist.fetchWishlist(),
+    cart.fetchCart()
+  ])
+
+  if (!auth.isLoggedIn && !googleLoginCompleted) {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       if (params.get('auth_trigger') === 'true') {

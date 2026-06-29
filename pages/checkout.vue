@@ -48,22 +48,22 @@
                   </label>
                 </div>
                 <button type="button" @click="showNewAddressForm = true" class="text-sm font-semibold text-deep-plum hover:underline">+ Add a new address</button>
-                <AppButton type="button" size="lg" :full="true" @click="proceedWithSavedAddress" class="mt-4">Continue to Shipping</AppButton>
+                <AppButton type="button" :full="true" @click="proceedWithSavedAddress" class="mt-4">Continue to Confirmation</AppButton>
               </div>
 
               <!-- New Address Form -->
               <div v-else class="space-y-4">
                 <button v-if="auth.user?.addresses && auth.user.addresses.length > 0" type="button" @click="showNewAddressForm = false" class="text-xs font-semibold text-charcoal/50 hover:text-deep-plum mb-2">← Back to saved addresses</button>
                 <div class="grid sm:grid-cols-2 gap-4">
-                  <AppInput v-model="form.fullName" label="Full Name" placeholder="Priya Sharma" required :error="errors.fullName" />
+                  <AppInput v-model="form.fullName" label="Full Name" placeholder="Priya Sharma" required :error="errors.fullName" @blur="form.fullName = capitalizeWords(form.fullName)" />
                   <AppInput v-model="form.phone" label="Phone Number" type="tel" placeholder="9876543210" required :error="errors.phone" />
                 </div>
                 <AppInput v-model="form.email" label="Email Address" type="email" placeholder="priya@email.com" required :error="errors.email" />
-                <AppInput v-model="form.line1" label="Address Line 1" placeholder="House No, Building, Street" required :error="errors.line1" />
-                <AppInput v-model="form.line2" label="Address Line 2 (Optional)" placeholder="Landmark, Area" />
+                <AppInput v-model="form.line1" label="Address Line 1" placeholder="House No, Building, Street" required :error="errors.line1" @blur="form.line1 = capitalizeWords(form.line1)" />
+                <AppInput v-model="form.line2" label="Address Line 2 (Optional)" placeholder="Landmark, Area" @blur="form.line2 = capitalizeWords(form.line2)" />
                 <div class="grid sm:grid-cols-3 gap-4">
                   <AppInput v-model="form.pincode" label="PIN Code" placeholder="400001" maxlength="6" required :error="errors.pincode" />
-                  <AppInput v-model="form.city" label="City" placeholder="Mumbai" required :error="errors.city" />
+                  <AppInput v-model="form.city" label="City" placeholder="Mumbai" required :error="errors.city" @blur="form.city = capitalizeWords(form.city)" />
                   <div>
                     <label class="block text-sm font-ui font-medium text-charcoal mb-1.5" for="state-select">State <span class="text-dusty-rose">*</span></label>
                     <select id="state-select" v-model="form.state" class="input-base" required aria-required="true">
@@ -72,15 +72,29 @@
                     </select>
                   </div>
                 </div>
-                <AppButton type="submit" size="lg" :full="true" :loading="savingAddress">Save & Continue to Shipping</AppButton>
+                <AppButton type="submit" :full="true" :loading="savingAddress">Save & Continue</AppButton>
               </div>
             </form>
           </div>
 
-          <!-- Step 2: Shipping -->
-          <div v-show="currentStep === 1" class="bg-white rounded-2xl shadow-soft border border-border-gray p-6">
-            <h2 class="font-ui font-semibold text-charcoal text-base mb-5">Shipping Method</h2>
-            <div class="space-y-3" role="radiogroup" aria-label="Shipping options">
+          <!-- Step 2: Confirmation -->
+          <div v-show="currentStep === 1" class="bg-white rounded-2xl shadow-soft border border-border-gray p-6 animate-slide-up">
+            <h2 class="font-ui font-semibold text-charcoal text-base mb-5">Confirm Your Order</h2>
+            
+            <p class="text-sm font-ui text-charcoal/80 mb-6 leading-relaxed">
+              Please take a moment to review your shipping details. When you're ready, click "Proceed to Payment" to securely complete your purchase via Razorpay. All payment methods including UPI, Cards, and Netbanking are supported.
+            </p>
+
+            <div class="bg-warm-ivory/50 rounded-xl p-4 border border-rose-blush/20 mb-6">
+              <h3 class="text-xs font-bold text-deep-plum uppercase tracking-wider mb-2">Shipping To</h3>
+              <p class="text-sm font-ui text-charcoal">{{ form.fullName }}</p>
+              <p class="text-xs text-mid-gray font-ui mt-1">{{ form.line1 }}<span v-if="form.line2">, {{ form.line2 }}</span></p>
+              <p class="text-xs text-mid-gray font-ui">{{ form.city }}, {{ form.state }} - {{ form.pincode }}</p>
+              <p class="text-xs text-mid-gray font-ui mt-1">Phone: {{ form.phone }}</p>
+            </div>
+
+            <h3 class="text-sm font-ui font-semibold text-charcoal mb-3">Shipping Method</h3>
+            <div class="space-y-3 mb-6" role="radiogroup" aria-label="Shipping options">
               <label
                 v-for="option in shippingOptions"
                 :key="option.id"
@@ -99,27 +113,6 @@
                 </span>
               </label>
             </div>
-            <div class="flex gap-3 mt-6">
-              <AppButton variant="secondary" @click="currentStep = 0">Back</AppButton>
-              <AppButton :full="true" size="lg" @click="currentStep = 2">Continue to Payment</AppButton>
-            </div>
-          </div>
-
-          <!-- Step 3: Review -->
-          <div v-show="currentStep === 2" class="bg-white rounded-2xl shadow-soft border border-border-gray p-6 animate-slide-up">
-            <h2 class="font-ui font-semibold text-charcoal text-base mb-5">Review Your Order</h2>
-            
-            <p class="text-sm font-ui text-charcoal/80 mb-6 leading-relaxed">
-              Please take a moment to review your order details and shipping address. When you're ready, click "Proceed to Payment" to securely complete your purchase via Razorpay. All payment methods including UPI, Cards, and Netbanking are supported.
-            </p>
-
-            <div class="bg-warm-ivory/50 rounded-xl p-4 border border-rose-blush/20 mb-6">
-              <h3 class="text-xs font-bold text-deep-plum uppercase tracking-wider mb-2">Shipping To</h3>
-              <p class="text-sm font-ui text-charcoal">{{ form.fullName }}</p>
-              <p class="text-xs text-mid-gray font-ui mt-1">{{ form.line1 }}<span v-if="form.line2">, {{ form.line2 }}</span></p>
-              <p class="text-xs text-mid-gray font-ui">{{ form.city }}, {{ form.state }} - {{ form.pincode }}</p>
-              <p class="text-xs text-mid-gray font-ui mt-1">Phone: {{ form.phone }}</p>
-            </div>
 
             <!-- Trust badges -->
             <div class="mt-4 flex flex-wrap gap-3 items-center">
@@ -127,8 +120,8 @@
             </div>
 
             <div class="flex gap-3 mt-6">
-              <AppButton variant="secondary" @click="currentStep = 1">Back</AppButton>
-              <AppButton :full="true" size="lg" :loading="placing" @click="placeOrder">Proceed to Payment – {{ formatPrice(orderTotal) }}</AppButton>
+              <AppButton variant="secondary" @click="currentStep = 0">Back</AppButton>
+              <AppButton :full="true" :loading="placing" @click="placeOrder">Proceed to Payment – {{ formatPrice(orderTotal) }}</AppButton>
             </div>
           </div>
         </div>
@@ -176,7 +169,7 @@
 
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
-import { formatPrice, isValidPincode, isValidPhone, isValidEmail } from '~/utils/formatters'
+import { formatPrice, isValidPincode, isValidPhone, isValidEmail, capitalizeWords } from '~/utils/formatters'
 
 definePageMeta({ layout: 'checkout' })
 
@@ -204,7 +197,7 @@ const checkoutDiscount = computed(() => {
 })
 
 const currentStep = ref(0)
-const steps = ['Address', 'Shipping', 'Review']
+const steps = ['Address', 'Confirmation']
 const placing = ref(false)
 const selectedShipping = ref('standard')
 const selectedPayment = ref('razorpay')
@@ -232,7 +225,9 @@ const prefillForm = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  auth.init()
+  await cart.fetchCart()
   prefillForm()
   if (isBuyNow.value) {
     try {
@@ -307,6 +302,11 @@ const proceedWithSavedAddress = () => {
 }
 
 const nextStep = async () => { 
+  form.fullName = capitalizeWords(form.fullName.trim())
+  form.line1 = capitalizeWords(form.line1.trim())
+  form.line2 = capitalizeWords(form.line2.trim())
+  form.city = capitalizeWords(form.city.trim())
+
   if (validate()) {
     if (showNewAddressForm.value && auth.isLoggedIn) {
       try {
@@ -331,6 +331,51 @@ const nextStep = async () => {
       }
     }
     currentStep.value = 1 
+  }
+}
+
+const sendAbandonedNotification = async (reason: string) => {
+  try {
+    const orderItems = checkoutItems.value.map(item => ({
+      productId: item.productId,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      variantColor: item.variantColor || '',
+      size: item.size || 'Standard'
+    }))
+
+    const shippingAddress = {
+      name: form.fullName.trim(),
+      line1: form.line1.trim(),
+      line2: form.line2.trim() || '',
+      city: form.city.trim(),
+      state: form.state,
+      pincode: form.pincode.trim(),
+      phone: form.phone.trim(),
+    }
+
+    const notificationPayload = {
+      items: orderItems,
+      shippingAddress,
+      total: orderTotal.value,
+      reason,
+      guestInfo: !auth.isLoggedIn ? {
+        name: form.fullName.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim()
+      } : undefined
+    }
+
+    await $fetch('/api/orders/notify-abandoned', {
+      method: 'POST',
+      body: notificationPayload,
+      headers: auth.isLoggedIn ? {
+        Authorization: `Bearer ${auth.token}`
+      } : {}
+    })
+  } catch (err) {
+    console.error('Failed to send abandoned notification:', err)
   }
 }
 
@@ -446,6 +491,7 @@ const placeOrder = async () => {
           ondismiss: function() {
             placing.value = false
             ui.addToast('error', 'Payment was cancelled')
+            sendAbandonedNotification('Payment modal dismissed/cancelled by user')
           }
         }
       }
@@ -455,6 +501,7 @@ const placeOrder = async () => {
       rzp1.on('payment.failed', function (response: any) {
         placing.value = false
         ui.addToast('error', response.error?.description || 'Payment failed')
+        sendAbandonedNotification(`Payment failed: ${response.error?.description || 'Unknown reason'}`)
       })
       rzp1.open()
     }

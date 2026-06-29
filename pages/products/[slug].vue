@@ -3,16 +3,16 @@
     <div v-if="product" class="bg-warm-ivory min-h-screen">
     <!-- Breadcrumb -->
     <div class="bg-white border-b border-border-gray">
-      <div class="page-container py-3">
+      <div class="page-container py-2.5">
         <nav aria-label="Breadcrumb">
-          <ol class="flex items-center gap-2 text-xs font-ui text-mid-gray flex-wrap">
+          <ol class="flex items-center gap-1.5 text-xs font-ui text-mid-gray flex-wrap">
             <li><NuxtLink to="/" class="hover:text-deep-plum">Home</NuxtLink></li>
-            <li aria-hidden="true">/</li>
+            <li aria-hidden="true" class="text-border-gray">/</li>
             <li><NuxtLink to="/products" class="hover:text-deep-plum">Products</NuxtLink></li>
-            <li aria-hidden="true">/</li>
+            <li aria-hidden="true" class="text-border-gray">/</li>
             <li><NuxtLink :to="`/products?category=${product.category}`" class="hover:text-deep-plum">{{ product.category }}</NuxtLink></li>
-            <li aria-hidden="true">/</li>
-            <li class="text-charcoal font-medium truncate max-w-[200px]">{{ product.name }}</li>
+            <li aria-hidden="true" class="text-border-gray">/</li>
+            <li class="text-charcoal font-medium truncate max-w-[160px] md:max-w-[320px]">{{ product.name }}</li>
           </ol>
         </nav>
       </div>
@@ -94,24 +94,23 @@
         </div>
 
         <!-- Product Info -->
-        <div class="space-y-5">
+        <div class="space-y-4">
           <!-- Category & Name -->
           <div>
-            <p class="text-xs text-dusty-rose font-ui font-semibold uppercase tracking-wider mb-1">{{ product.category }}</p>
-            <h1 class="font-serif text-2xl md:text-3xl text-deep-plum font-bold leading-tight mb-2">{{ product.name }}</h1>
-            <div class="flex items-center gap-3 flex-wrap">
+            <p class="text-[11px] text-dusty-rose font-ui font-semibold uppercase tracking-widest mb-1">{{ product.category }}</p>
+            <h1 class="font-serif text-xl md:text-3xl text-deep-plum font-bold leading-snug mb-1.5">{{ product.name }}</h1>
+            <div class="flex items-center gap-2 flex-wrap">
               <AppRating :rating="product.rating" :count="product.reviewCount" show-count show-value />
-              <span class="text-xs text-mid-gray font-ui">SKU: {{ product.sku }}</span>
-              <span v-if="product.styleId" class="text-xs text-mid-gray font-ui">Style ID: {{ product.styleId }}</span>
+              <span class="text-[11px] text-mid-gray font-ui">SKU: {{ product.sku }}</span>
             </div>
           </div>
 
           <!-- Price -->
-          <div class="flex items-end gap-3 pb-4 border-b border-border-gray">
-            <span class="text-3xl font-semibold text-charcoal font-sans">{{ formatPrice(product.price) }}</span>
-            <span v-if="product.originalPrice > product.price" class="text-lg text-mid-gray line-through font-ui mb-0.5">{{ formatPrice(product.originalPrice) }}</span>
-            <span v-if="product.discount" class="text-sm font-semibold text-green-600 font-ui mb-0.5">
-              You save {{ formatPrice(product.originalPrice - product.price) }}
+          <div class="flex items-center gap-3 pb-3 border-b border-border-gray">
+            <span class="text-2xl md:text-3xl font-bold text-charcoal font-sans">{{ formatPrice(product.price) }}</span>
+            <span v-if="product.originalPrice > product.price" class="text-base text-mid-gray line-through font-ui">{{ formatPrice(product.originalPrice) }}</span>
+            <span v-if="product.discount" class="text-xs font-semibold text-green-600 bg-green-50 border border-green-100 px-2 py-0.5 rounded-full font-ui">
+              {{ product.discount }}% off
             </span>
           </div>
 
@@ -130,14 +129,14 @@
 
           <!-- Variant / Color -->
           <div>
-            <p class="text-sm font-ui font-semibold text-charcoal mb-2">
-              Color: <span class="font-normal text-mid-gray">{{ product.variants[selectedVariant].color }}</span>
+            <p class="text-xs font-ui font-semibold text-charcoal mb-2">
+              Colour: <span class="font-normal text-mid-gray">{{ product.variants[selectedVariant].color }}</span>
             </p>
-            <div class="flex gap-2.5">
+            <div class="flex gap-2">
               <button
                 v-for="(variant, idx) in product.variants"
                 :key="variant.color"
-                class="w-8 h-8 rounded-full border-2 transition-all duration-200 cursor-pointer"
+                class="w-7 h-7 rounded-full border-2 transition-all duration-200 cursor-pointer"
                 :class="selectedVariant === idx ? 'border-deep-plum scale-110 shadow-md' : 'border-white shadow-sm hover:scale-105'"
                 :style="{ backgroundColor: variant.colorHex }"
                 :aria-label="variant.color"
@@ -150,24 +149,19 @@
           <!-- Size Selection -->
           <div>
             <div class="flex items-center justify-between mb-2">
-              <p class="text-sm font-ui font-semibold text-charcoal">
+              <p class="text-xs font-ui font-semibold text-charcoal">
                 Size: <span class="font-normal text-mid-gray">{{ selectedSize || 'Select a size' }}</span>
               </p>
-              <button
-                class="text-xs text-dusty-rose font-ui hover:text-deep-plum underline"
-                @click="ui.openSizeGuide"
-              >
-                Size Guide
-              </button>
+              <button class="text-xs text-dusty-rose font-ui hover:text-deep-plum underline" @click="ui.openSizeGuide">Size Guide</button>
             </div>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-1.5">
               <button
                 v-for="size in product.variants[selectedVariant].sizes"
                 :key="size"
-                class="min-w-[48px] px-3 py-2 border rounded-lg text-sm font-ui font-medium transition-all duration-200 cursor-pointer"
+                class="min-w-[44px] px-2.5 py-1.5 border rounded-lg text-xs font-ui font-semibold transition-all duration-200 cursor-pointer"
                 :class="selectedSize === size
                   ? 'border-deep-plum bg-deep-plum text-white shadow-sm'
-                  : 'border-border-gray text-charcoal hover:border-dusty-rose hover:text-dusty-rose'"
+                  : 'border-border-gray text-charcoal hover:border-deep-plum'"
                 :aria-pressed="selectedSize === size"
                 :aria-label="`Size ${size}`"
                 @click="selectedSize = size"
@@ -175,109 +169,91 @@
                 {{ size }}
               </button>
             </div>
-            <p v-if="sizeError" class="mt-1.5 text-xs text-red-500 font-ui" role="alert">Please select a size to continue.</p>
+            <p v-if="sizeError" class="mt-1 text-xs text-red-500 font-ui" role="alert">Please select a size to continue.</p>
           </div>
 
-          <!-- Quantity -->
-          <div>
-            <p class="text-sm font-ui font-semibold text-charcoal mb-2">Quantity</p>
-            <div class="flex items-center gap-3">
-              <button class="qty-btn" aria-label="Decrease quantity" @click="qty = Math.max(1, qty - 1)">−</button>
-              <span class="w-8 text-center font-ui font-semibold text-charcoal" aria-live="polite" aria-label="Quantity">{{ qty }}</span>
-              <button class="qty-btn" aria-label="Increase quantity" @click="qty = Math.min(10, qty + 1)">+</button>
-              <span class="text-xs text-mid-gray font-ui ml-2">{{ product.stockCount }} in stock</span>
+          <!-- Quantity + Add to Cart (inline on mobile) -->
+          <div class="flex items-center gap-3 pb-4 border-b border-border-gray">
+            <div class="flex items-center border border-border-gray rounded-lg overflow-hidden">
+              <button class="w-9 h-9 flex items-center justify-center text-charcoal hover:bg-light-gray transition-colors text-lg font-light" aria-label="Decrease quantity" @click="qty = Math.max(1, qty - 1)">−</button>
+              <span class="w-8 text-center text-sm font-semibold text-charcoal border-x border-border-gray h-9 flex items-center justify-center" aria-live="polite">{{ qty }}</span>
+              <button class="w-9 h-9 flex items-center justify-center text-charcoal hover:bg-light-gray transition-colors text-lg font-light" aria-label="Increase quantity" @click="qty = Math.min(10, qty + 1)">+</button>
             </div>
-          </div>
-
-          <!-- Add to Cart + Buy Now + Wishlist -->
-          <div class="flex gap-3 pb-5 border-b border-border-gray">
-            <div class="flex-1 flex gap-2">
-              <AppButton size="lg" :full="true" :loading="adding" @click="handleAddToCart" class="hidden md:inline-flex flex-1">
+            <span class="text-xs text-mid-gray font-ui">{{ product.stockCount }} in stock</span>
+            <div class="flex-1">
+              <AppButton size="md" :full="true" :loading="adding" @click="handleAddToCart" class="hidden md:inline-flex w-full">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
                 {{ isAlreadyInBag ? 'Go to Bag' : 'Add to Bag' }}
               </AppButton>
-              <button 
-                @click="handleBuyNow" 
-                class="flex-1 bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-semibold tracking-wide shadow-premium transition-all py-3 px-4 flex items-center justify-center gap-1.5"
-                :disabled="adding"
-              >
-                ⚡ Buy Now
-              </button>
             </div>
-            <button
-              class="w-12 h-12 shrink-0 rounded-xl border-2 border-border-gray flex items-center justify-center hover:border-dusty-rose hover:text-dusty-rose transition-all"
-              :class="{ 'border-dusty-rose text-dusty-rose bg-rose-blush': isWishlisted }"
-              :aria-label="isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'"
-              :aria-pressed="isWishlisted"
-              @click="wishlist.toggle(product)"
-            >
-              <svg class="w-5 h-5" :fill="isWishlisted ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </button>
           </div>
 
           <!-- Delivery check -->
-          <div class="bg-light-gray rounded-xl p-4">
-            <p class="text-sm font-ui font-semibold text-charcoal mb-2">Check Delivery</p>
+          <div class="bg-light-gray rounded-lg p-3">
+            <p class="text-xs font-ui font-semibold text-charcoal mb-2">Check Delivery</p>
             <div class="flex gap-2">
               <input
                 v-model="pincode"
                 type="text"
+                inputmode="numeric"
                 maxlength="6"
-                placeholder="Enter PIN code"
-                class="input-base flex-1"
+                placeholder="Enter 6-digit PIN code"
+                class="input-base flex-1 text-sm"
                 aria-label="Enter pincode to check delivery"
               />
               <AppButton size="sm" variant="secondary" @click="checkDelivery">Check</AppButton>
             </div>
-            <p v-if="deliveryMsg" class="mt-2 text-xs font-ui" :class="deliveryOk ? 'text-green-600' : 'text-red-500'" role="alert">
-              {{ deliveryMsg }}
-            </p>
+            <p v-if="deliveryMsg" class="mt-1.5 text-xs font-ui" :class="deliveryOk ? 'text-green-600' : 'text-red-500'" role="alert">{{ deliveryMsg }}</p>
           </div>
 
-          <!-- Store/Product Policy Indicators -->
-          <div class="grid grid-cols-2 gap-2.5 py-1">
-            <div class="flex items-center gap-2 p-2.5 bg-white border border-border-gray rounded-xl shadow-sm">
-              <span class="text-lg">🚚</span>
-              <div>
-                <p class="text-[11px] font-bold text-charcoal leading-tight">Free Shipping</p>
-                <p class="text-[9px] text-mid-gray font-ui leading-none mt-0.5">{{ product.isFreeShipping ? 'Eligible for Free Delivery' : 'Standard Delivery Rates' }}</p>
-              </div>
+          <!-- Policy Indicators -->
+          <div class="divide-y divide-border-gray border border-border-gray rounded-xl overflow-hidden bg-white">
+            <!-- Returns -->
+            <div class="flex items-center gap-3 px-3 py-2.5">
+              <!-- Return/Exchange Icon -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-charcoal" aria-hidden="true">
+                <path d="M1 4v6h6"/>
+                <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+              </svg>
+              <span class="text-[12.5px] font-ui text-charcoal">7-day return and size exchange</span>
             </div>
-            <div class="flex items-center gap-2 p-2.5 bg-white border border-border-gray rounded-xl shadow-sm">
-              <span class="text-lg">🔄</span>
-              <div>
-                <p class="text-[11px] font-bold text-charcoal leading-tight">Returns & Exchange</p>
-                <p class="text-[9px] text-mid-gray font-ui leading-none mt-0.5">
-                  {{ (product.isReturnable && product.isExchangeable) ? '7 Days Return & Exchange' : product.isReturnable ? '7 Days Returnable' : product.isExchangeable ? '7 Days Exchangeable' : 'Hygiene Excluded' }}
-                </p>
-              </div>
+            <!-- Free Delivery -->
+            <div class="flex items-center gap-3 px-3 py-2.5">
+              <!-- Delivery Truck Icon -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-charcoal" aria-hidden="true">
+                <rect x="1" y="3" width="15" height="13" rx="1"/>
+                <path d="M16 8h4l3 3v5h-7V8z"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+              <span class="text-[12.5px] font-ui text-charcoal">
+                <span v-if="product.price >= 999">Free delivery on this order</span>
+                <span v-else>Free delivery on ₹999+ orders</span>
+              </span>
             </div>
-            <div class="flex items-center gap-2 p-2.5 bg-white border border-border-gray rounded-xl shadow-sm">
-              <span class="text-lg">💵</span>
-              <div>
-                <p class="text-[11px] font-bold text-charcoal leading-tight">COD Status</p>
-                <p class="text-[9px] text-mid-gray font-ui leading-none mt-0.5">{{ product.isCodAvailable ? 'COD Available (On)' : 'Prepaid Only (Off)' }}</p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 p-2.5 bg-white border border-border-gray rounded-xl shadow-sm">
-              <span class="text-lg">🇮🇳</span>
-              <div>
-                <p class="text-[11px] font-bold text-charcoal leading-tight">Origin</p>
-                <p class="text-[9px] text-mid-gray font-ui leading-none mt-0.5">India 🇮🇳 (Aurangabad)</p>
-              </div>
+            <!-- COD -->
+            <div class="flex items-center gap-3 px-3 py-2.5">
+              <!-- COD / Cash Icon -->
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-charcoal" aria-hidden="true">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+                <line x1="6" y1="15" x2="10" y2="15"/>
+              </svg>
+              <span class="text-[12.5px] font-ui text-charcoal">
+                <span v-if="product.price >= 500 || product.price === 1">COD available on this order</span>
+                <span v-else>COD on ₹500+ orders</span>
+              </span>
             </div>
           </div>
 
           <!-- Highlights -->
           <div>
-            <h2 class="text-sm font-ui font-semibold text-charcoal mb-2">Product Highlights</h2>
-            <ul class="space-y-1.5">
-              <li v-for="h in product.highlights" :key="h" class="flex items-start gap-2 text-sm font-ui text-mid-gray">
-                <svg class="w-4 h-4 text-dusty-rose shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+            <h2 class="text-xs font-ui font-semibold text-charcoal uppercase tracking-wider mb-2">Highlights</h2>
+            <ul class="space-y-1">
+              <li v-for="h in product.highlights" :key="h" class="flex items-start gap-2 text-xs font-ui text-mid-gray leading-relaxed">
+                <svg class="w-3.5 h-3.5 text-dusty-rose shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
                 {{ h }}
@@ -472,8 +448,13 @@
         </div>
       </div>
 
+      <!-- Loyalty Discount Banner -->
+      <div class="mt-10">
+        <LoyaltyDiscountBanner />
+      </div>
+
       <!-- Similar Products -->
-      <div class="mt-12">
+      <div class="mt-10">
         <h2 class="font-serif text-2xl text-deep-plum font-semibold mb-6">Similar Products</h2>
         <div class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
           <div v-for="p in similarProducts" :key="p.id" class="w-48 md:w-56 shrink-0">
@@ -775,6 +756,23 @@ const copyShareLink = () => {
   }
 }
 
+const handleShare = async () => {
+  if (typeof window === 'undefined') return
+  const url = window.location.href
+  const title = product.value?.name ?? 'Check out this product'
+  const text = `${title} – Van Elvina`
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text, url })
+    } catch {
+      // user dismissed — no action needed
+    }
+  } else {
+    await navigator.clipboard.writeText(url)
+    ui.addToast('success', 'Link copied! Share it with your friends. 🔗')
+  }
+}
+
 const similarProducts = computed(() => {
   if (!product.value) return []
   
@@ -825,35 +823,7 @@ const handleAddToCart = async () => {
   addToCart(product.value, product.value.variants[selectedVariant.value].color, selectedSize.value, qty.value)
 }
 
-const handleBuyNow = async () => {
-  if (!selectedSize.value) { sizeError.value = true; return }
-  sizeError.value = false
 
-  if (product.value) {
-    const buyNowItem = {
-      productId: product.value.id || (product.value as any)._id,
-      variantColor: product.value.variants[selectedVariant.value].color,
-      size: selectedSize.value,
-      quantity: qty.value,
-      product: product.value
-    }
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('ve_buy_now_item', JSON.stringify(buyNowItem))
-    }
-  }
-
-  if (!auth.isLoggedIn) {
-    ui.addToast('error', 'Please log in to purchase.')
-    ui.setAuthRedirect('/checkout?buyNow=true')
-    ui.openAuthModal()
-    return
-  }
-
-  adding.value = true
-  await new Promise(r => setTimeout(r, 400))
-  adding.value = false
-  navigateTo('/checkout?buyNow=true')
-}
 
 const checkDelivery = () => {
   if (!isValidPincode(pincode.value)) {

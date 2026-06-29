@@ -86,6 +86,7 @@ export const useAuthStore = defineStore('auth', {
           body: { identifier: email, otp, name },
         })
         this.setAuth(data.token, data.user)
+        await this.fetchProfile()
         return data
       } catch (err: any) {
         throw new Error(err.data?.message || 'Invalid verification code')
@@ -104,6 +105,7 @@ export const useAuthStore = defineStore('auth', {
           body: { idToken },
         })
         this.setAuth(data.token, data.user)
+        await this.fetchProfile()
         return data
       } catch (err: any) {
         throw new Error(err.data?.message || 'Google login failed')
@@ -122,6 +124,7 @@ export const useAuthStore = defineStore('auth', {
           body: { email, password },
         })
         this.setAuth(data.token, data.user)
+        await this.fetchProfile()
         return data
       } catch (err: any) {
         throw new Error(err.data?.message || 'Login failed')
@@ -139,6 +142,7 @@ export const useAuthStore = defineStore('auth', {
           body: { name, email, password },
         })
         this.setAuth(data.token, data.user)
+        await this.fetchProfile()
         return data
       } catch (err: any) {
         throw new Error(err.data?.message || 'Signup failed')

@@ -156,7 +156,8 @@ export const useCartStore = defineStore('cart', {
           
           // Merge local and server items
           for (const item of serverData) {
-            const serverPId = item.productId._id || item.productId.id
+            const serverPId = item.productId?._id || item.productId?.id || item.productId
+            if (!serverPId) continue
             const existing = this.items.find(
               (i) => i.productId === serverPId && i.variantColor === (item.color || item.variantColor) && i.size === item.size
             )
@@ -168,10 +169,10 @@ export const useCartStore = defineStore('cart', {
                 variantColor: item.color || item.variantColor,
                 size: item.size,
                 quantity: item.quantity,
-                product: {
+                product: item.productId ? {
                   ...item.productId,
                   id: serverPId
-                }
+                } : undefined
               })
             }
           }

@@ -53,7 +53,7 @@
         <!-- Product grid -->
         <div class="product-grid">
           <ProductCard
-            v-for="product in store.paginated"
+            v-for="product in displayedProducts"
             :key="product.id"
             :product="product"
           />
@@ -67,35 +67,14 @@
           <AppButton @click="store.resetFilters">Clear All Filters</AppButton>
         </div>
 
-        <!-- Pagination -->
-        <div v-if="store.totalPages > 1" class="mt-10 flex items-center justify-center gap-2">
-          <button
-            class="px-3 py-2 border border-border-gray rounded-lg text-sm font-ui hover:border-dusty-rose disabled:opacity-40"
-            :disabled="store.page === 1"
-            aria-label="Previous page"
-            @click="store.setPage(store.page - 1)"
-          >
-            ‹
-          </button>
-          <button
-            v-for="p in store.totalPages"
-            :key="p"
-            class="w-9 h-9 rounded-lg text-sm font-ui transition-colors"
-            :class="store.page === p ? 'bg-deep-plum text-white' : 'border border-border-gray text-charcoal hover:border-dusty-rose'"
-            :aria-label="`Page ${p}`"
-            :aria-current="store.page === p ? 'page' : undefined"
-            @click="store.setPage(p)"
-          >
-            {{ p }}
-          </button>
-          <button
-            class="px-3 py-2 border border-border-gray rounded-lg text-sm font-ui hover:border-dusty-rose disabled:opacity-40"
-            :disabled="store.page === store.totalPages"
-            aria-label="Next page"
-            @click="store.setPage(store.page + 1)"
-          >
-            ›
-          </button>
+        <!-- Infinite Scroll Sentinel -->
+        <div v-if="store.totalCount > 0" ref="sentinel" class="w-full py-8 flex items-center justify-center select-none" aria-live="polite">
+          <div v-if="hasMore" class="flex gap-2.5 items-center justify-center">
+            <div class="dot w-2.5 h-2.5 rounded-full bg-dusty-rose dot-bounce dot-delay-1" />
+            <div class="dot w-2.5 h-2.5 rounded-full bg-mid-gray dot-bounce dot-delay-2" />
+            <div class="dot w-2.5 h-2.5 rounded-full bg-dusty-rose dot-bounce dot-delay-3" />
+          </div>
+          <p v-else class="text-xs text-mid-gray/70 font-ui text-center">You have reached the end of the collection.</p>
         </div>
       </main>
     </div>
@@ -198,11 +177,27 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import categoriesData from '~/data/categories.json'
 import type { SortOption } from '~/types'
 
 const store = useProductsStore()
 const ui = useUIStore()
+
+const displayedProducts = computed(() => {
+  return store.filtered.slice(0, store.page * store.pageSize)
+})
+
+const sentinel = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
+
+const hasMore = computed(() => store.page < store.totalPages)
+
+const loadMore = () => {
+  if (hasMore.value) {
+    store.setPage(store.page + 1)
+  }
+}
 
 // Dynamic Categories Fetch
 const categories = ref<any[]>(categoriesData)
@@ -316,6 +311,25 @@ const parseRouteQueries = () => {
 onMounted(() => {
   parseRouteQueries()
   loadCategories()
+
+  if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
+    observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        loadMore()
+      }
+    }, {
+      rootMargin: '150px'
+    })
+    if (sentinel.value) {
+      observer.observe(sentinel.value)
+    }
+  }
+})
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect()
+  }
 })
 
 watch(() => route.query, () => {
@@ -335,4 +349,28 @@ useSeoMeta({
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-up-enter-active, .slide-up-leave-active { transition: transform 0.3s ease, opacity 0.3s ease; }
 .slide-up-enter-from, .slide-up-leave-to { transform: translateY(100%); opacity: 0; }
+
+.dot-bounce {
+  animation: dotBounce 1.4s infinite ease-in-out;
+}
+.dot-delay-1 {
+  animation-delay: -0.32s;
+}
+.dot-delay-2 {
+  animation-delay: -0.16s;
+}
+.dot-delay-3 {
+  animation-delay: 0s;
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
 </style>
