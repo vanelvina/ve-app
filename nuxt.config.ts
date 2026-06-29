@@ -94,8 +94,7 @@ export default defineNuxtConfig({
       categories: ['shopping', 'lifestyle'],
     },
     workbox: {
-      navigateFallback: '/',
-      navigateFallbackDenylist: [/^\/auth/, /^\/api/],
+      navigateFallback: null,
       globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
       runtimeCaching: [
         {

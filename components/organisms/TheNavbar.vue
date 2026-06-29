@@ -117,7 +117,7 @@
             <img src="/logo.png" alt="Van Elvina Logo" class="h-9 md:h-11 w-auto object-contain" />
           </NuxtLink>
 
-          <div v-if="!isSearchIconOnly" class="flex items-center flex-1 relative mx-4">
+          <div class="flex items-center flex-1 relative mx-4">
             <button
               class="w-full flex items-center gap-2 px-5 py-2.5 bg-light-gray rounded-full text-xs text-mid-gray font-ui hover:bg-rose-blush/40 transition-colors duration-200 border border-transparent hover:border-dusty-rose/20"
               aria-label="Search products"
@@ -130,14 +130,7 @@
             </button>
           </div>
 
-          <div v-if="isSearchIconOnly" class="flex-1 mx-4"></div>
-
           <div class="flex items-center gap-2 md:gap-3">
-            <button v-if="isSearchIconOnly" @click="ui.openSearch" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Search">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
             <button @click="ui.openSizeGuide" class="inline-flex items-center px-4 py-1.5 bg-[#C59B27] hover:bg-[#A37B1D] text-white text-xs font-semibold rounded-full pulse-fit transition-all duration-300 select-none cursor-pointer">
               Find Your Fit
             </button>
@@ -152,16 +145,6 @@
               <span v-else-if="auth.isLoggedIn" class="text-xs font-bold text-deep-plum font-ui">{{ userInitials }}</span>
               <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </button>
-            <!-- Share (PDP only, desktop) -->
-            <button v-if="isSearchIconOnly" @click="handleNavShare" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Share this product">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="18" cy="5" r="3"/>
-                <circle cx="6" cy="12" r="3"/>
-                <circle cx="18" cy="19" r="3"/>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
               </svg>
             </button>
             <NuxtLink to="/bag" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Shopping bag">

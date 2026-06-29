@@ -192,6 +192,12 @@
                 {{ orders.length }}
               </span>
               <span 
+                v-else-if="tab.id === 'returns' && returnExchangeOrders.length"
+                class="text-[9px] px-1.5 py-0.5 rounded bg-amber-400/80 text-deep-plum font-bold"
+              >
+                {{ returnExchangeOrders.length }}
+              </span>
+              <span 
                 v-else-if="tab.id === 'inquiries' && inquiries.length"
                 class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
               >
@@ -1352,7 +1358,166 @@
         </div>
       </Transition>
 
+      <!-- RETURNS & EXCHANGES TAB -->
+      <Transition name="fade">
+        <section v-if="activeTab === 'returns'" class="space-y-6 animate-fade-in">
+          <!-- Section Header -->
+          <div class="flex items-center justify-between border-b border-rose-blush/30 pb-4">
+            <div>
+              <h2 class="text-xl font-serif text-deep-plum font-bold">Returns & Exchanges</h2>
+              <p class="text-xs text-charcoal/50 font-medium">Manage customer return and exchange requests. Update statuses and schedule pickups.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full font-bold">
+                {{ returnExchangeOrders.length }} Active Requests
+              </span>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-if="returnExchangeOrders.length === 0" class="py-16 text-center border border-dashed border-rose-blush/40 rounded-3xl bg-white">
+            <div class="text-5xl mb-4">✅</div>
+            <h3 class="font-serif text-lg text-deep-plum font-bold mb-1">No Active Requests</h3>
+            <p class="text-sm text-charcoal/50 font-ui">All return and exchange requests have been resolved.</p>
+          </div>
+
+          <!-- Returns & Exchanges List -->
+          <div v-else class="space-y-4">
+            <div
+              v-for="order in returnExchangeOrders"
+              :key="order.id"
+              class="bg-white rounded-2xl border border-rose-blush/30 overflow-hidden shadow-soft"
+            >
+              <!-- Card Header -->
+              <div class="flex items-center justify-between px-5 py-3 border-b border-rose-blush/20" 
+                :class="order.orderStatus === 'return_requested' || order.orderStatus === 'exchange_requested' ? 'bg-amber-50' : 'bg-rose-blush/10'">
+                <div class="flex items-center gap-3">
+                  <span class="text-lg">{{ order.orderStatus.includes('return') ? '⚠️' : '🔄' }}</span>
+                  <div>
+                    <p class="text-xs font-bold text-deep-plum uppercase tracking-wider font-ui">
+                      {{ order.orderStatus === 'return_requested' ? 'Return Requested'
+                        : order.orderStatus === 'exchange_requested' ? 'Exchange Requested'
+                        : order.orderStatus === 'return_picked_up' ? 'Return – Picked Up'
+                        : order.orderStatus === 'returned' ? 'Returned & Resolved'
+                        : order.orderStatus === 'exchange_packed' ? 'Exchange – Packed'
+                        : order.orderStatus === 'exchange_dispatched' ? 'Exchange – Dispatched'
+                        : order.orderStatus === 'exchanged' ? 'Exchanged & Resolved'
+                        : order.orderStatus }}
+                    </p>
+                    <p class="text-[10px] text-charcoal/50 font-ui">{{ order.orderId }}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs font-bold text-charcoal">₹{{ (order.total || 0).toLocaleString('en-IN') }}</p>
+                  <p class="text-[10px] text-charcoal/50 font-ui">{{ new Date(order.createdAt).toLocaleDateString('en-IN') }}</p>
+                </div>
+              </div>
+
+              <div class="px-5 py-4 grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- Customer & Reason -->
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-wider mb-1 font-ui">Customer</p>
+                    <p class="text-sm font-semibold text-deep-plum">{{ order.userId?.name || order.guestInfo?.name || 'Guest' }}</p>
+                    <p class="text-xs text-charcoal/60 font-ui">{{ order.userId?.email || order.guestInfo?.email || '—' }}</p>
+                  </div>
+
+                  <div v-if="order.shippingAddress">
+                    <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-wider mb-1 font-ui">Pickup Address</p>
+                    <p class="text-xs text-charcoal/70 font-ui leading-relaxed">
+                      {{ order.shippingAddress.name }}<br/>
+                      {{ order.shippingAddress.line1 }}{{ order.shippingAddress.line2 ? `, ${order.shippingAddress.line2}` : '' }}<br/>
+                      {{ order.shippingAddress.city }}, {{ order.shippingAddress.state }} – {{ order.shippingAddress.pincode }}<br/>
+                      <span class="font-semibold">📞 {{ order.shippingAddress.phone }}</span>
+                    </p>
+                  </div>
+
+                  <!-- Reason from last status note -->
+                  <div v-if="order.statusHistory && order.statusHistory.length">
+                    <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-wider mb-1 font-ui">Reason / Note</p>
+                    <p class="text-xs text-charcoal/80 font-ui bg-rose-blush/10 rounded-lg px-3 py-2 border border-rose-blush/20 italic">
+                      "{{ [...order.statusHistory].reverse().find(h => h.note)?.note || 'No reason provided' }}"
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Order Items -->
+                <div>
+                  <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-wider mb-2 font-ui">Items in Order</p>
+                  <div class="space-y-2">
+                    <div 
+                      v-for="(item, idx) in (order.items || []).slice(0, 3)"
+                      :key="idx"
+                      class="flex items-center gap-2.5"
+                    >
+                      <img 
+                        v-if="item.image" 
+                        :src="item.image" 
+                        :alt="item.name" 
+                        class="w-10 h-12 object-cover rounded-lg border border-rose-blush/20 shrink-0"
+                      />
+                      <div v-else class="w-10 h-12 bg-rose-blush/20 rounded-lg shrink-0"></div>
+                      <div class="min-w-0">
+                        <p class="text-xs font-semibold text-charcoal truncate">{{ item.name }}</p>
+                        <p class="text-[10px] text-charcoal/50 font-ui">{{ [item.color, item.size ? `Size: ${item.size}` : ''].filter(Boolean).join(' · ') }}</p>
+                        <p class="text-[10px] font-bold text-deep-plum">× {{ item.quantity }} · ₹{{ (item.price * item.quantity).toLocaleString('en-IN') }}</p>
+                      </div>
+                    </div>
+                    <p v-if="(order.items || []).length > 3" class="text-[10px] text-charcoal/40 font-ui">
+                      + {{ order.items.length - 3 }} more items
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status Update Footer -->
+              <div class="flex items-center justify-between gap-3 px-5 py-3 bg-warm-ivory/50 border-t border-rose-blush/20">
+                <p class="text-[10px] text-charcoal/50 font-ui">Update Status:</p>
+                <div class="flex flex-wrap gap-2 justify-end">
+                  <button
+                    v-if="order.orderStatus === 'return_requested' || order.orderStatus === 'exchange_requested'"
+                    @click="updateOrderStatus(order._id, 'return_picked_up')"
+                    class="text-[10px] px-3 py-1.5 bg-amber-100 text-amber-800 border border-amber-200 rounded-full font-bold hover:bg-amber-200 transition-colors cursor-pointer"
+                  >
+                    Mark Picked Up
+                  </button>
+                  <button
+                    v-if="order.orderStatus === 'return_picked_up'"
+                    @click="updateOrderStatus(order._id, 'returned')"
+                    class="text-[10px] px-3 py-1.5 bg-green-100 text-green-800 border border-green-200 rounded-full font-bold hover:bg-green-200 transition-colors cursor-pointer"
+                  >
+                    Mark Returned ✓
+                  </button>
+                  <button
+                    v-if="order.orderStatus === 'return_picked_up' || order.orderStatus === 'exchange_requested'"
+                    @click="updateOrderStatus(order._id, 'exchange_packed')"
+                    class="text-[10px] px-3 py-1.5 bg-blue-100 text-blue-800 border border-blue-200 rounded-full font-bold hover:bg-blue-200 transition-colors cursor-pointer"
+                  >
+                    Mark Packed 📦
+                  </button>
+                  <button
+                    v-if="order.orderStatus === 'exchange_packed'"
+                    @click="updateOrderStatus(order._id, 'exchange_dispatched')"
+                    class="text-[10px] px-3 py-1.5 bg-indigo-100 text-indigo-800 border border-indigo-200 rounded-full font-bold hover:bg-indigo-200 transition-colors cursor-pointer"
+                  >
+                    Mark Dispatched 🚚
+                  </button>
+                  <button
+                    v-if="order.orderStatus === 'exchange_dispatched'"
+                    @click="updateOrderStatus(order._id, 'exchanged')"
+                    class="text-[10px] px-3 py-1.5 bg-green-100 text-green-800 border border-green-200 rounded-full font-bold hover:bg-green-200 transition-colors cursor-pointer"
+                  >
+                    Mark Exchanged ✓
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </Transition>
+
       <!-- TAB 9: ABOUT US -->
+
       <section v-if="activeTab === 'about'" class="space-y-6 animate-fade-in">
         <!-- Section Header -->
         <div class="flex items-center justify-between border-b border-rose-blush/30 pb-4">
@@ -2848,6 +3013,7 @@ const tabGroups = [
     tabs: [
       { id: 'overview', name: 'Console Overview', icon: '📈' },
       { id: 'orders', name: 'Customer Orders', icon: '📦' },
+      { id: 'returns', name: 'Returns & Exchanges', icon: '🔄' },
       { id: 'users', name: 'Registered Customers', icon: '👥' },
       { id: 'inquiries', name: 'Customer Queries', icon: '💬' }
     ]
@@ -2939,6 +3105,15 @@ const blogs = ref<any[]>([])
 const users = ref<any[]>([])
 const orders = ref<any[]>([])
 const inquiries = ref<any[]>([])
+
+// Computed: filter orders with return/exchange statuses
+const returnExchangeOrders = computed(() =>
+  orders.value.filter(o => [
+    'return_requested', 'exchange_requested',
+    'return_picked_up', 'returned',
+    'exchange_packed', 'exchange_dispatched', 'exchanged'
+  ].includes(o.orderStatus || o.order_status))
+)
 
 const loadingData = ref(false)
 const aboutData = ref<any>(null)
