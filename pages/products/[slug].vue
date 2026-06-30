@@ -616,7 +616,7 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
         </svg>
-        ADD TO BAG
+        {{ isAlreadyInBag ? 'GO TO BAG' : 'ADD TO BAG' }}
       </span>
     </button>
   </div>
@@ -794,8 +794,38 @@ const handleShare = async () => {
   const url = window.location.href
   const title = product.value?.name ?? 'Check out this product'
   const text = `${title} – Van Elvina`
+
   if (navigator.share) {
     try {
+      const imageUrl = activeImage.value || product.value?.variants[0]?.images[0]
+      if (imageUrl) {
+        try {
+          // Fetch the product image as a blob
+          const response = await fetch(imageUrl)
+          const blob = await response.blob()
+          
+          // Determine mime type and appropriate extension
+          const mimeType = blob.type || 'image/jpeg'
+          const extension = mimeType.split('/')[1] || 'jpg'
+          const file = new File([blob], `product-image.${extension}`, { type: mimeType })
+          
+          // Check if file sharing is supported on this browser/platform
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title,
+              text,
+              url,
+              files: [file]
+            })
+            return
+          }
+        } catch (fileErr) {
+          console.warn('Failed to attach product image file to share payload:', fileErr)
+          // Fall back and share text & URL only
+        }
+      }
+      
+      // Fallback: share title, text, and URL
       await navigator.share({ title, text, url })
     } catch {
       // user dismissed — no action needed
@@ -879,6 +909,14 @@ watch(selectedSize, () => { if (selectedSize.value) sizeError.value = false })
 onMounted(() => {
   if (product.value) {
     addRecentlyViewed(product.value)
+    // Track deliberate PDP visit (high-intent view)
+    trackProductView(
+      product.value.id || product.value._id,
+      product.value.name,
+      product.value.category,
+      product.value.price
+    )
+    // Also track as impression for PLP-level aggregation
     trackProductImpression(
       product.value.id || product.value._id,
       product.value.name,

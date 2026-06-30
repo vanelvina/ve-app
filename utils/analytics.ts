@@ -80,6 +80,30 @@ export const trackCheckout = (orderId: string, total: number, itemsCount: number
   })
 }
 
+export const trackProductView = (productId: string, productName: string, category: string, price: number) => {
+  trackEvent('analytics_product_view', {
+    productId,
+    productName,
+    category,
+    price
+  })
+}
+
+export const trackCheckoutStarted = (itemsCount: number, total: number) => {
+  trackEvent('analytics_checkout_started', {
+    itemsCount,
+    total
+  })
+}
+
+export const trackCheckoutAbandoned = (itemsCount: number, total: number, lastStep: string) => {
+  trackEvent('analytics_checkout_abandoned', {
+    itemsCount,
+    total,
+    lastStep
+  })
+}
+
 export const trackLogin = (email: string, name: string) => {
   trackEvent('analytics_login', {
     email,

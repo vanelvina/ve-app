@@ -20,3 +20,9 @@
 - [x] Transfer the customer notifications bell from the global navbar to the sliding profile drawer component, and update the navbar profile button with a modern outline SVG icon matching the exact style of other navbar icons
 - [x] Resolve duplicate wishlist toast notifications by removing the redundant toast trigger from the useWishlist composable wrapper, leaving the store to handle it centrally
 - [x] Relocate the product share button from the global navbar header controls directly to the right-most side of the product title area on the Product Description Page (PDP)
+- [x] Attach the product variant image rather than the brand logo when triggering the share sheet on the Product Description Page (PDP)
+- [x] Make the mobile sticky bottom button dynamic to toggle between ADD TO BAG and GO TO BAG states after the product has been successfully added to the cart
+- [x] Refactor the PWA install prompt logic to replace persistent local storage blocking flags with temporary session storage tracking, ensuring that if a user uninstalls/deletes the app and opens the site in a standard mobile browser, they will be prompted to install it again on subsequent sessions
+- [x] Fix checkout redirect behavior by preventing openAuthModal from overwriting pre-set redirect targets, and explicitly passing /checkout when opening the modal from the shopping bag page
+- [x] Format the Razorpay checkout prefill options to strip all non-digit characters from the contact number, resolving the validation failure that caused the mobile number field to remain empty in the payment gateway
+- [x] Resolve 500 Internal Server Errors in admin status pipelines (Create Shipping Label, Mark In-Transit, Initiate Reverse Pickup) by implementing triggerOrderPushNotification to safely resolve customer emails before querying database subscriptions

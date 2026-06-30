@@ -59,13 +59,17 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
 const showPrompt = ref(false)
 const isIOS = ref(false)
 const deferredPrompt = ref<any>(null)
 
 const dismissPrompt = () => {
   showPrompt.value = false
-  localStorage.setItem('pwa_prompt_dismissed', 'true')
+  // Store in sessionStorage so it only dismisses for the current browsing session.
+  // Next time they open the browser, they will be prompted again.
+  sessionStorage.setItem('pwa_prompt_dismissed_session', 'true')
 }
 
 const triggerInstall = async () => {
@@ -83,13 +87,17 @@ const triggerInstall = async () => {
 onMounted(() => {
   if (!import.meta.client) return
 
-  // 1. Check if already dismissed
-  const dismissed = localStorage.getItem('pwa_prompt_dismissed') === 'true'
-  if (dismissed) return
-
-  // 2. Check if running in standalone PWA mode
+  // 1. Check if already running in standalone PWA mode
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone
-  if (isStandalone) return
+  if (isStandalone) {
+    // If they have it installed and are currently running it, hide prompt.
+    showPrompt.value = false
+    return
+  }
+
+  // 2. Check if dismissed during this session
+  const dismissedThisSession = sessionStorage.getItem('pwa_prompt_dismissed_session') === 'true'
+  if (dismissedThisSession) return
 
   // 3. Detect mobile device
   const userAgent = window.navigator.userAgent.toLowerCase()
@@ -114,10 +122,10 @@ onMounted(() => {
     }, 4000)
   }
 
-  // 6. Listen for successful install to never show again
+  // 6. Listen for successful install
   window.addEventListener('appinstalled', () => {
-    localStorage.setItem('pwa_prompt_dismissed', 'true')
     showPrompt.value = false
+    console.log('App was successfully installed!')
   })
 })
 </script>

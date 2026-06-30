@@ -85,9 +85,9 @@
 </template>
 
 <script setup lang="ts">
-const banners = ref<any[]>([])
+const banners = useState<any[]>('homepage-banners', () => [])
 const current = ref(0)
-const loading = ref(true)
+const loading = ref(banners.value.length === 0)
 
 const fetchBanners = async () => {
   const config = useRuntimeConfig()
@@ -125,7 +125,11 @@ const handleSwipe = () => {
 }
 
 onMounted(() => {
-  fetchBanners()
+  if (banners.value.length === 0) {
+    fetchBanners()
+  } else {
+    loading.value = false
+  }
 })
 
 const next = () => {

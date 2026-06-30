@@ -49,7 +49,7 @@ export const useUIStore = defineStore('ui', {
       this.authModalOpen = true
       if (redirectPath && typeof redirectPath === 'string') {
         this.authRedirect = redirectPath
-      } else if (import.meta.client) {
+      } else if (import.meta.client && !this.authRedirect) {
         const currentPath = window.location.pathname + window.location.search
         if (!currentPath.includes('/auth/')) {
           this.authRedirect = currentPath

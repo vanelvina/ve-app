@@ -24,8 +24,8 @@
 </template>
 
 <script setup lang="ts">
-const reviews = ref<any[]>([])
-const loading = ref(true)
+const reviews = useState<any[]>('homepage-reviews', () => [])
+const loading = ref(reviews.value.length === 0)
 
 const stats = [
   { value: '50,000+', label: 'Happy Customers' },
@@ -47,6 +47,10 @@ const fetchReviews = async () => {
 }
 
 onMounted(() => {
-  fetchReviews()
+  if (reviews.value.length === 0) {
+    fetchReviews()
+  } else {
+    loading.value = false
+  }
 })
 </script>

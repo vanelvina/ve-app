@@ -169,6 +169,7 @@
 
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 import { formatPrice, isValidPincode, isValidPhone, isValidEmail, capitalizeWords } from '~/utils/formatters'
 
 definePageMeta({ layout: 'checkout' })
@@ -197,6 +198,7 @@ const checkoutDiscount = computed(() => {
 })
 
 const currentStep = ref(0)
+const orderCompleted = ref(false) // set true when navigating to thank-you; prevents false abandon tracking
 const steps = ['Address', 'Confirmation']
 const placing = ref(false)
 const selectedShipping = ref('standard')
@@ -234,6 +236,20 @@ onMounted(async () => {
       const stored = sessionStorage.getItem('ve_buy_now_item')
       if (stored) buyNowItem.value = JSON.parse(stored)
     } catch (e) {}
+  }
+  // Track that user has reached the checkout page
+  const itemsCount = checkoutItems.value.length
+  const total = orderTotal.value
+  if (itemsCount > 0) {
+    trackCheckoutStarted(itemsCount, total)
+  }
+})
+
+// Track abandonment when user navigates away without completing the order
+onBeforeRouteLeave(() => {
+  if (!orderCompleted.value && checkoutItems.value.length > 0) {
+    const stepName = currentStep.value === 0 ? 'address' : 'confirmation'
+    trackCheckoutAbandoned(checkoutItems.value.length, orderTotal.value, stepName)
   }
 })
 
@@ -434,6 +450,7 @@ const placeOrder = async () => {
           sessionStorage.removeItem('ve_buy_now_item')
         }
         ui.addToast('success', 'Order placed successfully! 🎉')
+        orderCompleted.value = true
         router.push(`/thank-you?order=${res.orderId}`)
       } else {
         throw new Error(res.message || 'Failed to place order')
@@ -468,6 +485,7 @@ const placeOrder = async () => {
                 sessionStorage.removeItem('ve_buy_now_item')
               }
               ui.addToast('success', 'Payment successful! Order placed! 🎉')
+              orderCompleted.value = true
               router.push(`/thank-you?order=${res.orderId}`)
             } else {
               throw new Error(res.message || 'Payment verification failed')
@@ -482,7 +500,10 @@ const placeOrder = async () => {
         prefill: {
           name: form.fullName.trim(),
           email: form.email.trim() || '',
-          contact: form.phone.trim().length === 10 ? '+91' + form.phone.trim() : form.phone.trim()
+          contact: (() => {
+            const clean = form.phone.replace(/\D/g, '')
+            return clean.length === 10 ? '91' + clean : clean
+          })()
         },
         theme: {
           color: "#2A1B18" // Deep Cocoa

@@ -110,17 +110,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
-const blogsList = ref<any[]>([])
-const latestBlogs = ref<any[]>([])
+const blogsList = useState<any[]>('homepage-blogs', () => [])
+const latestBlogs = computed(() => blogsList.value.slice(0, 3))
 
 const fetchBlogs = async () => {
   const config = useRuntimeConfig()
   try {
     const data = await $fetch<any[]>(`${config.public.apiBase}/blogs`)
     blogsList.value = data
-    latestBlogs.value = data.slice(0, 3)
   } catch (error) {
     console.error('Failed to load active blogs:', error)
   }
@@ -137,7 +136,9 @@ const formatDate = (dateStr: string) => {
 }
 
 onMounted(() => {
-  fetchBlogs()
+  if (blogsList.value.length === 0) {
+    fetchBlogs()
+  }
 })
 </script>
 

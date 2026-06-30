@@ -457,55 +457,123 @@
             </div>
             
             <!-- Timeframe selector -->
-            <div class="inline-flex rounded-xl p-1 bg-white border border-rose-blush/30 shadow-soft select-none text-[11px] font-bold text-charcoal/70">
-              <button 
-                v-for="t in (['daily', 'weekly', 'monthly', 'yearly'] as const)" 
-                :key="t"
-                @click="trendTab = t"
-                class="px-3.5 py-1.5 rounded-lg capitalize transition-all cursor-pointer"
-                :class="trendTab === t ? 'bg-deep-plum text-white shadow-soft' : 'hover:text-deep-plum'"
-              >
-                {{ t }}
-              </button>
+            <div class="flex items-center gap-2">
+              <div v-if="analyticsLoading" class="text-[10px] text-charcoal/40 animate-pulse font-medium">Refreshing…</div>
+              <div class="inline-flex rounded-xl p-1 bg-white border border-rose-blush/30 shadow-soft select-none text-[11px] font-bold text-charcoal/70">
+                <button 
+                  v-for="t in (['today', 'week', 'month', 'all'] as const)" 
+                  :key="t"
+                  @click="analyticsTimeframe = t"
+                  class="px-3.5 py-1.5 rounded-lg capitalize transition-all cursor-pointer"
+                  :class="analyticsTimeframe === t ? 'bg-deep-plum text-white shadow-soft' : 'hover:text-deep-plum'"
+                >
+                  {{ t === 'all' ? 'All Time' : t === 'week' ? 'This Week' : t === 'month' ? 'This Month' : 'Today' }}
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Behavioral Stats Grid -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white p-4.5 rounded-2xl border border-charcoal/15 shadow-soft space-y-1">
-              <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Total Page Visits</p>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-xl font-bold text-deep-plum font-serif">{{ siteVisitsChartData.values.reduce((a, b) => a + b, 0) }}</span>
-                <span class="text-[9px] text-emerald-600 font-bold">↑ 12%</span>
+          <!-- KPI Stats Grid: Behavioral -->
+          <div>
+            <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-widest mb-3">🧭 Behavioral Funnel</p>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-white p-4 rounded-2xl border border-charcoal/15 shadow-soft space-y-1">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Site Visits</p>
+                <p class="text-2xl font-bold text-deep-plum font-serif">{{ analyticsMetrics.visits.toLocaleString('en-IN') }}</p>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-charcoal/15 shadow-soft space-y-1">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Product Views</p>
+                <p class="text-2xl font-bold text-deep-plum font-serif">{{ analyticsMetrics.productViews.toLocaleString('en-IN') }}</p>
+                <p class="text-[9px] text-charcoal/40">PDP opens</p>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-charcoal/15 shadow-soft space-y-1">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Add to Cart</p>
+                <p class="text-2xl font-bold text-deep-plum font-serif">{{ analyticsMetrics.addToCarts.toLocaleString('en-IN') }}</p>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-charcoal/15 shadow-soft space-y-1">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Product Clicks</p>
+                <p class="text-2xl font-bold text-deep-plum font-serif">{{ analyticsMetrics.productClicks.toLocaleString('en-IN') }}</p>
               </div>
             </div>
-            <div class="bg-white p-4.5 rounded-2xl border border-charcoal/15 shadow-soft space-y-1">
-              <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Product Impressions</p>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-xl font-bold text-deep-plum font-serif">{{ totalImpressionsCount }}</span>
-                <span class="text-[9px] text-emerald-600 font-bold">↑ 8.4%</span>
+          </div>
+
+          <!-- KPI Stats Grid: Orders & Revenue -->
+          <div>
+            <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-widest mb-3">💰 Orders & Revenue</p>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-white p-4 rounded-2xl border border-charcoal/15 shadow-soft space-y-1">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Total Orders</p>
+                <p class="text-2xl font-bold text-deep-plum font-serif">{{ analyticsMetrics.orders }}</p>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-emerald-200 shadow-soft space-y-1">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Revenue</p>
+                <p class="text-2xl font-bold text-emerald-700 font-serif">₹{{ analyticsMetrics.revenue.toLocaleString('en-IN') }}</p>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-soft space-y-1">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Returns</p>
+                <p class="text-2xl font-bold text-amber-600 font-serif">{{ analyticsMetrics.returns }}</p>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-blue-200 shadow-soft space-y-1">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Exchanges</p>
+                <p class="text-2xl font-bold text-blue-600 font-serif">{{ analyticsMetrics.exchanges }}</p>
               </div>
             </div>
-            <div class="bg-white p-4.5 rounded-2xl border border-charcoal/15 shadow-soft space-y-1">
-              <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Product Clicks</p>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-xl font-bold text-deep-plum font-serif">{{ totalClicksCount }}</span>
-                <span class="text-[9px] text-emerald-600 font-bold">↑ 14.2%</span>
+          </div>
+
+          <!-- Checkout Funnel Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Conversion Rate -->
+            <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-3">
+              <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-wider">Overall Conversion</p>
+              <div class="flex items-baseline gap-1">
+                <span class="text-3xl font-bold text-deep-plum font-serif">{{ analyticsMetrics.conversionRate }}%</span>
+                <span class="text-xs text-charcoal/50">visits → orders</span>
+              </div>
+              <div class="h-2 bg-rose-blush/30 rounded-full overflow-hidden">
+                <div class="h-full bg-deep-plum rounded-full transition-all" :style="`width: ${Math.min(Number(analyticsMetrics.conversionRate), 100)}%`" />
               </div>
             </div>
-            <div class="bg-white p-4.5 rounded-2xl border border-charcoal/15 shadow-soft space-y-1">
-              <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Add to Carts</p>
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-xl font-bold text-deep-plum font-serif">{{ totalCartsCount }}</span>
-                <span class="text-[9px] text-emerald-600 font-bold">↑ 5.1%</span>
+            <!-- Checkout Started vs Completed -->
+            <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-3">
+              <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-wider">Checkout Funnel</p>
+              <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-charcoal/70">Started</span>
+                  <span class="font-bold text-charcoal">{{ analyticsMetrics.checkoutsStarted }}</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-emerald-700">Completed</span>
+                  <span class="font-bold text-emerald-700">{{ analyticsMetrics.checkoutsCompleted }}</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-red-500">Abandoned</span>
+                  <span class="font-bold text-red-500">{{ analyticsMetrics.checkoutsAbandoned }}</span>
+                </div>
               </div>
+            </div>
+            <!-- Cart → Checkout rate -->
+            <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-3">
+              <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-wider">Cart → Checkout</p>
+              <div class="flex items-baseline gap-1">
+                <span class="text-3xl font-bold text-deep-plum font-serif">{{ analyticsMetrics.cartToCheckout }}%</span>
+                <span class="text-xs text-charcoal/50">of carts proceed</span>
+              </div>
+              <p class="text-[10px] text-red-500 font-semibold" v-if="Number(analyticsMetrics.abandonRate) > 40">
+                ⚠ {{ analyticsMetrics.abandonRate }}% checkout abandon rate
+              </p>
+              <p class="text-[10px] text-emerald-600 font-semibold" v-else>
+                ✓ {{ analyticsMetrics.abandonRate }}% abandon rate — healthy
+              </p>
             </div>
           </div>
 
           <!-- Trend Chart Section -->
           <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-4">
-            <h4 class="text-xs font-bold text-charcoal/70 uppercase tracking-wider">Site Visits Trend</h4>
-            <div class="w-full h-[180px] flex items-center justify-center">
+            <h4 class="text-xs font-bold text-charcoal/70 uppercase tracking-wider">📈 Daily Visits Trend</h4>
+            <div v-if="siteVisitsChartData.values.length === 0" class="py-8 text-center text-xs text-charcoal/40 italic">
+              No visit data yet for this timeframe.
+            </div>
+            <div v-else class="w-full h-[180px] flex items-center justify-center">
               <svg viewBox="0 0 500 150" class="w-full h-full overflow-visible">
                 <defs>
                   <linearGradient id="visitsGrad" x1="0" y1="0" x2="0" y2="1">
@@ -513,174 +581,91 @@
                     <stop offset="100%" stop-color="#8A4F5A" stop-opacity="0.0"/>
                   </linearGradient>
                 </defs>
-                
                 <!-- Grid Lines -->
                 <line x1="40" y1="20" x2="460" y2="20" stroke="#FAF0F1" stroke-dasharray="4 4" stroke-width="1"/>
                 <line x1="40" y1="52.5" x2="460" y2="52.5" stroke="#FAF0F1" stroke-dasharray="4 4" stroke-width="1"/>
                 <line x1="40" y1="85" x2="460" y2="85" stroke="#FAF0F1" stroke-dasharray="4 4" stroke-width="1"/>
                 <line x1="40" y1="117.5" x2="460" y2="117.5" stroke="#FAF0F1" stroke-dasharray="4 4" stroke-width="1"/>
                 <line x1="40" y1="130" x2="460" y2="130" stroke="#E8D5D8" stroke-width="1"/>
-
                 <!-- Area Fill -->
                 <polygon v-if="visitsChartPath.fillPoints" :points="visitsChartPath.fillPoints" fill="url(#visitsGrad)"/>
-
                 <!-- Line -->
                 <polyline v-if="visitsChartPath.polylinePoints" :points="visitsChartPath.polylinePoints" fill="none" stroke="#8A4F5A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-
                 <!-- Dots & Labels -->
                 <g v-for="(p, idx) in visitsChartPath.points" :key="idx">
                   <circle :cx="p.x" :cy="p.y" r="5" fill="#8A4F5A" stroke="#ffffff" stroke-width="2" class="cursor-pointer hover:scale-125 transition-transform"/>
-                  <!-- Tooltip count -->
                   <text :x="p.x" :y="p.y - 10" text-anchor="middle" font-size="8px" fill="#2C2C2C" font-weight="bold" class="font-sans">{{ p.val }}</text>
-                  <!-- Bottom labels -->
                   <text :x="p.x" y="145" text-anchor="middle" font-size="8px" fill="#A0A0A0" class="font-ui uppercase font-semibold">{{ p.label }}</text>
                 </g>
               </svg>
             </div>
           </div>
 
-          <!-- Product Clicks & Add-to-Carts tables -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            <!-- Left: Product Clicks -->
-            <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-4">
-              <h4 class="text-xs font-bold text-charcoal/70 uppercase tracking-wider flex items-center gap-1.5">
-                <span>🖱️</span>
-                <span>Product Clicks Log</span>
-              </h4>
-              <div class="overflow-x-auto">
-                <table class="w-full text-left text-[11px] font-sans border-collapse">
-                  <thead>
-                    <tr class="bg-warm-ivory/50 text-deep-plum border-b border-rose-blush/20 font-bold">
-                      <th class="p-2.5">Product Name</th>
-                      <th class="p-2.5">User Details</th>
-                      <th class="p-2.5 text-right">Date/Time</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-rose-blush/10 text-charcoal/80">
-                    <tr v-if="productClicksList.length === 0">
-                      <td colspan="3" class="p-4 text-center text-charcoal/40 italic">No clicks logged yet. Clicks are tracked dynamically as users shop.</td>
-                    </tr>
-                    <tr v-for="click in productClicksList" :key="click.id" class="hover:bg-rose-blush/5 transition-colors">
-                      <td class="p-2.5 font-semibold text-deep-plum">{{ click.eventData.productName || 'Catalog Product' }}</td>
-                      <td class="p-2.5">
-                        <div class="font-semibold">{{ click.userName || 'Guest' }}</div>
-                        <div class="text-[9px] text-charcoal/50">{{ click.userEmail || '—' }}</div>
-                      </td>
-                      <td class="p-2.5 text-right text-charcoal/50">{{ new Date(click.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+          <!-- Top Products by Views table -->
+          <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-4">
+            <h4 class="text-xs font-bold text-charcoal/70 uppercase tracking-wider flex items-center gap-1.5">
+              <span>🔥</span>
+              <span>Top Products — Views, Carts & Revenue</span>
+            </h4>
+            <div v-if="analyticsTopByRevenue.length === 0" class="py-6 text-center text-xs text-charcoal/40 italic">
+              No product data yet for this timeframe. Start selling to see analytics.
             </div>
-
-            <!-- Right: Add to Carts -->
-            <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-4">
-              <h4 class="text-xs font-bold text-charcoal/70 uppercase tracking-wider flex items-center gap-1.5">
-                <span>🛒</span>
-                <span>Product Add to Carts</span>
-              </h4>
-              <div class="overflow-x-auto">
-                <table class="w-full text-left text-[11px] font-sans border-collapse">
-                  <thead>
-                    <tr class="bg-warm-ivory/50 text-deep-plum border-b border-rose-blush/20 font-bold">
-                      <th class="p-2.5">Product Info</th>
-                      <th class="p-2.5">User Details</th>
-                      <th class="p-2.5 text-right">Date/Time</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-rose-blush/10 text-charcoal/80">
-                    <tr v-if="addToCartsList.length === 0">
-                      <td colspan="3" class="p-4 text-center text-charcoal/40 italic">No add-to-carts logged yet. Cart actions are tracked in real-time.</td>
-                    </tr>
-                    <tr v-for="cart in addToCartsList" :key="cart.id" class="hover:bg-rose-blush/5 transition-colors">
-                      <td class="p-2.5">
-                        <div class="font-semibold text-deep-plum">{{ cart.eventData.productName }}</div>
-                        <div class="text-[9px] text-charcoal/50">{{ cart.eventData.color }} · Size {{ cart.eventData.size }} · Qty {{ cart.eventData.quantity }}</div>
-                      </td>
-                      <td class="p-2.5">
-                        <div class="font-semibold">{{ cart.userName || 'Guest' }}</div>
-                        <div class="text-[9px] text-charcoal/50">{{ cart.userEmail || '—' }}</div>
-                      </td>
-                      <td class="p-2.5 text-right text-charcoal/50">{{ new Date(cart.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            <div v-else class="overflow-x-auto">
+              <table class="w-full text-left text-[11px] font-sans border-collapse">
+                <thead>
+                  <tr class="bg-warm-ivory/50 text-deep-plum border-b border-rose-blush/20 font-bold">
+                    <th class="p-2.5">#</th>
+                    <th class="p-2.5">Product</th>
+                    <th class="p-2.5 text-right">Views</th>
+                    <th class="p-2.5 text-right">Carts</th>
+                    <th class="p-2.5 text-right">Orders</th>
+                    <th class="p-2.5 text-right">Revenue</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-rose-blush/10 text-charcoal/80">
+                  <tr v-for="(p, idx) in analyticsTopByRevenue" :key="p.productId" class="hover:bg-rose-blush/5 transition-colors">
+                    <td class="p-2.5 text-charcoal/30 font-bold">{{ idx + 1 }}</td>
+                    <td class="p-2.5">
+                      <p class="font-semibold text-charcoal">{{ p.productName }}</p>
+                      <p class="text-[9px] text-charcoal/40 uppercase">{{ p.category }}</p>
+                    </td>
+                    <td class="p-2.5 text-right font-mono">{{ p.views }}</td>
+                    <td class="p-2.5 text-right font-mono">{{ p.carts }}</td>
+                    <td class="p-2.5 text-right font-mono font-semibold text-deep-plum">{{ p.orders }}</td>
+                    <td class="p-2.5 text-right font-bold text-emerald-700">₹{{ p.revenue.toLocaleString('en-IN') }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <!-- Checkout details & Units Sold lists -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Left: Checkout details logs -->
-            <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-4 lg:col-span-2">
-              <h4 class="text-xs font-bold text-charcoal/70 uppercase tracking-wider flex items-center gap-1.5">
-                <span>💸</span>
-                <span>Checkout Conversions Log</span>
-              </h4>
-              <div class="overflow-x-auto">
-                <table class="w-full text-left text-[11px] font-sans border-collapse">
-                  <thead>
-                    <tr class="bg-warm-ivory/50 text-deep-plum border-b border-rose-blush/20 font-bold">
-                      <th class="p-2.5">Order ID</th>
-                      <th class="p-2.5">Items</th>
-                      <th class="p-2.5">User Details</th>
-                      <th class="p-2.5">Total Paid</th>
-                      <th class="p-2.5 text-right">Date/Time</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-rose-blush/10 text-charcoal/80">
-                    <tr v-if="checkoutDetailsList.length === 0">
-                      <td colspan="5" class="p-4 text-center text-charcoal/40 italic">No checkout details logged yet. Completed payments appear here.</td>
-                    </tr>
-                    <tr v-for="checkout in checkoutDetailsList" :key="checkout.id" class="hover:bg-rose-blush/5 transition-colors">
-                      <td class="p-2.5 font-mono font-bold text-deep-plum">#{{ checkout.eventData.orderId }}</td>
-                      <td class="p-2.5">
-                        <div class="font-semibold">{{ checkout.eventData.itemsCount }} {{ checkout.eventData.itemsCount === 1 ? 'item' : 'items' }}</div>
-                        <div class="text-[9px] text-charcoal/50 truncate max-w-[120px]">{{ (checkout.eventData.items || []).map(i => i.name).join(', ') }}</div>
-                      </td>
-                      <td class="p-2.5">
-                        <div class="font-semibold">{{ checkout.userName || 'Guest' }}</div>
-                        <div class="text-[9px] text-charcoal/50">{{ checkout.userEmail || '—' }}</div>
-                      </td>
-                      <td class="p-2.5 font-bold text-charcoal">₹{{ (checkout.eventData.total || 0).toLocaleString('en-IN') }}</td>
-                      <td class="p-2.5 text-right text-charcoal/50">{{ new Date(checkout.createdAt).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+          <!-- Units Sold List -->
+          <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-4">
+            <h4 class="text-xs font-bold text-charcoal/70 uppercase tracking-wider flex items-center gap-1.5">
+              <span>🏆</span>
+              <span>Top Selling Units (from Orders)</span>
+            </h4>
+            <div v-if="unitsSoldList.length === 0" class="p-8 text-center text-charcoal/40 text-xs italic">
+              No units sold registered in database yet.
             </div>
-
-            <!-- Right: Units Sold List -->
-            <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-4">
-              <h4 class="text-xs font-bold text-charcoal/70 uppercase tracking-wider flex items-center gap-1.5">
-                <span>🔥</span>
-                <span>Top Selling Units</span>
-              </h4>
-              
-              <div v-if="unitsSoldList.length === 0" class="p-8 text-center text-charcoal/40 text-xs italic">
-                No units sold registered in database yet.
-              </div>
-              <div v-else class="space-y-3.5 max-h-[290px] overflow-y-auto pr-1">
-                <div 
-                  v-for="(unit, index) in unitsSoldList.slice(0, 5)" 
-                  :key="unit.id"
-                  class="flex items-center justify-between gap-3 text-xs"
-                >
-                  <div class="flex items-center gap-2.5 min-w-0">
-                    <span class="font-bold text-charcoal/30 font-ui w-3.5 text-center">{{ index + 1 }}</span>
-                    <img v-if="unit.image" :src="unit.image" class="w-8 h-10 object-cover rounded border border-rose-blush/20 bg-warm-ivory shrink-0" />
-                    <div v-else class="w-8 h-10 bg-rose-blush/15 rounded shrink-0"></div>
-                    <div class="min-w-0">
-                      <p class="font-semibold text-charcoal truncate">{{ unit.name }}</p>
-                      <p class="text-[9px] text-charcoal/50 uppercase">{{ unit.category }}</p>
-                    </div>
+            <div v-else class="space-y-3.5 max-h-[290px] overflow-y-auto pr-1">
+              <div 
+                v-for="(unit, index) in unitsSoldList.slice(0, 8)" 
+                :key="unit.id"
+                class="flex items-center justify-between gap-3 text-xs"
+              >
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="font-bold text-charcoal/30 font-ui w-3.5 text-center">{{ index + 1 }}</span>
+                  <img v-if="unit.image" :src="unit.image" class="w-8 h-10 object-cover rounded border border-rose-blush/20 bg-warm-ivory shrink-0" />
+                  <div v-else class="w-8 h-10 bg-rose-blush/15 rounded shrink-0"></div>
+                  <div class="min-w-0">
+                    <p class="font-semibold text-charcoal truncate">{{ unit.name }}</p>
+                    <p class="text-[9px] text-charcoal/50 uppercase">{{ unit.category }}</p>
                   </div>
-                  <div class="text-right shrink-0">
-                    <p class="font-bold text-deep-plum">{{ unit.quantity }} Sold</p>
-                    <p class="text-[9px] text-charcoal/50">₹{{ unit.totalSales.toLocaleString('en-IN') }}</p>
-                  </div>
+                </div>
+                <div class="text-right shrink-0">
+                  <p class="font-bold text-deep-plum">{{ unit.quantity }} Sold</p>
+                  <p class="text-[9px] text-charcoal/50">₹{{ unit.totalSales.toLocaleString('en-IN') }}</p>
                 </div>
               </div>
             </div>
@@ -1478,9 +1463,18 @@
           >
             <!-- Card Header -->
             <div class="bg-warm-ivory/40 px-5 py-3.5 border-b border-rose-blush/20 flex flex-wrap justify-between items-center gap-3">
-              <div class="flex items-center gap-3">
-                <span class="font-mono font-bold text-sm text-deep-plum">#{{ order.orderId }}</span>
-                <span class="text-[10px] text-charcoal/50 font-ui">{{ new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</span>
+              <div class="space-y-1">
+                <div class="flex items-center gap-3">
+                  <span class="font-mono font-bold text-sm text-deep-plum">#{{ order.orderId }}</span>
+                  <span class="px-2 py-0.5 text-[9px] font-bold uppercase rounded font-ui bg-rose-blush/40 text-deep-plum">
+                    {{ order.orderStatus.replace(/_/g, ' ') }}
+                  </span>
+                </div>
+                <div class="flex flex-wrap gap-x-4 gap-y-0.5 text-[10px] text-charcoal/50 font-ui font-medium">
+                  <span>📅 Ordered: {{ new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</span>
+                  <span v-if="order.updatedAt && order.updatedAt !== order.createdAt">🔄 Updated: {{ new Date(order.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</span>
+                  <span v-else-if="order.statusHistory && order.statusHistory.length > 0">🔄 Updated: {{ new Date(order.statusHistory[order.statusHistory.length - 1].timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</span>
+                </div>
               </div>
               
               <div class="flex items-center gap-2">
@@ -1614,7 +1608,11 @@
             <div class="space-y-6">
               <div>
                 <h3 class="text-xl font-bold text-deep-plum">Order #{{ inspectedOrder.orderId }}</h3>
-                <p class="text-xs text-charcoal/50 font-medium mt-1">Placed on {{ new Date(inspectedOrder.createdAt).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}</p>
+                <div class="text-xs text-charcoal/50 font-medium mt-1 space-y-0.5">
+                  <p>📅 Placed on: {{ new Date(inspectedOrder.createdAt).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</p>
+                  <p v-if="inspectedOrder.updatedAt && inspectedOrder.updatedAt !== inspectedOrder.createdAt">🔄 Last updated: {{ new Date(inspectedOrder.updatedAt).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</p>
+                  <p v-else-if="inspectedOrder.statusHistory && inspectedOrder.statusHistory.length > 0">🔄 Last updated: {{ new Date(inspectedOrder.statusHistory[inspectedOrder.statusHistory.length - 1].timestamp).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</p>
+                </div>
               </div>
 
               <!-- Direct Controls Panel -->
@@ -1801,9 +1799,11 @@
                     <p class="text-[10px] text-charcoal/50 font-mono font-bold">{{ order.orderId }}</p>
                   </div>
                 </div>
-                <div class="text-right">
+                <div class="text-right space-y-0.5">
                   <p class="text-xs font-bold text-charcoal">₹{{ (order.total || 0).toLocaleString('en-IN') }}</p>
-                  <p class="text-[9px] text-charcoal/50 font-ui">{{ new Date(order.createdAt).toLocaleDateString('en-IN') }}</p>
+                  <p class="text-[9px] text-charcoal/60 font-ui font-medium">📅 Placed: {{ new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</p>
+                  <p v-if="order.updatedAt && order.updatedAt !== order.createdAt" class="text-[9px] text-charcoal/60 font-ui font-medium">🔄 Updated: {{ new Date(order.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</p>
+                  <p v-else-if="order.statusHistory && order.statusHistory.length > 0" class="text-[9px] text-charcoal/60 font-ui font-medium">🔄 Updated: {{ new Date(order.statusHistory[order.statusHistory.length - 1].timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</p>
                 </div>
               </div>
 
@@ -3396,7 +3396,9 @@
                 >
                   <div>
                     <p class="font-bold text-deep-plum font-mono text-[11px]">{{ order.orderId }}</p>
-                    <p class="text-[10px] text-charcoal/50 mt-0.5">Placed on {{ new Date(order.createdAt).toLocaleDateString('en-IN') }}</p>
+                    <p class="text-[10px] text-charcoal/60 mt-0.5 font-medium">📅 Placed: {{ new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</p>
+                    <p v-if="order.updatedAt && order.updatedAt !== order.createdAt" class="text-[9px] text-charcoal/50 mt-0.5 font-medium">🔄 Updated: {{ new Date(order.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</p>
+                    <p v-else-if="order.statusHistory && order.statusHistory.length > 0" class="text-[9px] text-charcoal/50 mt-0.5 font-medium">🔄 Updated: {{ new Date(order.statusHistory[order.statusHistory.length - 1].timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) }}</p>
                   </div>
                   <div class="flex items-center gap-3">
                     <span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-rose-blush text-deep-plum">
@@ -3549,6 +3551,9 @@ const users = ref<any[]>([])
 const orders = ref<any[]>([])
 const inquiries = ref<any[]>([])
 const analyticsEvents = ref<any[]>([])
+const analyticsSummary = ref<any>(null)
+const analyticsTimeframe = ref<'today' | 'week' | 'month' | 'all'>('week')
+const analyticsLoading = ref(false)
 
 // Admin Notifications state
 const showNotificationsDropdown = ref(false)
@@ -3633,131 +3638,50 @@ const parsedAnalyticsEvents = computed(() => {
   })
 })
 
-// Calculate executive overview metrics (mock counts added to make it look premium from day 1)
-const totalImpressionsCount = computed(() => {
-  return parsedAnalyticsEvents.value.filter(e => e.eventType === 'analytics_impression').length + 1850
+// ─── Real analytics metrics from summary endpoint ───────────────────────────
+const analyticsMetrics = computed(() => analyticsSummary.value?.metrics || {
+  visits: 0, productViews: 0, impressions: 0, productClicks: 0,
+  addToCarts: 0, checkoutsStarted: 0, checkoutsCompleted: 0, checkoutsAbandoned: 0,
+  logins: 0, orders: 0, returns: 0, exchanges: 0, revenue: 0,
+  conversionRate: '0.0', abandonRate: '0.0', cartToCheckout: '0.0'
 })
+const analyticsFunnel = computed(() => analyticsSummary.value?.funnel || [])
+const analyticsTopByViews = computed(() => analyticsSummary.value?.topProductsByViews || [])
+const analyticsTopByRevenue = computed(() => analyticsSummary.value?.topProductsByRevenue || [])
+const analyticsTopByCarts = computed(() => analyticsSummary.value?.topProductsByCarts || [])
+const analyticsDailyTrend = computed(() => analyticsSummary.value?.dailyTrend || [])
 
-const totalClicksCount = computed(() => {
-  return parsedAnalyticsEvents.value.filter(e => e.eventType === 'analytics_click').length + 720
-})
-
-const totalCartsCount = computed(() => {
-  return parsedAnalyticsEvents.value.filter(e => e.eventType === 'analytics_add_to_cart').length + 240
-})
-
+// Rebuild the visits chart from the real daily trend data
 const siteVisitsChartData = computed(() => {
-  const visits = parsedAnalyticsEvents.value.filter(e => e.eventType === 'analytics_visit')
-  const now = new Date()
-  
-  if (trendTab.value === 'daily') {
-    const labels = []
-    const values = []
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date()
-      d.setDate(now.getDate() - i)
-      const dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-      labels.push(dateStr)
-      const count = visits.filter(e => {
-        const ed = new Date(e.createdAt)
-        return ed.getDate() === d.getDate() && ed.getMonth() === d.getMonth() && ed.getFullYear() === d.getFullYear()
-      }).length
-      const baseMock = Math.round(75 + Math.sin(i * 1.6) * 20 + (i % 2 === 0 ? 8 : -4))
-      values.push(baseMock + count)
-    }
-    return { labels, values }
-  } else if (trendTab.value === 'weekly') {
-    const labels = []
-    const values = []
-    for (let i = 3; i >= 0; i--) {
-      labels.push(`Week ${4 - i}`)
-      const endD = new Date()
-      endD.setDate(now.getDate() - (i * 7))
-      const startD = new Date()
-      startD.setDate(now.getDate() - ((i + 1) * 7))
-      const count = visits.filter(e => {
-        const ed = new Date(e.createdAt)
-        return ed >= startD && ed < endD
-      }).length
-      const baseMock = Math.round(520 + Math.cos(i * 2.2) * 80)
-      values.push(baseMock + count)
-    }
-    return { labels, values }
-  } else if (trendTab.value === 'monthly') {
-    const labels = []
-    const values = []
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date()
-      d.setMonth(now.getMonth() - i)
-      const monthStr = d.toLocaleDateString('en-IN', { month: 'short' })
-      labels.push(monthStr)
-      const count = visits.filter(e => {
-        const ed = new Date(e.createdAt)
-        return ed.getMonth() === d.getMonth() && ed.getFullYear() === d.getFullYear()
-      }).length
-      const baseMock = Math.round(2100 + i * 320 + Math.sin(i) * 200)
-      values.push(baseMock + count)
-    }
-    return { labels, values }
-  } else {
-    const labels = []
-    const values = []
-    for (let i = 2; i >= 0; i--) {
-      const year = now.getFullYear() - i
-      labels.push(year.toString())
-      const count = visits.filter(e => {
-        const ed = new Date(e.createdAt)
-        return ed.getFullYear() === year
-      }).length
-      const baseMock = Math.round(24000 + i * 6500)
-      values.push(baseMock + count)
-    }
-    return { labels, values }
-  }
-})
-
-const visitsChartPath = computed(() => {
-  const data = siteVisitsChartData.value
-  if (!data.values || data.values.length === 0) return { points: [], polylinePoints: '', fillPoints: '' }
-  const max = Math.max(...data.values, 10)
-  const min = Math.min(...data.values, 0)
-  const range = max - min || 1
-  
-  const width = 500
-  const height = 150
-  const paddingX = 40
-  const paddingY = 20
-  
-  const points = data.values.map((val, idx) => {
-    const x = paddingX + (idx / (data.values.length - 1)) * (width - 2 * paddingX)
-    const y = height - paddingY - ((val - min) / range) * (height - 2 * paddingY)
-    return { x, y, val, label: data.labels[idx] }
+  const trend = analyticsDailyTrend.value
+  if (!trend.length) return { labels: [], values: [] }
+  const labels = trend.map((d: any) => {
+    const dt = new Date(d.date)
+    return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
   })
-  
-  const polylinePoints = points.map(p => `${p.x},${p.y}`).join(' ')
-  const fillPoints = `${points[0].x},${height - paddingY} ` + polylinePoints + ` ${points[points.length - 1].x},${height - paddingY}`
-  
-  return { points, polylinePoints, fillPoints }
+  const values = trend.map((d: any) => d.visits || 0)
+  return { labels, values }
 })
 
-// Tracking logs lists
-const productClicksList = computed(() => {
-  return parsedAnalyticsEvents.value
-    .filter(e => e.eventType === 'analytics_click')
-    .slice(0, 10)
-})
+// Fetch the analytics summary from backend
+const fetchAnalyticsSummary = async () => {
+  analyticsLoading.value = true
+  const config = useRuntimeConfig()
+  try {
+    const data = await $fetch<any>(
+      `${config.public.apiBase}/inquiries/analytics/summary?timeframe=${analyticsTimeframe.value}`,
+      { headers: adminStore.getHeaders() }
+    )
+    analyticsSummary.value = data
+  } catch (err) {
+    console.error('Failed to fetch analytics summary:', err)
+  } finally {
+    analyticsLoading.value = false
+  }
+}
 
-const addToCartsList = computed(() => {
-  return parsedAnalyticsEvents.value
-    .filter(e => e.eventType === 'analytics_add_to_cart')
-    .slice(0, 10)
-})
-
-const checkoutDetailsList = computed(() => {
-  return parsedAnalyticsEvents.value
-    .filter(e => e.eventType === 'analytics_checkout')
-    .slice(0, 10)
-})
+// Re-fetch when timeframe changes
+watch(analyticsTimeframe, () => { fetchAnalyticsSummary() })
 
 // Units Sold list aggregated from real orders
 const unitsSoldList = computed(() => {
@@ -4231,7 +4155,7 @@ const loadAllData = async () => {
   loadingData.value = true
   const config = useRuntimeConfig()
   try {
-    const [bannersData, categoriesData, productsData, widgetsData, blogsData, usersData, ordersData, aboutPageData, inquiriesData, analyticsData] = await Promise.all([
+    const [bannersData, categoriesData, productsData, widgetsData, blogsData, usersData, ordersData, aboutPageData, inquiriesData] = await Promise.all([
       $fetch<any[]>(`${config.public.apiBase}/banners`),
       $fetch<any[]>(`${config.public.apiBase}/categories`),
       $fetch<any[]>(`${config.public.apiBase}/products`),
@@ -4241,7 +4165,6 @@ const loadAllData = async () => {
       $fetch<any>(`${config.public.apiBase}/orders`, { headers: adminStore.getHeaders() }).then(res => res.orders || []),
       $fetch<any>(`${config.public.apiBase}/about`),
       $fetch<any[]>(`${config.public.apiBase}/inquiries`, { headers: adminStore.getHeaders() }),
-      $fetch<any[]>(`${config.public.apiBase}/inquiries/analytics`, { headers: adminStore.getHeaders() }).catch(() => [])
     ])
     banners.value = bannersData
     categories.value = categoriesData
@@ -4272,7 +4195,8 @@ const loadAllData = async () => {
     orders.value = ordersData
     aboutData.value = aboutPageData
     inquiries.value = inquiriesData
-    analyticsEvents.value = analyticsData
+    // Fetch real analytics summary (events + orders aggregated)
+    fetchAnalyticsSummary()
   } catch (error) {
     console.error('Failed to load dashboard data:', error)
     uiStore.addToast('error', 'Error loading database resources')

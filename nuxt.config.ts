@@ -46,6 +46,14 @@ export default defineNuxtConfig({
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap',
         },
+        // Preload main woff2 font file for instant text rendering and improved CLS
+        {
+          rel: 'preload',
+          href: 'https://db.onlinewebfonts.com/t/2da648610423269fab0d0cceaada478b.woff2',
+          as: 'font',
+          type: 'font/woff2',
+          crossorigin: '',
+        },
       ],
       script: [
         { src: 'https://accounts.google.com/gsi/client', async: true, defer: true },
@@ -73,8 +81,6 @@ export default defineNuxtConfig({
       gaMeasurementId: process.env.NUXT_PUBLIC_GA_MEASUREMENT_ID || '',
     },
   },
-
-
 
   // PWA Configuration
   pwa: {
@@ -125,6 +131,16 @@ export default defineNuxtConfig({
             cacheableResponse: { statuses: [0, 200] },
           },
         },
+        // Cache Supabase API layout endpoints using StaleWhileRevalidate
+        {
+          urlPattern: /^https:\/\/klixyrdhwlloswsspmqk\.supabase\.co\/functions\/v1\/api\/(widgets|banners|categories|products|blogs|reviews|about).*/i,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'supabase-api-cache',
+            expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 }, // 1 day
+            cacheableResponse: { statuses: [0, 200] },
+          },
+        },
       ],
     },
     client: {
@@ -146,6 +162,27 @@ export default defineNuxtConfig({
       '/api': {
         target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api',
         changeOrigin: true,
+      }
+    }
+  },
+
+  // Vite Build & Rollup chunk optimizations
+  vite: {
+    build: {
+      cssCodeSplit: true,
+      minify: 'esbuild',
+      chunkSizeWarningLimit: 800,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules/swiper')) {
+              return 'swiper-vendor'
+            }
+            if (id.includes('node_modules/pinia') || id.includes('node_modules/@pinia')) {
+              return 'pinia-vendor'
+            }
+          }
+        }
       }
     }
   },

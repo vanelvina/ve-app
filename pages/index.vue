@@ -144,23 +144,44 @@
 
 <script setup lang="ts">
 import { organizationSchema } from '~/utils/schema'
+import { useProductsStore } from '~/stores/products'
 
+const config = useRuntimeConfig()
+const productsStore = useProductsStore()
+
+// Define Nuxt state keys for homepage SSR pre-fetching
 const widgets = useState<any[]>('homepage-widgets', () => [])
-const loading = ref(widgets.value.length === 0)
+const banners = useState<any[]>('homepage-banners', () => [])
+const categories = useState<any[]>('homepage-categories', () => [])
+const reviews = useState<any[]>('homepage-reviews', () => [])
+const blogsList = useState<any[]>('homepage-blogs', () => [])
 
-const fetchWidgets = async () => {
-  const config = useRuntimeConfig()
-  try {
-    const data = await $fetch<any[]>(`${config.public.apiBase}/widgets`)
-    if (JSON.stringify(widgets.value) !== JSON.stringify(data)) {
-      widgets.value = data
-    }
-  } catch (error) {
-    console.error('Failed to load layout widgets:', error)
-  } finally {
-    loading.value = false
+// Fetch all first-load dependencies in parallel on the server during SSR
+const { data: initData } = await useAsyncData('homepage-init', async () => {
+  const [widgetsData, bannersData, categoriesData, reviewsData, blogsData, productsData] = await Promise.all([
+    $fetch<any[]>(`${config.public.apiBase}/widgets`).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/banners`).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/categories`).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/reviews`).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/blogs`).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/products`).catch(() => [])
+  ])
+  return { widgetsData, bannersData, categoriesData, reviewsData, blogsData, productsData }
+})
+
+// Populate Nuxt shared states and Pinia product store with SSR payload
+if (initData.value) {
+  if (initData.value.widgetsData) widgets.value = initData.value.widgetsData
+  if (initData.value.bannersData) banners.value = initData.value.bannersData
+  if (initData.value.categoriesData) categories.value = initData.value.categoriesData
+  if (initData.value.reviewsData) reviews.value = initData.value.reviewsData ? initData.value.reviewsData.slice(0, 6) : []
+  if (initData.value.blogsData) blogsList.value = initData.value.blogsData
+  if (initData.value.productsData && productsStore.all.length === 0) {
+    productsStore.all = initData.value.productsData
   }
 }
+
+const loading = ref(widgets.value.length === 0)
 
 const isMobileScreen = ref(false)
 
@@ -171,13 +192,7 @@ const updateScreenSize = () => {
 onMounted(() => {
   updateScreenSize()
   window.addEventListener('resize', updateScreenSize, { passive: true })
-
-  if (widgets.value.length === 0) {
-    fetchWidgets()
-  } else {
-    loading.value = false
-    fetchWidgets()
-  }
+  loading.value = false
 })
 
 onUnmounted(() => {

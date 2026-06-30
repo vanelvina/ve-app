@@ -29,8 +29,8 @@ defineProps<{
   widget?: any
 }>()
 
-const categories = ref<any[]>([])
-const loading = ref(true)
+const categories = useState<any[]>('homepage-categories', () => [])
+const loading = ref(categories.value.length === 0)
 
 const fetchCategories = async () => {
   const config = useRuntimeConfig()
@@ -45,6 +45,10 @@ const fetchCategories = async () => {
 }
 
 onMounted(() => {
-  fetchCategories()
+  if (categories.value.length === 0) {
+    fetchCategories()
+  } else {
+    loading.value = false
+  }
 })
 </script>

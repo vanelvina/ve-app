@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
+import { shallowRef } from 'vue'
 import type { Product, FilterState, SortOption } from '~/types'
 
 export const useProductsStore = defineStore('products', {
   state: () => ({
-    all: [] as Product[],
+    all: shallowRef<Product[]>([]),
     recentlyViewed: [] as Product[],
     loading: false,
     filters: {

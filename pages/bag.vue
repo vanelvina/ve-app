@@ -187,7 +187,7 @@ const proceedToCheckout = () => {
   if (!auth.isLoggedIn) {
     ui.addToast('error', 'Please log in to proceed to checkout.')
     ui.setAuthRedirect('/checkout')
-    ui.openAuthModal()
+    ui.openAuthModal('/checkout')
   } else {
     navigateTo('/checkout')
   }
