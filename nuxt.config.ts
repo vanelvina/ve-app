@@ -76,6 +76,7 @@ export default defineNuxtConfig({
       appName: 'Van Elvina',
       appUrl: 'https://vanelvina.com',
       apiBase: process.env.NUXT_PUBLIC_API_BASE || (process.env.NODE_ENV === 'development' ? '/api' : 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api'),
+      vapidPublicKey: process.env.NUXT_PUBLIC_VAPID_PUBLIC_KEY || 'BF2ljIBKIQS12D8ynJn2rLVbA8LFcsEsOm4Pjik6HAMWto3LaGWwh29Sud_KGZzfODX5zPTE-ZugvVveDWCGwzY',
       googleClientId: '1095271875819-6sh520q88vas8u7g3n4ukrh0o2aihgib.apps.googleusercontent.com',
       razorpayKeyId: process.env.NUXT_PUBLIC_RAZORPAY_KEY_ID || 'TEST_KEY_ID',
       gaMeasurementId: process.env.NUXT_PUBLIC_GA_MEASUREMENT_ID || '',

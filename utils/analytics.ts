@@ -12,6 +12,7 @@ export const trackEvent = async (eventType: string, eventData: any = {}) => {
     
     await $fetch(`${config.public.apiBase}/inquiries/event`, {
       method: 'POST',
+      keepalive: true,
       body: {
         eventType,
         userEmail,

@@ -24,7 +24,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const syncSubscription = async (subscription: PushSubscription | null) => {
     if (!subscription) return
     const config = useRuntimeConfig()
-    
+
     let email = 'anonymous'
     let name = 'Anonymous'
 
@@ -34,8 +34,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     } else {
       admin.init()
       if (admin.isAuthenticated) {
-        email = 'admin'
-        name = 'Admin User'
+        email = admin.adminUser?.email || 'admin'
+        name = admin.adminUser?.name || 'Admin User'
       }
     }
 
@@ -61,21 +61,29 @@ export default defineNuxtPlugin((nuxtApp) => {
     }
 
     try {
+      const config = useRuntimeConfig()
       const registration = await navigator.serviceWorker.ready
-      
+
       // Request permission
       let permission = Notification.permission
       if (permission === 'default') {
         permission = await Notification.requestPermission()
       }
-      
+
       if (permission !== 'granted') {
         console.warn('[Push] Permission was not granted for push notifications.')
         return
       }
 
-      // VAPID Public Key
-      const publicVapidKey = 'BF2ljIBKIQS12D8ynJn2rLVbA8LFcsEsOm4Pjik6HAMWto3LaGWwh29Sud_KGZzfODX5zPTE-ZugvVveDWCGwzY'
+      const existingSubscription = await registration.pushManager.getSubscription()
+      if (existingSubscription) {
+        console.log('[Push] Reusing existing browser subscription')
+        await syncSubscription(existingSubscription)
+        return
+      }
+
+      // VAPID Public Key from runtime config with fallback to the current production key
+      const publicVapidKey = config.public.vapidPublicKey || 'BF2ljIBKIQS12D8ynJn2rLVbA8LFcsEsOm4Pjik6HAMWto3LaGWwh29Sud_KGZzfODX5zPTE-ZugvVveDWCGwzY'
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
