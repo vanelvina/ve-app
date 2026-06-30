@@ -32,6 +32,8 @@ export interface Product {
   styleId?: string
   deliveryDays: number
   isWishlisted?: boolean
+  isCodAvailable?: boolean
+  isFreeShipping?: boolean
 }
 
 export interface Category {

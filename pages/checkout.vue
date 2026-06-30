@@ -78,11 +78,11 @@
           </div>
 
           <!-- Step 2: Confirmation -->
-          <div v-show="currentStep === 1" class="bg-white rounded-2xl shadow-soft border border-border-gray p-6 animate-slide-up">
+          <div v-show="currentStep === 1" class="bg-white rounded-2xl shadow-soft border border-border-gray p-4 sm:p-6 animate-slide-up">
             <h2 class="font-ui font-semibold text-charcoal text-base mb-5">Confirm Your Order</h2>
             
             <p class="text-sm font-ui text-charcoal/80 mb-6 leading-relaxed">
-              Please take a moment to review your shipping details. When you're ready, click "Proceed to Payment" to securely complete your purchase via Razorpay. All payment methods including UPI, Cards, and Netbanking are supported.
+              Please take a moment to review your shipping details. Choose a payment method and confirm your order.
             </p>
 
             <div class="bg-warm-ivory/50 rounded-xl p-4 border border-rose-blush/20 mb-6">
@@ -114,14 +114,45 @@
               </label>
             </div>
 
+            <h3 class="text-sm font-ui font-semibold text-charcoal mb-3">Payment Method</h3>
+            <div class="space-y-3 mb-4" role="radiogroup" aria-label="Payment methods">
+              <label
+                v-for="option in paymentOptions"
+                :key="option.id"
+                class="flex items-center justify-between p-4 rounded-xl border-2 transition-all"
+                :class="option.disabled ? 'border-border-gray bg-gray-50 cursor-not-allowed opacity-60' : (selectedPayment === option.id ? 'border-deep-plum bg-rose-blush/40 cursor-pointer' : 'border-border-gray hover:border-dusty-rose cursor-pointer')"
+              >
+                <div class="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    :value="option.id"
+                    v-model="selectedPayment"
+                    class="text-deep-plum"
+                    :aria-label="option.name"
+                    :disabled="option.disabled"
+                  />
+                  <div>
+                    <p class="text-sm font-ui font-semibold text-charcoal">{{ option.name }}</p>
+                    <p class="text-xs text-mid-gray font-ui">{{ option.desc }}</p>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <p v-if="!codEligible" class="text-xs text-amber-700 font-ui mb-4">
+              COD is available only for orders above ₹499.
+            </p>
+
             <!-- Trust badges -->
             <div class="mt-4 flex flex-wrap gap-3 items-center">
               <div v-for="b in ['🔒 SSL Secured', '✅ PCI Compliant', '🏦 100% Safe']" :key="b" class="text-xs font-ui text-mid-gray flex items-center gap-1">{{ b }}</div>
             </div>
 
-            <div class="flex gap-3 mt-6">
-              <AppButton variant="secondary" @click="currentStep = 0">Back</AppButton>
-              <AppButton :full="true" :loading="placing" @click="placeOrder">Proceed to Payment – {{ formatPrice(orderTotal) }}</AppButton>
+            <div class="flex flex-col sm:flex-row gap-3 mt-6">
+              <AppButton variant="secondary" class="w-full sm:w-auto" @click="currentStep = 0">Back</AppButton>
+              <AppButton :full="true" :loading="placing" @click="placeOrder" class="w-full sm:w-auto">
+                {{ selectedPayment === 'cod' ? 'Confirm Order' : 'Proceed to Payment' }} – {{ formatPrice(orderTotal) }}
+              </AppButton>
             </div>
           </div>
         </div>
@@ -257,25 +288,49 @@ watch(() => auth.isLoggedIn, () => {
   prefillForm()
 })
 
-const allFreeShippingProducts = computed(() => {
-  return checkoutItems.value.length > 0 && checkoutItems.value.every((item: any) => item.product.isFreeShipping === true)
+const hasTestProduct = computed(() => {
+  return checkoutItems.value.some((item: any) => item.product?.name?.toLowerCase().includes('test'))
 })
 
-const shippingOptions = computed(() => [
-  { 
-    id: 'standard', 
-    name: 'Standard Delivery', 
-    desc: '3–5 business days', 
-    price: (checkoutSubtotal.value >= 999 || allFreeShippingProducts.value) ? 0 : 79 
+const codEligible = computed(() => {
+  return checkoutSubtotal.value > 499 && checkoutItems.value.every((item: any) => item.product?.isCodAvailable !== false)
+})
+
+const paymentOptions = computed(() => [
+  {
+    id: 'cod',
+    name: 'Cash on Delivery (COD)',
+    desc: codEligible.value ? 'Pay in cash at delivery' : 'COD available only for orders above ₹499',
+    disabled: !codEligible.value,
   },
-  { 
-    id: 'express', 
-    name: 'Express Delivery', 
-    desc: '1–2 business days (Metro cities)', 
-    price: 149 
+  {
+    id: 'razorpay',
+    name: 'Online Payment',
+    desc: 'Cards, UPI, Netbanking, wallets',
+    disabled: false,
   },
 ])
 
+const shippingOptions = computed(() => [
+  {
+    id: 'standard',
+    name: 'Standard Delivery',
+    desc: '3–5 business days',
+    price: (checkoutSubtotal.value >= 999 || hasTestProduct.value) ? 0 : 40,
+  },
+  {
+    id: 'express',
+    name: 'Express Delivery',
+    desc: '1–2 business days (Metro cities)',
+    price: 149,
+  },
+])
+
+watch(codEligible, (eligible) => {
+  if (!eligible && selectedPayment.value === 'cod') {
+    selectedPayment.value = 'razorpay'
+  }
+})
 
 const shippingFee = computed(() => shippingOptions.value.find(o => o.id === selectedShipping.value)?.price ?? 0)
 const orderTotal = computed(() => checkoutSubtotal.value - checkoutDiscount.value + shippingFee.value)

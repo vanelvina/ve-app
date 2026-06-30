@@ -275,8 +275,8 @@
                 <line x1="6" y1="15" x2="10" y2="15"/>
               </svg>
               <span class="text-[12.5px] font-ui text-charcoal">
-                <span v-if="product.price >= 500 || product.price === 1">COD available on this order</span>
-                <span v-else>COD on ₹500+ orders</span>
+                <span v-if="product.isCodAvailable === false">COD is not available for this product</span>
+                <span v-else>COD available on orders above ₹499</span>
               </span>
             </div>
           </div>

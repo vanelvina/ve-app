@@ -31,10 +31,14 @@ export const useCartStore = defineStore('cart', {
         0,
       )
       if (state.items.length === 0) return 0
-      if (subtotal >= 999) return 0
-      
-      const allFreeShipping = state.items.every(item => item.product?.isFreeShipping === true)
-      return allFreeShipping ? 0 : 79
+
+      const hasTestProduct = state.items.some((item) =>
+        item.product?.name?.toLowerCase().includes('test'),
+      )
+
+      if (subtotal >= 999 || hasTestProduct) return 0
+
+      return 40
     },
     grandTotal(): number {
       return this.subtotal - this.appliedDiscount + this.shippingCost
