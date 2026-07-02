@@ -54,7 +54,7 @@
         <div class="product-grid">
           <ProductCard
             v-for="product in displayedProducts"
-            :key="product.id"
+            :key="product.cycleKey || product.id"
             :product="product"
           />
         </div>
@@ -195,8 +195,8 @@ const displayedProducts = computed(() => {
     const product = base[i % base.length]
     result.push({
       ...product,
-      // Create a unique ID for Vue's :key so it doesn't complain about duplicates when cycling
-      id: `${product.id}-cycle-${Math.floor(i / base.length)}`
+      // Use a custom property for Vue's :key so we do not mutate the product's actual ID
+      cycleKey: `${product.id}-cycle-${Math.floor(i / base.length)}`
     })
   }
   
