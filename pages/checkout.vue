@@ -139,16 +139,12 @@
               </label>
             </div>
 
-            <p v-if="!codEligible" class="text-xs text-amber-700 font-ui mb-4">
-              COD is available only for orders above ₹499.
-            </p>
-
-            <!-- Trust badges -->
+             <!-- Trust badges -->
             <div class="mt-4 flex flex-wrap gap-3 items-center">
               <div v-for="b in ['🔒 SSL Secured', '✅ PCI Compliant', '🏦 100% Safe']" :key="b" class="text-xs font-ui text-mid-gray flex items-center gap-1">{{ b }}</div>
             </div>
 
-            <div class="flex flex-col sm:flex-row gap-3 mt-6">
+            <div class="flex flex-col-reverse sm:flex-row gap-3 mt-6">
               <AppButton variant="secondary" class="w-full sm:w-auto" @click="currentStep = 0">Back</AppButton>
               <AppButton :full="true" :loading="placing" @click="placeOrder" class="w-full sm:w-auto">
                 {{ selectedPayment === 'cod' ? 'Confirm Order' : 'Proceed to Payment' }} – {{ formatPrice(orderTotal) }}
