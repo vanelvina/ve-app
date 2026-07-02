@@ -12,14 +12,13 @@
         class="flex items-center justify-between px-4 py-3 bg-white/95 backdrop-blur-md shadow-sm"
         style="background-color: #FAF6F0;"
       >
-        <!-- Left: back button + favicon + greeting -->
         <div class="flex items-center gap-1.5">
-          <button @click="router.back()" class="p-1 -ml-1 text-charcoal/70 hover:text-deep-plum transition-colors" aria-label="Go back">
+          <button v-if="route.path !== '/'" @click="router.back()" class="p-1 -ml-1 text-charcoal/70 hover:text-deep-plum transition-colors" aria-label="Go back">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <NuxtLink to="/" aria-label="Van Elvina – Home" class="shrink-0">
+          <NuxtLink to="/" aria-label="Van Elvina – Home" class="shrink-0" :class="route.path === '/' ? 'ml-1' : ''">
             <img src="/favicon.png" alt="Van Elvina" class="w-8 h-8 object-contain" />
           </NuxtLink>
           <p class="text-[15px] font-bold font-serif text-deep-plum tracking-tight truncate max-w-[120px] sm:max-w-[180px]">Hey {{ auth.isLoggedIn && auth.user?.name ? auth.user.name.split(' ')[0] : 'Delicate' }}!</p>

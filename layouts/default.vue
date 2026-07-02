@@ -56,7 +56,7 @@ onMounted(async () => {
 
   // Google Login URL hash interception (fail-safe for any page redirect)
   let googleLoginCompleted = false
-  if (import.meta.client && typeof window !== 'undefined') {
+  if (import.meta.client && typeof window !== 'undefined' && route.path !== '/auth/google/callback') {
     const hashStr = window.location.hash || ''
     const hashClean = hashStr.startsWith('#') ? hashStr.substring(1) : hashStr
     if (hashClean) {
