@@ -3,8 +3,7 @@
     <!-- Main Container -->
     <main class="page-container py-6 px-4 max-w-2xl mx-auto">
       <div v-if="loading" class="flex flex-col items-center justify-center py-20 gap-3">
-        <div class="w-10 h-10 border-4 border-deep-plum border-t-transparent rounded-full animate-spin" />
-        <p class="text-xs text-mid-gray font-ui">Loading categories...</p>
+        <!-- Using GlobalLoader for this instead -->
       </div>
 
       <div v-else-if="banners.length" class="space-y-4 md:space-y-6">

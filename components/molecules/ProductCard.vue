@@ -115,10 +115,12 @@
         </h3>
       </NuxtLink>
 
-      <!-- Star Rating -->
+      <!-- Star Rating (Temporarily Hidden) -->
+      <!--
       <div class="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
         <AppRating :rating="product.rating" :count="product.reviewCount" show-count />
       </div>
+      -->
 
       <!-- Price Layout -->
       <div class="flex items-baseline gap-1.5 md:gap-2 flex-wrap">
@@ -144,7 +146,8 @@
         </span>
       </div>
 
-      <!-- Add to Cart (mobile visible) -->
+      <!-- Add to Cart (mobile visible) - Temporarily Hidden -->
+      <!--
       <button
         class="mt-2.5 md:mt-3 w-full py-1.5 md:py-2.5 rounded-lg bg-rose-blush text-deep-plum text-[10px] md:text-xs font-ui font-semibold hover:bg-deep-plum hover:text-white transition-all duration-250 md:hidden"
         :aria-label="`Add ${product.name} to cart`"
@@ -152,6 +155,7 @@
       >
         Add to Cart
       </button>
+      -->
     </div>
   </article>
 </template>

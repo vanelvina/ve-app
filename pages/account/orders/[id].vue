@@ -104,7 +104,7 @@
                   class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
                   :class="getStepClass(step.id)"
                 >
-                  <svg v-if="isStepCompleted(step.id)" class="w-4 h-4" :class="step.id === normalizeStatus(order.orderStatus) ? 'text-deep-plum' : 'text-white'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="step.id === normalizeStatus(order.orderStatus)" class="w-4 h-4 text-deep-plum" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                   </svg>
                   <span v-else>{{ idx + 1 }}</span>
@@ -138,7 +138,7 @@
                   class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
                   :class="getStepClass(step.id)"
                 >
-                  <svg v-if="isStepCompleted(step.id)" class="w-4 h-4" :class="step.id === normalizeStatus(order.orderStatus) ? 'text-deep-plum' : 'text-white'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="step.id === normalizeStatus(order.orderStatus)" class="w-4 h-4 text-deep-plum" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                   </svg>
                   <span v-else>{{ idx + 1 }}</span>

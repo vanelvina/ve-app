@@ -99,6 +99,56 @@ export const useProductsStore = defineStore('products', {
       return this.filtered.length
     },
 
+    infiniteCycleBase(): Product[] {
+      const allProducts = this.all
+      const filteredProducts = this.filtered // Tier 1: exact matches
+      
+      const addedIds = new Set(filteredProducts.map(p => p.id))
+      const result = [...filteredProducts]
+      
+      // Tier 2: Same Categories (ignore size/color filters)
+      if (this.filters.categories.length > 0) {
+        const sameCatProducts = allProducts.filter(p => {
+          if (addedIds.has(p.id)) return false
+          const productCats = (p.category || '').split(',').map(s => s.trim().toLowerCase())
+          return this.filters.categories.some(c => productCats.includes(c.toLowerCase()))
+        })
+        sameCatProducts.forEach(p => {
+          result.push(p)
+          addedIds.add(p.id)
+        })
+      }
+      
+      // Tier 3: Same Subcategories (based on products found so far)
+      const activeSubcats = new Set<string>()
+      result.forEach(p => {
+        if (p.subcategory) {
+          activeSubcats.add(p.subcategory.toLowerCase())
+        }
+      })
+      if (activeSubcats.size > 0) {
+        const sameSubcatProducts = allProducts.filter(p => {
+          if (addedIds.has(p.id)) return false
+          if (!p.subcategory) return false
+          return activeSubcats.has(p.subcategory.toLowerCase())
+        })
+        sameSubcatProducts.forEach(p => {
+          result.push(p)
+          addedIds.add(p.id)
+        })
+      }
+      
+      // Tier 4: All remaining products
+      allProducts.forEach(p => {
+        if (!addedIds.has(p.id)) {
+          result.push(p)
+          addedIds.add(p.id)
+        }
+      })
+      
+      return result
+    },
+
     getBySlug: (state) => (slug: string) => state.all.find((p) => p.slug === slug),
 
     getByCategory: (state) => (category: string) =>
@@ -115,7 +165,9 @@ export const useProductsStore = defineStore('products', {
       this.loading = true
       const config = useRuntimeConfig()
       try {
-        const data = await $fetch<Product[]>(`${config.public.apiBase}/products`)
+        const data = await $fetch<Product[]>(`${config.public.apiBase}/products`, {
+          silent: this.all.length > 0
+        })
         this.all = data
       } catch (error) {
         console.error('Failed to fetch products from API:', error)

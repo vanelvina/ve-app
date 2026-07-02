@@ -152,6 +152,11 @@ const handleLogin = async () => {
     ui.closeAuthModal()
     ui.addToast('success', `Welcome back${auth.user?.name ? `, ${auth.user.name}` : ''}! 🎉`)
     
+    const nuxtApp = useNuxtApp()
+    if (nuxtApp.$registerPush) {
+      nuxtApp.$registerPush().catch((err: any) => console.error('Push error:', err))
+    }
+    
     if (redirectPath) {
       navigateTo(redirectPath)
     }
@@ -182,6 +187,11 @@ const handleSignup = async () => {
     const redirectPath = ui.authRedirect
     ui.closeAuthModal()
     ui.addToast('success', `Welcome${auth.user?.name ? `, ${auth.user.name}` : ''}! 🎉`)
+    
+    const nuxtApp = useNuxtApp()
+    if (nuxtApp.$registerPush) {
+      nuxtApp.$registerPush().catch((err: any) => console.error('Push error:', err))
+    }
     
     if (redirectPath) {
       navigateTo(redirectPath)

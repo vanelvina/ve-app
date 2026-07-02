@@ -67,7 +67,8 @@ export const useCartStore = defineStore('cart', {
       const config = useRuntimeConfig()
       try {
         const data = await $fetch<any[]>(`${config.public.apiBase}/cart`, {
-          headers: { Authorization: `Bearer ${auth.token}` }
+          headers: { Authorization: `Bearer ${auth.token}` },
+          silent: this.items.length > 0
         })
         
         this.items = data
@@ -103,7 +104,8 @@ export const useCartStore = defineStore('cart', {
         await $fetch<any>(`${config.public.apiBase}/cart`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${auth.token}` },
-          body: { items: this.items }
+          body: { items: this.items },
+          silent: true
         })
       } catch (err) {
         console.error('Failed to sync cart with server:', err)
@@ -166,7 +168,8 @@ export const useCartStore = defineStore('cart', {
         if (this.items.length > 0) {
           // Get server items first to merge without duplicates
           const serverData = await $fetch<any[]>(`${config.public.apiBase}/cart`, {
-            headers: { Authorization: `Bearer ${auth.token}` }
+            headers: { Authorization: `Bearer ${auth.token}` },
+            silent: true
           })
           
           // Merge local and server items
@@ -202,20 +205,58 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
-    applyCoupon(code: string): { success: boolean; message: string } {
-      const coupons: Record<string, number> = {
-        ELVINA10: 0.1,
+    async applyCoupon(code: string): Promise<{ success: boolean; message: string }> {
+      const upper = code.toUpperCase()
+      
+      const loyaltyCoupons: Record<string, { discount: number, requiredDelivered: number }> = {
+        ELVINA10: { discount: 0.1, requiredDelivered: 0 },
+        ELVINAROYAL20: { discount: 0.2, requiredDelivered: 1 },
+        ELVINAROYAL30: { discount: 0.3, requiredDelivered: 2 },
+        ELVINAROYAL40: { discount: 0.4, requiredDelivered: 3 },
+        ELVINAROYAL50: { discount: 0.5, requiredDelivered: 4 },
+      }
+
+      if (loyaltyCoupons[upper]) {
+        const auth = useAuthStore()
+        if (!auth.isLoggedIn) {
+          return { success: false, message: 'Please login to use loyalty coupons.' }
+        }
+        
+        try {
+          const orders = await auth.fetchMyOrders()
+          const deliveredCount = (orders || []).filter((o: any) => o.orderStatus === 'delivered' || o.status === 'delivered').length
+          const required = loyaltyCoupons[upper].requiredDelivered
+          
+          if (deliveredCount !== required) {
+            return { success: false, message: `This coupon is not valid for your current order history.` }
+          }
+          
+          if (this.items.length === 0) return { success: false, message: 'Bag is empty' }
+          
+          const maxPrice = Math.max(...this.items.map(item => item.product?.price ?? 0))
+          
+          this.couponCode = upper
+          this.appliedDiscount = Math.round(maxPrice * loyaltyCoupons[upper].discount)
+          return { success: true, message: `Coupon applied to the highest priced item! You saved ₹${this.appliedDiscount}` }
+          
+        } catch (err) {
+          return { success: false, message: 'Failed to validate coupon against your order history.' }
+        }
+      }
+
+      const otherCoupons: Record<string, number> = {
         WELCOME20: 0.2,
         COMFORT15: 0.15,
         FIRST30: 0.3,
       }
-      const upper = code.toUpperCase()
-      if (coupons[upper]) {
+      
+      if (otherCoupons[upper]) {
         this.couponCode = upper
-        this.appliedDiscount = Math.round(this.subtotal * coupons[upper])
+        this.appliedDiscount = Math.round(this.subtotal * otherCoupons[upper])
         return { success: true, message: `Coupon applied! You saved ₹${this.appliedDiscount}` }
       }
-      return { success: false, message: 'Invalid coupon code. Try ELVINA10 or WELCOME20.' }
+      
+      return { success: false, message: 'Invalid coupon code.' }
     },
 
     removeCoupon() {

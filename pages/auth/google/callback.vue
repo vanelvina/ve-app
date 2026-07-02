@@ -2,12 +2,7 @@
   <div class="min-h-screen bg-warm-ivory flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-soft text-center">
       <div v-if="loading" class="flex flex-col items-center justify-center space-y-4">
-        <svg class="animate-spin w-12 h-12 text-deep-plum" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-        </svg>
-        <h2 class="mt-6 text-xl font-serif text-charcoal">Logging you in...</h2>
-        <p class="text-sm font-ui text-mid-gray">Please wait while we securely connect your account.</p>
+        <!-- GlobalLoader handles the visual loading state -->
       </div>
       <div v-else-if="errorMsg" class="space-y-4">
         <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto">

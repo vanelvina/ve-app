@@ -85,7 +85,7 @@ export default defineNuxtConfig({
 
   // PWA Configuration
   pwa: {
-    registerType: 'autoUpdate',
+    registerType: 'prompt',
     manifest: {
       name: 'Van Elvina – Women Comfort First',
       short_name: 'Van Elvina',

@@ -147,6 +147,12 @@ const handleLogin = async () => {
     const success = await adminStore.login(username.value, password.value)
     if (success) {
       uiStore.addToast('success', 'Logged in successfully! Welcome to dashboard.')
+      
+      const nuxtApp = useNuxtApp()
+      if (nuxtApp.$registerPush) {
+        nuxtApp.$registerPush().catch((err: any) => console.error('Push error:', err))
+      }
+      
       navigateTo('/admin/dashboard')
     }
   } catch (err: any) {

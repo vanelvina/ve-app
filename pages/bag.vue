@@ -112,7 +112,12 @@
                   class="input-base flex-1"
                   aria-label="Coupon code"
                 />
-                <AppButton size="sm" variant="secondary" @click="applyCoupon">Apply</AppButton>
+                <AppButton size="sm" variant="secondary" :loading="applyingCoupon" @click="applyCoupon">Apply</AppButton>
+              </div>
+              <div v-if="!cart.couponCode" class="mt-2 text-right">
+                <button @click="showCouponList = true" class="text-xs font-ui text-deep-plum font-semibold hover:underline">
+                  View available offers
+                </button>
               </div>
               <div v-else class="flex items-center justify-between bg-green-50 rounded-lg px-3 py-2">
                 <span class="text-sm font-ui font-semibold text-green-700">{{ cart.couponCode }} applied ✓</span>
@@ -162,6 +167,12 @@
         </div>
       </div>
     </div>
+    
+    <CouponListModal 
+      :is-open="showCouponList" 
+      @close="showCouponList = false" 
+      @apply="handleCouponApply" 
+    />
   </div>
 </template>
 
@@ -169,16 +180,28 @@
 import { formatPrice } from '~/utils/formatters'
 import { useAuthStore } from '~/stores/auth'
 
+import CouponListModal from '~/components/organisms/CouponListModal.vue'
+
 definePageMeta({ layout: 'default' })
 
 const cart = useCartStore()
 const ui = useUIStore()
 const auth = useAuthStore()
 const couponInput = ref('')
+const showCouponList = ref(false)
 
-const applyCoupon = () => {
+const applyingCoupon = ref(false)
+
+const handleCouponApply = (code: string) => {
+  couponInput.value = code
+  applyCoupon()
+}
+
+const applyCoupon = async () => {
   if (!couponInput.value.trim()) return
-  const result = cart.applyCoupon(couponInput.value.trim())
+  applyingCoupon.value = true
+  const result = await cart.applyCoupon(couponInput.value.trim())
+  applyingCoupon.value = false
   ui.addToast(result.success ? 'success' : 'error', result.message)
   if (result.success) couponInput.value = ''
 }

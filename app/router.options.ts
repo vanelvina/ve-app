@@ -25,13 +25,13 @@ export default <RouterConfig>{
       // Wait for page transition to finish before restoring scroll position
       nuxtApp.hooks.hookOnce('page:transition:finish', () => {
         setTimeout(() => {
-          doResolve(savedPosition || { top: 0 })
+          doResolve(savedPosition ? { ...savedPosition, behavior: 'auto' } : { top: 0, behavior: 'auto' })
         }, 50)
       })
 
       // Fallback timer if hook doesn't fire (e.g. transition is disabled or skipped)
       setTimeout(() => {
-        doResolve(savedPosition || { top: 0 })
+        doResolve(savedPosition ? { ...savedPosition, behavior: 'auto' } : { top: 0, behavior: 'auto' })
       }, 400)
     })
   }

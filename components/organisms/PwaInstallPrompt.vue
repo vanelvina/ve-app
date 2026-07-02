@@ -78,6 +78,11 @@ const triggerInstall = async () => {
     const { outcome } = await deferredPrompt.value.userChoice
     if (outcome === 'accepted') {
       console.log('User accepted the PWA install prompt')
+      // Trigger push registration on accept
+      const nuxtApp = useNuxtApp()
+      if (nuxtApp.$registerPush) {
+        nuxtApp.$registerPush().catch((err: any) => console.error('Push error:', err))
+      }
     }
     deferredPrompt.value = null
     showPrompt.value = false
@@ -99,12 +104,8 @@ onMounted(() => {
   const dismissedThisSession = sessionStorage.getItem('pwa_prompt_dismissed_session') === 'true'
   if (dismissedThisSession) return
 
-  // 3. Detect mobile device
+  // 3. Detect device (but allow on all)
   const userAgent = window.navigator.userAgent.toLowerCase()
-  const isMobile = /android|webos|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent)
-  
-  if (!isMobile) return // Only show on mobile devices
-
   isIOS.value = /iphone|ipad|ipod/.test(userAgent)
   const isSafari = /safari/.test(userAgent) && !/crios|fxios|chrome|firefox|opera/.test(userAgent)
 

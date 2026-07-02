@@ -35,7 +35,7 @@
   }
 
   html {
-    @apply scroll-smooth antialiased;
+    @apply antialiased;
     font-feature-settings: 'kern' 1, 'liga' 1;
   }
 

@@ -185,13 +185,28 @@ const store = useProductsStore()
 const ui = useUIStore()
 
 const displayedProducts = computed(() => {
-  return store.filtered.slice(0, store.page * store.pageSize)
+  const base = store.infiniteCycleBase
+  if (!base || base.length === 0) return []
+  
+  const totalWanted = store.page * store.pageSize
+  const result = []
+  
+  for (let i = 0; i < totalWanted; i++) {
+    const product = base[i % base.length]
+    result.push({
+      ...product,
+      // Create a unique ID for Vue's :key so it doesn't complain about duplicates when cycling
+      id: `${product.id}-cycle-${Math.floor(i / base.length)}`
+    })
+  }
+  
+  return result
 })
 
 const sentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 
-const hasMore = computed(() => store.page < store.totalPages)
+const hasMore = computed(() => store.infiniteCycleBase && store.infiniteCycleBase.length > 0)
 
 const loadMore = () => {
   if (hasMore.value) {
@@ -204,7 +219,9 @@ const categories = ref<any[]>(categoriesData)
 const loadCategories = async () => {
   const config = useRuntimeConfig()
   try {
-    const data = await $fetch<any[]>(`${config.public.apiBase}/categories`)
+    const data = await $fetch<any[]>(`${config.public.apiBase}/categories`, {
+      silent: true
+    })
     if (data && data.length) {
       categories.value = data
     }

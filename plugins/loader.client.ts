@@ -10,12 +10,12 @@ export default defineNuxtPlugin((nuxtApp) => {
   if (originalFetch) {
     const wrappedFetch = function (request: any, options: any = {}) {
       const urlStr = typeof request === 'string' ? request : (request?.url || '')
-      const isApiRequest = urlStr.includes(apiBase) || 
+      const isApiRequest = !options.silent && (urlStr.includes(apiBase) || 
                             urlStr.startsWith('/api') || 
                             urlStr.includes('/user-auth') || 
                             urlStr.includes('/orders') || 
                             urlStr.includes('/cart') || 
-                            urlStr.includes('/wishlist')
+                            urlStr.includes('/wishlist'))
 
       if (isApiRequest) {
         ui.incrementActiveRequests()

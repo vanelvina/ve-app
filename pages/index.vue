@@ -1,5 +1,10 @@
 <template>
   <div>
+    <!-- PWA Update Prompt -->
+    <ClientOnly>
+      <PwaUpdatePrompt />
+    </ClientOnly>
+
     <!-- Render widgets dynamically based on active order and status -->
     <div>
       <div 
@@ -158,13 +163,16 @@ const blogsList = useState<any[]>('homepage-blogs', () => [])
 
 // Fetch all first-load dependencies in parallel on the server during SSR
 const { data: initData } = await useAsyncData('homepage-init', async () => {
+  const isSilent = widgets.value.length > 0
+  const fetchOpts = isSilent ? { silent: true } : {}
+  
   const [widgetsData, bannersData, categoriesData, reviewsData, blogsData, productsData] = await Promise.all([
-    $fetch<any[]>(`${config.public.apiBase}/widgets`).catch(() => []),
-    $fetch<any[]>(`${config.public.apiBase}/banners`).catch(() => []),
-    $fetch<any[]>(`${config.public.apiBase}/categories`).catch(() => []),
-    $fetch<any[]>(`${config.public.apiBase}/reviews`).catch(() => []),
-    $fetch<any[]>(`${config.public.apiBase}/blogs`).catch(() => []),
-    $fetch<any[]>(`${config.public.apiBase}/products`).catch(() => [])
+    $fetch<any[]>(`${config.public.apiBase}/widgets`, fetchOpts).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/banners`, fetchOpts).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/categories`, fetchOpts).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/reviews`, fetchOpts).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/blogs`, fetchOpts).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/products`, fetchOpts).catch(() => [])
   ])
   return { widgetsData, bannersData, categoriesData, reviewsData, blogsData, productsData }
 })

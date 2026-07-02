@@ -37,8 +37,9 @@ export default defineNuxtPlugin(() => {
 
   // Initialize dataLayer and gtag function
   window.dataLayer = window.dataLayer || []
-  window.gtag = function (...args: any[]) {
-    window.dataLayer.push(args)
+  window.gtag = function () {
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer.push(arguments)
   }
 
   window.gtag('js', new Date())

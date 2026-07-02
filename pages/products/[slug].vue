@@ -76,9 +76,19 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
               </svg>
             </div>
+
+            <!-- Mobile Dots Indicator -->
+            <div v-if="allImages.length > 1" class="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 md:hidden pointer-events-none">
+              <div 
+                v-for="(_, idx) in allImages" 
+                :key="`dot-${idx}`" 
+                class="w-1.5 h-1.5 rounded-full transition-all duration-300 shadow-sm"
+                :class="activeImageIdx === idx ? 'bg-deep-plum w-4' : 'bg-white/80'"
+              ></div>
+            </div>
           </div>
           <!-- Thumbnails -->
-          <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <div class="hidden md:flex gap-2 overflow-x-auto scrollbar-hide pb-1">
             <button
               v-for="(img, idx) in allImages"
               :key="idx"
@@ -115,7 +125,7 @@
               </button>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
-              <AppRating :rating="product.rating" :count="product.reviewCount" show-count show-value />
+              <!-- <AppRating :rating="product.rating" :count="product.reviewCount" show-count show-value /> -->
               <span class="text-[11px] text-mid-gray font-ui">SKU: {{ product.sku }}</span>
             </div>
           </div>
@@ -250,7 +260,7 @@
                 <path d="M1 4v6h6"/>
                 <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
               </svg>
-              <span class="text-[12.5px] font-ui text-charcoal">7-day return and size exchange</span>
+              <span class="text-[12.5px] font-ui text-charcoal">7-day return and exchange</span>
             </div>
             <!-- Free Delivery -->
             <div class="flex items-center gap-3 px-3 py-2.5">
@@ -387,6 +397,8 @@
               </div>
             </div>
           </div>
+          <!-- Reviews (Temporarily Hidden) -->
+          <!--
           <div v-else-if="activeTab === 'Reviews'">
             <div class="flex items-center gap-6 mb-6">
               <div class="text-center">
@@ -408,7 +420,6 @@
               <ReviewCard v-for="review in productReviews" :key="review.id" :review="review" />
             </div>
 
-            <!-- Rate This Product Form -->
             <div class="border-t border-border-gray pt-6 mt-8">
               <h3 class="font-ui font-semibold text-charcoal text-sm mb-1">Rate &amp; Review This Product</h3>
               <p class="text-[11px] text-mid-gray mb-4 font-ui">Your review will help other customers make an informed choice. Required fields are marked *</p>
@@ -456,6 +467,7 @@
               </form>
             </div>
           </div>
+          -->
           <div v-else-if="activeTab === 'FAQs'">
             <div v-if="!productFaqs.length" class="p-6 text-center text-xs text-mid-gray italic">
               No FAQs configured for this product yet.
@@ -620,6 +632,33 @@
       </span>
     </button>
   </div>
+  
+  <!-- Size Selection Modal -->
+  <Transition name="fade">
+    <div v-if="sizeModalOpen" class="overlay-backdrop" @click="sizeModalOpen = false" style="z-index: 60" />
+  </Transition>
+  <Transition name="slide-up">
+    <div v-if="sizeModalOpen" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-modal p-6 md:max-w-md md:mx-auto md:bottom-auto md:top-1/2 md:-translate-y-1/2 md:rounded-2xl" style="z-index: 70">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-ui font-semibold text-charcoal text-lg">Select a Size</h3>
+        <button class="btn-icon" @click="sizeModalOpen = false" aria-label="Close">
+          <svg class="w-5 h-5 text-mid-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      
+      <div v-if="product" class="grid grid-cols-4 sm:grid-cols-5 gap-3">
+        <button
+          v-for="size in product.variants[selectedVariant].sizes"
+          :key="size"
+          class="h-12 border rounded-xl flex items-center justify-center font-ui text-sm font-semibold transition-all duration-200"
+          :class="selectedSize === size ? 'border-deep-plum bg-deep-plum text-white shadow-md shadow-deep-plum/20' : 'border-[#E8DDD5] text-charcoal hover:border-dusty-rose bg-white'"
+          @click="selectSizeAndAdd(size)"
+        >
+          {{ size }}
+        </button>
+      </div>
+    </div>
+  </Transition>
   </div>
 </template>
 
@@ -721,7 +760,7 @@ onUnmounted(() => {
   }
 })
 
-const tabs = ['Description', 'Fabric, Care & Origin', 'Reviews', 'FAQs']
+const tabs = ['Description', 'Fabric, Care & Origin', /* 'Reviews', */ 'FAQs']
 const faqs = faqsData.slice(0, 5)
 
 const allImages = computed(() =>
@@ -877,7 +916,11 @@ const isAlreadyInBag = computed(() => {
 })
 
 const handleAddToCart = async () => {
-  if (!selectedSize.value) { sizeError.value = true; return }
+  if (!selectedSize.value) { 
+    sizeError.value = true;
+    sizeModalOpen.value = true;
+    return 
+  }
   sizeError.value = false
   
   if (isAlreadyInBag.value) {
@@ -889,7 +932,18 @@ const handleAddToCart = async () => {
   await new Promise(r => setTimeout(r, 400))
   adding.value = false
   if (!product.value) return
-  addToCart(product.value, product.value.variants[selectedVariant.value].color, selectedSize.value, qty.value)
+  const pId = product.value.id || (product.value as any)._id
+  const color = product.value.variants[selectedVariant.value].color
+  trackAddToCart(pId, product.value.name, product.value.price, color, selectedSize.value, qty.value)
+  addToCart(product.value, color, selectedSize.value, qty.value)
+}
+
+const sizeModalOpen = ref(false)
+
+const selectSizeAndAdd = (size: string) => {
+  selectedSize.value = size
+  sizeModalOpen.value = false
+  handleAddToCart()
 }
 
 

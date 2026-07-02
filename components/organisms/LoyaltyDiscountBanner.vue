@@ -50,8 +50,8 @@
     <!-- Guest CTA -->
     <div v-if="!isLoggedIn" class="loyalty-cta-guest">
       <div class="cta-text">
-        <strong>Login &amp; get 15% off your 1st order</strong>
-        <span class="cta-code">ELVINA15</span>
+        <strong>Login &amp; get 10% off your 1st order</strong>
+        <span class="cta-code">ELVINA10</span>
       </div>
       <button class="cta-btn" @click="handleLogin" aria-label="Login to unlock loyalty discounts">
         Login
@@ -67,7 +67,7 @@
         <span v-else> — applied automatically</span>
       </div>
       <div v-else class="cta-maxed">
-        🏆 You've unlocked all tiers! Your 5th order is <strong>100% free</strong>.
+        🏆 You've unlocked all tiers! Enjoy your exclusive loyalty status.
       </div>
     </div>
 
@@ -82,11 +82,11 @@ const isLoggedIn = computed(() => auth.isLoggedIn)
 const orderCount = ref(0)
 
 const tiers = [
-  { order: 1, label: '15% Off', code: 'ELVINA15', special: false },
-  { order: 2, label: '25% Off', code: null,       special: false },
-  { order: 3, label: '50% Off', code: null,       special: false },
-  { order: 4, label: '75% Off', code: null,       special: false },
-  { order: 5, label: '100% Free', code: null,     special: true  },
+  { order: 1, label: '10% Off', code: 'ELVINA10',      special: false },
+  { order: 2, label: '20% Off', code: 'ELVINAROYAL20', special: false },
+  { order: 3, label: '30% Off', code: 'ELVINAROYAL30', special: false },
+  { order: 4, label: '40% Off', code: 'ELVINAROYAL40', special: false },
+  { order: 5, label: '50% Off', code: 'ELVINAROYAL50', special: true  },
 ]
 
 const currentTier = computed(() =>
@@ -106,7 +106,7 @@ const handleLogin = () => {
 const loadOrders = async () => {
   try {
     const orders = await auth.fetchMyOrders()
-    orderCount.value = Array.isArray(orders) ? orders.length : 0
+    orderCount.value = Array.isArray(orders) ? orders.filter((o: any) => o.orderStatus === 'delivered' || o.status === 'delivered').length : 0
   } catch { orderCount.value = 0 }
 }
 

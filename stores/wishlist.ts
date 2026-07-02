@@ -35,7 +35,8 @@ export const useWishlistStore = defineStore('wishlist', {
       const config = useRuntimeConfig()
       try {
         const data = await $fetch<any[]>(`${config.public.apiBase}/wishlist`, {
-          headers: { Authorization: `Bearer ${auth.token}` }
+          headers: { Authorization: `Bearer ${auth.token}` },
+          silent: this.items.length > 0
         })
         
         this.items = data.map(item => ({
@@ -60,7 +61,8 @@ export const useWishlistStore = defineStore('wishlist', {
           const res = await $fetch<any>(`${config.public.apiBase}/wishlist/toggle`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${auth.token}` },
-            body: { productId: pId }
+            body: { productId: pId },
+            silent: true
           })
           
           if (res.action === 'added') {
@@ -100,7 +102,8 @@ export const useWishlistStore = defineStore('wishlist', {
           await $fetch<any>(`${config.public.apiBase}/wishlist/toggle`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${auth.token}` },
-            body: { productId: targetId }
+            body: { productId: targetId },
+            silent: true
           })
           this.items = this.items.filter((p) => (p.id || (p as any)._id) !== targetId)
           ui.addToast('info', `Removed from wishlist`)
@@ -127,7 +130,8 @@ export const useWishlistStore = defineStore('wishlist', {
         await $fetch<any>(`${config.public.apiBase}/wishlist/merge`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${auth.token}` },
-          body: { productIds }
+          body: { productIds },
+          silent: true
         })
         if (import.meta.client) {
           localStorage.removeItem('ve_guest_wishlist')

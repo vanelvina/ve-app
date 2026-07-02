@@ -111,4 +111,10 @@ export default defineNuxtPlugin((nuxtApp) => {
       registerPush()
     }, 2000)
   }
+
+  return {
+    provide: {
+      registerPush
+    }
+  }
 })
