@@ -82,8 +82,13 @@ export default defineNuxtPlugin((nuxtApp) => {
         return
       }
 
-      // VAPID Public Key from runtime config with fallback to the current production key
-      const publicVapidKey = config.public.vapidPublicKey || 'BGMpRAqfexagv3dgwiH7WidSTEzAfj0lMJak_4ZskcYD7N6ZFtZLlTrObVtNLXJOXzAMu6onqA0R0dFP9e-IRuA'
+      // VAPID Public Key from runtime config
+      const publicVapidKey = config.public.vapidPublicKey
+      if (!publicVapidKey) {
+        console.warn('[Push] VAPID public key is not configured. Push subscription skipped.')
+        return
+      }
+      
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
