@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { shallowRef } from 'vue'
 import type { Product, FilterState, SortOption } from '~/types'
 
+const MAX_CYCLES = 3 // After 3 full loops through all products, show "end of collection"
+
 export const useProductsStore = defineStore('products', {
   state: () => ({
     all: shallowRef<Product[]>([]),
@@ -99,14 +101,19 @@ export const useProductsStore = defineStore('products', {
       return this.filtered.length
     },
 
+    // Builds the ordered base for infinite cycling.
+    // Tier 1: Exact filter matches (category + size + color + price)
+    // Tier 2: Same selected category (ignoring size/color)
+    // Tier 3: Same subcategory as Tier 1/2 products
+    // Tier 4: All remaining products
     infiniteCycleBase(): Product[] {
       const allProducts = this.all
       const filteredProducts = this.filtered // Tier 1: exact matches
-      
+
       const addedIds = new Set(filteredProducts.map(p => p.id))
       const result = [...filteredProducts]
-      
-      // Tier 2: Same Categories (ignore size/color filters)
+
+      // Tier 2: Same selected categories (ignore size/color/price filters)
       if (this.filters.categories.length > 0) {
         const sameCatProducts = allProducts.filter(p => {
           if (addedIds.has(p.id)) return false
@@ -118,8 +125,8 @@ export const useProductsStore = defineStore('products', {
           addedIds.add(p.id)
         })
       }
-      
-      // Tier 3: Same Subcategories (based on products found so far)
+
+      // Tier 3: Same subcategory as products already in result (broader discovery)
       const activeSubcats = new Set<string>()
       result.forEach(p => {
         if (p.subcategory) {
@@ -137,7 +144,7 @@ export const useProductsStore = defineStore('products', {
           addedIds.add(p.id)
         })
       }
-      
+
       // Tier 4: All remaining products
       allProducts.forEach(p => {
         if (!addedIds.has(p.id)) {
@@ -145,8 +152,16 @@ export const useProductsStore = defineStore('products', {
           addedIds.add(p.id)
         }
       })
-      
+
       return result
+    },
+
+    // Returns true when we've shown MAX_CYCLES full cycles through the base
+    hasReachedCycleLimit(): boolean {
+      const base = this.infiniteCycleBase
+      if (!base || base.length === 0) return false
+      const totalWanted = this.page * this.pageSize
+      return totalWanted >= base.length * MAX_CYCLES
     },
 
     getBySlug: (state) => (slug: string) => state.all.find((p) => p.slug === slug),
@@ -177,7 +192,7 @@ export const useProductsStore = defineStore('products', {
     },
     setFilters(filters: Partial<FilterState>) {
       this.filters = { ...this.filters, ...filters }
-      this.page = 1
+      this.page = 1 // Reset to page 1 when filters change
     },
     resetFilters() {
       this.filters = {

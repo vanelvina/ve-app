@@ -177,21 +177,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import categoriesData from '~/data/categories.json'
 import type { SortOption } from '~/types'
 
 const store = useProductsStore()
 const ui = useUIStore()
 
+// Scroll restoration for seamless back-navigation
+const { saveScroll, restoreScroll } = useScrollRestore()
+
 const displayedProducts = computed(() => {
   const base = store.infiniteCycleBase
   if (!base || base.length === 0) return []
-  
+
   const totalWanted = store.page * store.pageSize
+  // Cap display at MAX_CYCLES worth of products to avoid infinite memory growth
+  const maxDisplay = base.length * 3
+  const actualWanted = Math.min(totalWanted, maxDisplay)
   const result = []
-  
-  for (let i = 0; i < totalWanted; i++) {
+
+  for (let i = 0; i < actualWanted; i++) {
     const product = base[i % base.length]
     result.push({
       ...product,
@@ -199,18 +205,36 @@ const displayedProducts = computed(() => {
       cycleKey: `${product.id}-cycle-${Math.floor(i / base.length)}`
     })
   }
-  
+
   return result
 })
 
 const sentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 
-const hasMore = computed(() => store.infiniteCycleBase && store.infiniteCycleBase.length > 0)
+// hasMore = true only if we haven't reached the cycle limit yet
+const hasMore = computed(() => store.infiniteCycleBase.length > 0 && !store.hasReachedCycleLimit)
 
 const loadMore = () => {
   if (hasMore.value) {
     store.setPage(store.page + 1)
+  }
+}
+
+const setupObserver = () => {
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+  if (typeof window !== 'undefined' && 'IntersectionObserver' in window && sentinel.value) {
+    observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore.value) {
+        loadMore()
+      }
+    }, {
+      rootMargin: '200px'
+    })
+    observer.observe(sentinel.value)
   }
 }
 
@@ -293,8 +317,8 @@ const parseRouteQueries = () => {
   let queryCategory = route.query.category || route.query.categories
   let categoriesArray: string[] = []
   if (queryCategory) {
-    const cats = Array.isArray(queryCategory) 
-      ? queryCategory 
+    const cats = Array.isArray(queryCategory)
+      ? queryCategory
       : String(queryCategory).split(',').map(s => s.trim())
     categoriesArray = cats.map(c => {
       const matched = categories.value.find((cat: any) => cat.name.toLowerCase() === c.toLowerCase())
@@ -305,16 +329,16 @@ const parseRouteQueries = () => {
   let querySize = route.query.size || route.query.sizes
   let sizesArray: string[] = []
   if (querySize) {
-    sizesArray = Array.isArray(querySize) 
-      ? querySize 
+    sizesArray = Array.isArray(querySize)
+      ? querySize
       : String(querySize).split(',').map(s => s.trim())
   }
 
   let queryColor = route.query.color || route.query.colors
   let colorsArray: string[] = []
   if (queryColor) {
-    colorsArray = Array.isArray(queryColor) 
-      ? queryColor 
+    colorsArray = Array.isArray(queryColor)
+      ? queryColor
       : String(queryColor).split(',').map(s => s.trim())
   }
 
@@ -328,26 +352,35 @@ const parseRouteQueries = () => {
 onMounted(() => {
   parseRouteQueries()
   loadCategories()
-
-  if (typeof window !== 'undefined' && 'IntersectionObserver' in window) {
-    observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        loadMore()
-      }
-    }, {
-      rootMargin: '150px'
-    })
-    if (sentinel.value) {
-      observer.observe(sentinel.value)
-    }
-  }
+  // Restore scroll position (seamless back-navigation)
+  restoreScroll()
+  // Set up infinite scroll observer after next tick so sentinel is rendered
+  nextTick(() => {
+    setupObserver()
+  })
 })
 
 onUnmounted(() => {
   if (observer) {
     observer.disconnect()
   }
+  // Save scroll position before leaving
+  saveScroll()
 })
+
+// Re-setup observer when sentinel element is available
+watch(sentinel, () => {
+  if (sentinel.value) {
+    setupObserver()
+  }
+})
+
+// Re-setup observer when filters change so sentinel position is re-evaluated
+watch(() => store.filters, () => {
+  nextTick(() => {
+    setupObserver()
+  })
+}, { deep: true })
 
 watch(() => route.query, () => {
   parseRouteQueries()

@@ -192,6 +192,19 @@
       </div>
     </div>
   </div>
+
+  <!-- Payment Processing Overlay: blocks UI while verifying Razorpay payment -->
+  <Teleport to="body">
+    <Transition name="fade">
+      <div v-if="processingPayment" class="fixed inset-0 z-[300] bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center gap-6" role="status" aria-live="polite">
+        <div class="w-16 h-16 rounded-full border-4 border-rose-blush border-t-deep-plum animate-spin" />
+        <div class="text-center">
+          <p class="font-serif text-xl text-deep-plum font-semibold">Processing your payment…</p>
+          <p class="text-xs text-mid-gray font-ui mt-1">Please don't close this page.</p>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -199,7 +212,7 @@ import { onMounted, watch } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { formatPrice, isValidPincode, isValidPhone, isValidEmail, capitalizeWords } from '~/utils/formatters'
 
-definePageMeta({ layout: 'checkout' })
+definePageMeta({ layout: 'checkout', middleware: ['auth-redirect'] })
 
 const router = useRouter()
 const cart = useCartStore()
@@ -228,6 +241,7 @@ const currentStep = ref(0)
 const orderCompleted = ref(false) // set true when navigating to thank-you; prevents false abandon tracking
 const steps = ['Address', 'Confirmation']
 const placing = ref(false)
+const processingPayment = ref(false) // shows full-screen overlay during Razorpay verify-payment
 const selectedShipping = ref('standard')
 const selectedPayment = ref('razorpay')
 
@@ -255,7 +269,6 @@ const prefillForm = () => {
 }
 
 onMounted(async () => {
-  auth.init()
   await cart.fetchCart()
   prefillForm()
   if (isBuyNow.value) {
@@ -434,7 +447,8 @@ const sendAbandonedNotification = async (reason: string) => {
       } : undefined
     }
 
-    await $fetch('/api/orders/notify-abandoned', {
+    const config = useRuntimeConfig()
+    await $fetch(`${config.public.apiBase}/orders/notify-abandoned`, {
       method: 'POST',
       body: notificationPayload,
       headers: auth.isLoggedIn ? {
@@ -520,8 +534,10 @@ const placeOrder = async () => {
         description: "Order Payment",
         order_id: rzpOrder.id,
         handler: async function (response: any) {
+          // Show blocking overlay immediately on payment success to prevent navigating away
+          processingPayment.value = true
+          placing.value = true
           try {
-            placing.value = true
             const verifyPayload = {
               ...payload,
               razorpay_order_id: response.razorpay_order_id,
@@ -545,6 +561,7 @@ const placeOrder = async () => {
             console.error('Verify payment error:', err)
             ui.addToast('error', err.data?.message || err.message || 'Payment verification failed')
           } finally {
+            processingPayment.value = false
             placing.value = false
           }
         },

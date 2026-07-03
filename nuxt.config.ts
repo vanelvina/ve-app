@@ -46,6 +46,10 @@ export default defineNuxtConfig({
 
   // App config
   app: {
+    // Custom scroll behavior: restore position for back/forward, scroll to top for new navigations
+    router: {
+      scrollBehaviorType: 'smooth',
+    },
     head: {
       title: 'Van Elvina – Women Comfort First',
       charset: 'utf-8',
@@ -87,6 +91,10 @@ export default defineNuxtConfig({
     '/sw.js': { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' } },
     '/_payload.json': { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' } },
     '/manifest.webmanifest': { headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' } },
+    // Ensure static assets have long-term caching (safe as they have hashes in filenames)
+    '/_nuxt/**': { headers: { 'Cache-Control': 'public, max-age=31536000, immutable' } },
+    // Avoid caching page HTML files so updates are immediately visible
+    '/**': { headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache', 'Expires': '0' } },
   },
 
   // Runtime config

@@ -158,6 +158,8 @@ const handleLogin = async () => {
     }
     
     if (redirectPath) {
+      // Use nextTick to let modal close animation complete before navigating
+      await nextTick()
       navigateTo(redirectPath)
     }
   } catch (err: any) {
@@ -194,6 +196,8 @@ const handleSignup = async () => {
     }
     
     if (redirectPath) {
+      // Use nextTick to let modal close animation complete before navigating
+      await nextTick()
       navigateTo(redirectPath)
     }
   } catch (err: any) {

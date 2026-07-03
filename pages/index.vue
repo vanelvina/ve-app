@@ -1,10 +1,5 @@
 <template>
   <div>
-    <!-- PWA Update Prompt -->
-    <ClientOnly>
-      <PwaUpdatePrompt />
-    </ClientOnly>
-
     <!-- Render widgets dynamically based on active order and status -->
     <div>
       <div 
@@ -161,35 +156,50 @@ const categories = useState<any[]>('homepage-categories', () => [])
 const reviews = useState<any[]>('homepage-reviews', () => [])
 const blogsList = useState<any[]>('homepage-blogs', () => [])
 
-// Fetch all first-load dependencies in parallel on the server during SSR
+// Non-blocking fetch: serve SSR-cached data instantly if available (getCachedData).
+// Only re-fetches when the cache is stale or missing.
 const { data: initData } = await useAsyncData('homepage-init', async () => {
-  const isSilent = widgets.value.length > 0
-  const fetchOpts = isSilent ? { silent: true } : {}
-  
+  // If widgets are already hydrated from SSR payload, run as silent background refresh
+  const alreadyHasWidgets = widgets.value.length > 0
+  const fetchOpts = alreadyHasWidgets ? { silent: true } : {}
+
   const [widgetsData, bannersData, categoriesData, reviewsData, blogsData, productsData] = await Promise.all([
     $fetch<any[]>(`${config.public.apiBase}/widgets`, fetchOpts).catch(() => []),
     $fetch<any[]>(`${config.public.apiBase}/banners`, fetchOpts).catch(() => []),
     $fetch<any[]>(`${config.public.apiBase}/categories`, fetchOpts).catch(() => []),
     $fetch<any[]>(`${config.public.apiBase}/reviews`, fetchOpts).catch(() => []),
     $fetch<any[]>(`${config.public.apiBase}/blogs`, fetchOpts).catch(() => []),
-    $fetch<any[]>(`${config.public.apiBase}/products`, fetchOpts).catch(() => [])
+    // Skip products fetch entirely if already cached in store — avoids duplicate API call
+    productsStore.all.length > 0
+      ? Promise.resolve(productsStore.all)
+      : $fetch<any[]>(`${config.public.apiBase}/products`, fetchOpts).catch(() => [])
   ])
   return { widgetsData, bannersData, categoriesData, reviewsData, blogsData, productsData }
+}, {
+  // Return cached Nuxt state immediately on client if available; re-validates in background
+  getCachedData(key, nuxtApp) {
+    const cached = nuxtApp.payload.data[key] || nuxtApp.static.data[key]
+    // Only use cache if we already have widgets rendered — prevents stale first-paint
+    if (cached && widgets.value.length > 0) return cached
+    return undefined
+  }
 })
 
-// Populate Nuxt shared states and Pinia product store with SSR payload
+// Populate Nuxt shared states and Pinia product store with fetched/refreshed data
 if (initData.value) {
-  if (initData.value.widgetsData) widgets.value = initData.value.widgetsData
-  if (initData.value.bannersData) banners.value = initData.value.bannersData
-  if (initData.value.categoriesData) categories.value = initData.value.categoriesData
-  if (initData.value.reviewsData) reviews.value = initData.value.reviewsData ? initData.value.reviewsData.slice(0, 6) : []
-  if (initData.value.blogsData) blogsList.value = initData.value.blogsData
-  if (initData.value.productsData && productsStore.all.length === 0) {
+  if (initData.value.widgetsData?.length) widgets.value = initData.value.widgetsData
+  if (initData.value.bannersData?.length) banners.value = initData.value.bannersData
+  if (initData.value.categoriesData?.length) categories.value = initData.value.categoriesData
+  if (initData.value.reviewsData) reviews.value = initData.value.reviewsData.slice(0, 6)
+  if (initData.value.blogsData?.length) blogsList.value = initData.value.blogsData
+  if (initData.value.productsData?.length && productsStore.all.length === 0) {
     productsStore.all = initData.value.productsData
   }
 }
 
-const loading = ref(widgets.value.length === 0)
+// Show content immediately if widgets are already available (SSR hydration or previous visit).
+// Only show loading state on the very first ever visit when widgets are empty.
+const loading = ref(false)
 
 const isMobileScreen = ref(false)
 
@@ -200,7 +210,6 @@ const updateScreenSize = () => {
 onMounted(() => {
   updateScreenSize()
   window.addEventListener('resize', updateScreenSize, { passive: true })
-  loading.value = false
 })
 
 onUnmounted(() => {

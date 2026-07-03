@@ -960,7 +960,11 @@ const checkDelivery = () => {
 
 watch(selectedSize, () => { if (selectedSize.value) sizeError.value = false })
 
+// Scroll restoration for seamless back-navigation from PDP → PLP
+const { saveScroll, restoreScroll } = useScrollRestore()
+
 onMounted(() => {
+  restoreScroll()
   if (product.value) {
     addRecentlyViewed(product.value)
     // Track deliberate PDP visit (high-intent view)
@@ -978,6 +982,10 @@ onMounted(() => {
       product.value.price
     )
   }
+})
+
+onBeforeUnmount(() => {
+  saveScroll()
 })
 
 // SEO
