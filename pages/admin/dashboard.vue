@@ -3663,6 +3663,51 @@ const siteVisitsChartData = computed(() => {
   return { labels, values }
 })
 
+// Computes the SVG path points for the visits trend line and area polygon
+const visitsChartPath = computed(() => {
+  const data = siteVisitsChartData.value
+  const n = data.values.length
+  if (n === 0) {
+    return { points: [], polylinePoints: '', fillPoints: '' }
+  }
+
+  const minVal = 0
+  const maxVal = Math.max(...data.values, 10) // default max to at least 10 to avoid divide-by-zero/flat line
+
+  const startX = 40
+  const endX = 460
+  const startY = 130
+  const endY = 20
+
+  const width = endX - startX
+  const height = startY - endY // 110 pixels
+
+  const points = data.values.map((val, idx) => {
+    // Distribute X evenly across startX to endX
+    const x = startX + (n > 1 ? (idx / (n - 1)) * width : width / 2)
+    // Scale Y value proportionally
+    const y = startY - ((val - minVal) / (maxVal - minVal)) * height
+    return {
+      x,
+      y,
+      val,
+      label: data.labels[idx] || ''
+    }
+  })
+
+  const polylinePoints = points.map(p => `${p.x},${p.y}`).join(' ')
+  // For the polygon fill, we start at (startX, baselineY), go through all points, and close at (endX, baselineY)
+  const fillPoints = points.length > 0 
+    ? `${points[0].x},${startY} ${polylinePoints} ${points[points.length - 1].x},${startY}`
+    : ''
+
+  return {
+    points,
+    polylinePoints,
+    fillPoints
+  }
+})
+
 // Fetch the analytics summary from backend
 const fetchAnalyticsSummary = async () => {
   analyticsLoading.value = true

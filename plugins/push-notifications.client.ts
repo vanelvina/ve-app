@@ -83,7 +83,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       }
 
       // VAPID Public Key from runtime config with fallback to the current production key
-      const publicVapidKey = config.public.vapidPublicKey || 'BF2ljIBKIQS12D8ynJn2rLVbA8LFcsEsOm4Pjik6HAMWto3LaGWwh29Sud_KGZzfODX5zPTE-ZugvVveDWCGwzY'
+      const publicVapidKey = config.public.vapidPublicKey || 'BGMpRAqfexagv3dgwiH7WidSTEzAfj0lMJak_4ZskcYD7N6ZFtZLlTrObVtNLXJOXzAMu6onqA0R0dFP9e-IRuA'
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
