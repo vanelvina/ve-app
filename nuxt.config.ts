@@ -1,3 +1,22 @@
+// Helper to resolve the correct API base URL
+const getApiBase = () => {
+  const envBase = process.env.NUXT_PUBLIC_API_BASE;
+  
+  // If the env variable points to the old Render backend, ignore it and use Supabase
+  if (envBase && envBase.includes('onrender.com')) {
+    return 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api';
+  }
+  
+  // In production, relative '/api' calls won't work without a server proxy, so force Supabase URL
+  if (process.env.NODE_ENV === 'production') {
+    if (!envBase || envBase === '/api') {
+      return 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api';
+    }
+  }
+  
+  return envBase || '/api';
+};
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
@@ -75,7 +94,7 @@ export default defineNuxtConfig({
     public: {
       appName: 'Van Elvina',
       appUrl: 'https://vanelvina.com',
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || (process.env.NODE_ENV === 'development' ? '/api' : 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api'),
+      apiBase: getApiBase(),
       vapidPublicKey: process.env.NUXT_PUBLIC_VAPID_PUBLIC_KEY || 'BF2ljIBKIQS12D8ynJn2rLVbA8LFcsEsOm4Pjik6HAMWto3LaGWwh29Sud_KGZzfODX5zPTE-ZugvVveDWCGwzY',
       googleClientId: '1095271875819-6sh520q88vas8u7g3n4ukrh0o2aihgib.apps.googleusercontent.com',
       razorpayKeyId: process.env.NUXT_PUBLIC_RAZORPAY_KEY_ID || 'TEST_KEY_ID',
