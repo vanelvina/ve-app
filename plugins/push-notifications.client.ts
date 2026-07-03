@@ -62,9 +62,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     try {
       const config = useRuntimeConfig()
-      const registration = await navigator.serviceWorker.ready
-
-      // Request permission
+      // Request permission first (non-blocking)
       let permission = Notification.permission
       if (permission === 'default') {
         permission = await Notification.requestPermission()
@@ -74,6 +72,9 @@ export default defineNuxtPlugin((nuxtApp) => {
         console.warn('[Push] Permission was not granted for push notifications.')
         return
       }
+
+      // Now wait for service worker ready state
+      const registration = await navigator.serviceWorker.ready
 
       const existingSubscription = await registration.pushManager.getSubscription()
       if (existingSubscription) {

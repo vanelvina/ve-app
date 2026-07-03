@@ -5,9 +5,6 @@
       <NuxtPage />
     </NuxtLayout>
     <PwaInstallPrompt />
-    <ClientOnly>
-      <PwaUpdatePrompt />
-    </ClientOnly>
     <GlobalLoader :show="ui.apiLoading" />
   </div>
 </template>

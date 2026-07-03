@@ -1,5 +1,8 @@
 <template>
   <div class="min-h-screen flex flex-col bg-warm-ivory">
+    <!-- Soft Notification Prompt -->
+    <SoftNotificationPrompt />
+
     <!-- Navbar -->
     <TheNavbar />
 
@@ -25,8 +28,7 @@
     <!-- Toast Notifications -->
     <ToastNotifications />
 
-    <!-- Coupon Popup (bottom right) -->
-    <CouponPopup />
+
 
     <!-- Profile Sidebar Drawer -->
     <ProfileDrawer />
