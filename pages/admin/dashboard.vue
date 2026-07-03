@@ -520,17 +520,60 @@
             </div>
           </div>
 
+          <!-- Rates & Percentages Grid -->
+          <div class="mt-2">
+            <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-widest mb-3">📊 Fulfillment & Payment Rates</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- COD vs Online -->
+              <div class="bg-white p-4 rounded-2xl border border-charcoal/15 shadow-soft space-y-1.5">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">COD vs Online Ratio</p>
+                <div class="flex justify-between items-baseline">
+                  <p class="text-xl font-bold text-deep-plum font-serif">{{ paymentMethodMetrics.text }}</p>
+                </div>
+                <div class="h-2 bg-rose-blush/30 rounded-full overflow-hidden flex mt-1">
+                  <div class="h-full bg-deep-plum transition-all" :style="`width: ${paymentMethodMetrics.codRate}`" title="COD" />
+                  <div class="h-full bg-emerald-600 transition-all" :style="`width: ${paymentMethodMetrics.onlineRate}`" title="Online" />
+                </div>
+              </div>
+              
+              <!-- Return Percentage -->
+              <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-soft space-y-1.5">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Return Rate</p>
+                <p class="text-2xl font-bold text-amber-600 font-serif">{{ returnRate }}</p>
+                <p class="text-[9px] text-charcoal/45">Return requests relative to total orders</p>
+              </div>
+
+              <!-- Exchange Percentage -->
+              <div class="bg-white p-4 rounded-2xl border border-blue-200 shadow-soft space-y-1.5">
+                <p class="text-[10px] text-charcoal/40 uppercase tracking-wider font-bold">Exchange Rate</p>
+                <p class="text-2xl font-bold text-blue-600 font-serif">{{ exchangeRate }}</p>
+                <p class="text-[9px] text-charcoal/45">Exchange requests relative to total orders</p>
+              </div>
+            </div>
+          </div>
+
           <!-- Checkout Funnel Row -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <!-- Conversion Rate -->
-            <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-3">
-              <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-wider">Overall Conversion</p>
+            <div class="bg-white p-5 rounded-2xl border border-charcoal/15 shadow-soft space-y-3 relative">
+              <div class="flex justify-between items-start">
+                <p class="text-[10px] font-bold text-charcoal/40 uppercase tracking-wider">Overall Conversion</p>
+                <select 
+                  v-model="selectedConversionType" 
+                  class="text-[10px] font-semibold text-deep-plum bg-rose-blush/10 border border-rose-blush/30 rounded-lg px-2 py-1 outline-none focus:border-deep-plum cursor-pointer"
+                >
+                  <option value="visits_to_order">Visits to Order</option>
+                  <option value="cart_to_order">Cart to Order</option>
+                  <option value="checkout_to_order">Checkout to Order</option>
+                  <option value="register_to_order">Logins to Order</option>
+                </select>
+              </div>
               <div class="flex items-baseline gap-1">
-                <span class="text-3xl font-bold text-deep-plum font-serif">{{ analyticsMetrics.conversionRate }}%</span>
-                <span class="text-xs text-charcoal/50">visits → orders</span>
+                <span class="text-3xl font-bold text-deep-plum font-serif">{{ currentConversionData.rate }}%</span>
+                <span class="text-xs text-charcoal/50">{{ currentConversionData.label }}</span>
               </div>
               <div class="h-2 bg-rose-blush/30 rounded-full overflow-hidden">
-                <div class="h-full bg-deep-plum rounded-full transition-all" :style="`width: ${Math.min(Number(analyticsMetrics.conversionRate), 100)}%`" />
+                <div class="h-full bg-deep-plum rounded-full transition-all" :style="`width: ${Math.min(Number(currentConversionData.rate), 100)}%`" />
               </div>
             </div>
             <!-- Checkout Started vs Completed -->
@@ -1390,10 +1433,18 @@
                   </td>
                   <td class="p-4">{{ user.stats?.orderCount || 0 }}</td>
                   <td class="p-4 font-bold text-charcoal">₹{{ (user.stats?.totalSpent || 0).toLocaleString('en-IN') }}</td>
-                  <td class="p-4 text-[10px] text-charcoal/60">{{ user.lastActive ? new Date(user.lastActive).toLocaleDateString() : 'N/A' }}</td>
+                  <td class="p-4 text-[10px] text-charcoal/60">{{ user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString('en-IN') : 'N/A' }}</td>
+                  <td class="p-4">
+                    <span 
+                      class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border"
+                      :class="user.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'"
+                    >
+                      {{ user.isActive ? 'Active' : 'Suspended' }}
+                    </span>
+                  </td>
                   <td class="p-4 text-right">
                     <button @click.stop="toggleUserStatus(user)" class="text-xs font-bold text-deep-plum hover:underline">
-                      {{ user.enabled ? 'Ban' : 'Unban' }}
+                      {{ user.isActive ? 'Ban' : 'Unban' }}
                     </button>
                   </td>
                 </tr>
@@ -2505,11 +2556,14 @@
             <!-- Category and Subcategory Multi-select Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border border-charcoal/10 bg-warm-ivory/10 p-4 rounded-2xl">
               <div>
-                <label class="block font-bold text-xs uppercase tracking-wide text-charcoal/70 mb-2">Categories (Select Multiple) *</label>
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block font-bold text-xs uppercase tracking-wide text-charcoal/70">Categories (Select Multiple) *</label>
+                  <button type="button" @click="createQuickCategory" class="text-deep-plum hover:underline font-bold text-[9px] uppercase tracking-wide">+ Create Category</button>
+                </div>
                 <div class="grid grid-cols-2 gap-2 max-h-[120px] overflow-y-auto p-3 bg-white border border-charcoal/20 rounded-xl">
                   <label 
-                    v-for="cat in categories.filter(c => c.slug !== 'all')" 
-                    :key="cat._id"
+                    v-for="cat in allAvailableCategories" 
+                    :key="cat.name"
                     class="flex items-center gap-2 text-xs font-semibold text-charcoal cursor-pointer select-none hover:text-deep-plum transition-colors"
                   >
                     <input 
@@ -2524,24 +2578,27 @@
                 </div>
               </div>
               <div>
-                <label class="block font-bold text-xs uppercase tracking-wide text-charcoal/70 mb-2">Subcategories (Select Multiple)</label>
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block font-bold text-xs uppercase tracking-wide text-charcoal/70">Subcategories (Select Multiple)</label>
+                  <button type="button" @click="createQuickSubcategory" class="text-deep-plum hover:underline font-bold text-[9px] uppercase tracking-wide">+ Create Subcategory</button>
+                </div>
                 <div v-if="selectedCategorySubcategories.length === 0" class="flex items-center justify-center h-[120px] text-[11px] text-charcoal/40 italic bg-white border border-charcoal/20 rounded-xl">
                   Select a category first to see options
                 </div>
                 <div v-else class="grid grid-cols-2 gap-2 max-h-[120px] overflow-y-auto p-3 bg-white border border-charcoal/20 rounded-xl">
                   <label 
                     v-for="sub in selectedCategorySubcategories" 
-                    :key="sub._id || sub.name"
+                    :key="sub"
                     class="flex items-center gap-2 text-xs font-semibold text-charcoal cursor-pointer select-none hover:text-deep-plum transition-colors"
                   >
                     <input 
                       type="checkbox"
-                      :value="sub.name"
-                      :checked="isSubcategorySelected(sub.name)"
-                      @change="toggleFormSubcategory(sub.name)"
+                      :value="sub"
+                      :checked="isSubcategorySelected(sub)"
+                      @change="toggleFormSubcategory(sub)"
                       class="w-4 h-4 rounded border-charcoal/20 text-deep-plum focus:ring-deep-plum/20 cursor-pointer"
                     />
-                    <span>{{ sub.name }}</span>
+                    <span>{{ sub }}</span>
                   </label>
                 </div>
               </div>
@@ -2722,37 +2779,80 @@
                   </div>
                 </div>
 
+                <!-- Sizes section -->
                 <div>
-                  <label class="block text-charcoal/50 font-bold mb-1.5">Variant Sizes (Select presets or add custom)</label>
+                  <label class="block text-charcoal/50 font-bold mb-1.5">Variant Sizes (Click S, M, L... to delete, or add any custom size below)</label>
                   <div class="flex flex-wrap gap-1.5 mb-2">
-                    <button 
-                      v-for="szPreset in ['XS', 'S', 'M', 'L', 'XL', 'XXL', '30B', '32B', '34B', '36B', '38B', '32C', '34C', '36C', '38C', '32D', '34D', '36D']" 
-                      :key="szPreset"
-                      type="button"
-                      @click="toggleSizePreset(v, szPreset)"
-                      class="px-2 py-1 rounded text-[10px] font-bold border transition-colors"
-                      :class="v.sizes.includes(szPreset) ? 'bg-deep-plum text-white border-deep-plum' : 'bg-white text-charcoal/60 border-charcoal/20 hover:border-deep-plum'"
+                    <span 
+                      v-for="sz in v.sizes" 
+                      :key="sz"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-deep-plum text-white text-[10px] font-bold rounded-lg shadow-soft border border-deep-plum/20"
                     >
-                      {{ szPreset }}
+                      {{ sz }}
+                      <button 
+                        type="button" 
+                        @click="toggleSizePreset(v, sz)" 
+                        class="text-white/60 hover:text-white font-bold text-[9px] focus:outline-none"
+                      >✕</button>
+                    </span>
+                    <span v-if="!v.sizes || !v.sizes.length" class="text-[10px] text-charcoal/40 italic">No sizes added yet. Use input below to add sizes.</span>
+                  </div>
+                  <!-- Quick add input -->
+                  <div class="flex gap-2">
+                    <input 
+                      v-model="v.newSizeInput" 
+                      @keydown.enter.prevent="addCustomSizeToVariant(v)"
+                      placeholder="Type custom size (e.g. 32B, 34C, S, XL) and click Add" 
+                      class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white font-semibold" 
+                    />
+                    <button 
+                      type="button" 
+                      @click="addCustomSizeToVariant(v)" 
+                      class="px-3 py-2 bg-deep-plum text-white hover:bg-plum-800 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors shrink-0"
+                    >
+                      Add Size
                     </button>
                   </div>
-                  <input :value="v.sizes.join(', ')" @input="v.sizes = ($event.target as HTMLInputElement).value.split(',').map(s => s.trim()).filter(Boolean)" placeholder="Comma-separated custom sizes (e.g. 30A, 32A)" class="w-full p-2 border border-charcoal/20 rounded-lg text-xs bg-white font-mono" />
                 </div>
 
-                <div class="border-t border-rose-blush/10 pt-2.5">
-                  <div class="flex items-center justify-between mb-2">
-                    <label class="block text-charcoal/50 font-bold">Photo URLs (List)</label>
-                    <button type="button" @click="v.images.push('')" class="text-deep-plum font-bold text-[9px] hover:underline">+ Add Image URL</button>
-                  </div>
-                  <div class="space-y-2">
-                    <div v-for="(_, imgIdx) in v.images" :key="imgIdx" class="flex gap-2 items-center">
-                      <!-- Mini Asset Preview -->
+                <!-- Media inputs (Main image, video url, additional images list) -->
+                <div class="border-t border-rose-blush/10 pt-3.5 space-y-3">
+                  <!-- Main image -->
+                  <div>
+                    <label class="block text-charcoal/50 font-bold mb-1">Color Variant Main Image URL *</label>
+                    <div class="flex gap-2 items-center">
                       <div class="w-8 h-8 shrink-0 rounded bg-white border border-rose-blush flex items-center justify-center overflow-hidden shadow-soft">
-                        <img v-if="v.images[imgIdx]" :src="v.images[imgIdx]" class="w-full h-full object-cover" />
-                        <span v-else class="text-[8px] text-charcoal/30">Null</span>
+                        <img v-if="v.mainImageInput" :src="v.mainImageInput" class="w-full h-full object-cover" />
+                        <span v-else class="text-[8px] text-charcoal/30">Main</span>
                       </div>
-                      <input v-model="v.images[imgIdx]" placeholder="https://example.com/color-pic.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
-                      <button type="button" @click="v.images.splice(imgIdx, 1)" class="text-red-500 text-xs">✕</button>
+                      <input v-model="v.mainImageInput" required placeholder="https://example.com/main-color.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
+                    </div>
+                  </div>
+
+                  <!-- Video URL -->
+                  <div>
+                    <label class="block text-charcoal/50 font-bold mb-1">YouTube Video Link (Watch URL or Embed Link - Optional)</label>
+                    <input v-model="v.videoUrlInput" placeholder="https://www.youtube.com/watch?v=..." class="w-full p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
+                  </div>
+
+                  <!-- Additional Images -->
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <label class="block text-charcoal/50 font-bold">Additional Images (Optional)</label>
+                      <button type="button" @click="v.additionalImagesList.push('')" class="text-deep-plum font-bold text-[9px] hover:underline">+ Add More Image URL</button>
+                    </div>
+                    <div v-if="!v.additionalImagesList || !v.additionalImagesList.length" class="text-[10px] text-charcoal/40 italic">
+                      No additional images added.
+                    </div>
+                    <div class="space-y-2 max-h-[140px] overflow-y-auto pr-1">
+                      <div v-for="(_, imgIdx) in v.additionalImagesList" :key="imgIdx" class="flex gap-2 items-center">
+                        <div class="w-8 h-8 shrink-0 rounded bg-white border border-rose-blush flex items-center justify-center overflow-hidden shadow-soft">
+                          <img v-if="v.additionalImagesList[imgIdx]" :src="v.additionalImagesList[imgIdx]" class="w-full h-full object-cover" />
+                          <span v-else class="text-[8px] text-charcoal/30">Extra</span>
+                        </div>
+                        <input v-model="v.additionalImagesList[imgIdx]" placeholder="https://example.com/extra-view.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
+                        <button type="button" @click="v.additionalImagesList.splice(imgIdx, 1)" class="text-red-500 text-xs">✕</button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2768,36 +2868,6 @@
               <input v-model="productModal.form.availableOffer" type="text" placeholder="e.g. Buy 2 Get 1 Free, or Flat 10% Off with code VANELVINA" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
             </div>
 
-            <!-- YouTube Video URL -->
-            <div>
-              <label class="block font-semibold mb-1 text-charcoal/70">YouTube Video Embed Link / Watch URL</label>
-              <input v-model="productModal.form.videoUrl" type="text" placeholder="e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
-              <div v-if="productModal.form.videoUrl" class="mt-2 aspect-video w-full max-w-sm rounded-xl overflow-hidden border border-rose-blush/20">
-                <iframe :src="getVideoEmbedUrl(productModal.form.videoUrl)" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
-              </div>
-            </div>
-
-            <!-- Top-Level Product Images (Multiple) -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <label class="block font-semibold text-charcoal/70">Product Main Images (Multiple URLs)</label>
-                <button type="button" @click="productModal.form.images.push('')" class="text-deep-plum font-bold text-[10px] hover:underline">+ Add Image URL</button>
-              </div>
-              <div v-if="!productModal.form.images?.length" class="p-3 text-center text-charcoal/40 bg-warm-ivory/20 rounded-xl border border-dashed border-rose-blush/30">
-                No main images added. Click "+ Add Image URL" above.
-              </div>
-              <div class="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-                <div v-for="(_, imgIdx) in productModal.form.images" :key="imgIdx" class="flex gap-2 items-center">
-                  <div class="w-8 h-8 rounded bg-white border border-rose-blush flex items-center justify-center overflow-hidden shrink-0 shadow-soft">
-                    <img v-if="productModal.form.images[imgIdx]" :src="productModal.form.images[imgIdx]" class="w-full h-full object-cover" />
-                    <span v-else class="text-[8px] text-charcoal/30">Null</span>
-                  </div>
-                  <input v-model="productModal.form.images[imgIdx]" placeholder="https://example.com/product-main.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
-                  <button type="button" @click="productModal.form.images.splice(imgIdx, 1)" class="text-red-500 text-xs">✕</button>
-                </div>
-              </div>
-            </div>
-
             <!-- Product Features / Highlights (Multiple) -->
             <div class="space-y-2">
               <div class="flex items-center justify-between">
@@ -2807,7 +2877,7 @@
               <div v-if="!productModal.form.features?.length" class="p-3 text-center text-charcoal/40 bg-warm-ivory/20 rounded-xl border border-dashed border-rose-blush/30">
                 No key features added. Click "+ Add Feature Bullet" above.
               </div>
-              <div class="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+              <div class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
                 <div v-for="(_, fIdx) in productModal.form.features" :key="fIdx" class="flex gap-2 items-center">
                   <span class="text-charcoal/40 font-bold">•</span>
                   <input v-model="productModal.form.features[fIdx]" placeholder="e.g. Ultra-soft seam-free elastic band" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
@@ -3708,6 +3778,59 @@ const visitsChartPath = computed(() => {
   }
 })
 
+const selectedConversionType = ref('visits_to_order')
+
+const currentConversionData = computed(() => {
+  const metrics = analyticsMetrics.value
+  const orders = metrics.checkoutsCompleted || metrics.orders || 0
+  
+  if (selectedConversionType.value === 'cart_to_order') {
+    const carts = metrics.addToCarts || 0
+    const rate = carts > 0 ? ((orders / carts) * 100).toFixed(1) : '0.0'
+    return { rate, label: 'cart → orders' }
+  }
+  
+  if (selectedConversionType.value === 'checkout_to_order') {
+    const checkouts = metrics.checkoutsStarted || 0
+    const rate = checkouts > 0 ? ((orders / checkouts) * 100).toFixed(1) : '0.0'
+    return { rate, label: 'checkout → orders' }
+  }
+  
+  if (selectedConversionType.value === 'register_to_order') {
+    const logins = metrics.logins || 0
+    const rate = logins > 0 ? ((orders / logins) * 100).toFixed(1) : '0.0'
+    return { rate, label: 'logins → orders' }
+  }
+  
+  // Default: visits_to_order
+  const visits = metrics.visits || 0
+  const rate = visits > 0 ? ((orders / visits) * 100).toFixed(1) : '0.0'
+  return { rate, label: 'visits → orders' }
+})
+
+const paymentMethodMetrics = computed(() => {
+  const total = orders.value.length
+  if (total === 0) return { codRate: '0%', onlineRate: '0%', text: '0% COD / 0% Online' }
+  const codCount = orders.value.filter(o => o.paymentMethod === 'cod').length
+  const onlineCount = orders.value.filter(o => o.paymentMethod === 'online' || o.paymentMethod === 'razorpay' || o.paymentMethod === 'prepaid').length
+  const codRate = ((codCount / total) * 100).toFixed(0) + '%'
+  const onlineRate = ((onlineCount / total) * 100).toFixed(0) + '%'
+  return { codRate, onlineRate, text: `${codRate} COD / ${onlineRate} Online` }
+})
+
+const returnRate = computed(() => {
+  const oCount = analyticsMetrics.value.orders || 0
+  const rCount = analyticsMetrics.value.returns || 0
+  return oCount > 0 ? ((rCount / oCount) * 100).toFixed(1) + '%' : '0.0%'
+})
+
+const exchangeRate = computed(() => {
+  const oCount = analyticsMetrics.value.orders || 0
+  const eCount = analyticsMetrics.value.exchanges || 0
+  return oCount > 0 ? ((eCount / oCount) * 100).toFixed(1) + '%' : '0.0%'
+})
+
+
 // Fetch the analytics summary from backend
 const fetchAnalyticsSummary = async () => {
   analyticsLoading.value = true
@@ -4516,6 +4639,54 @@ const openProductModal = (prod: any | null) => {
   if (prod) {
     productModal.value.isEdit = true
     productModal.value.itemId = prod._id
+    
+    // Parse variants to extract mainImage, videoUrl, and additional images
+    const parsedVariants = (prod.variants || []).map((v: any) => {
+      const mainImageInput = v.images?.[0] || ''
+      const hasVideo = v.images?.[1] && (
+        v.images[1].includes('youtube.com') || 
+        v.images[1].includes('youtu.be') || 
+        v.images[1].includes('video') || 
+        v.images[1].includes('.mp4')
+      )
+      
+      let videoUrlInput = ''
+      let additionalImagesList: string[] = []
+      
+      if (hasVideo) {
+        videoUrlInput = v.images[1]
+        additionalImagesList = v.images.slice(2)
+      } else {
+        const videoIndex = (v.images || []).findIndex((img: string, idx: number) => 
+          idx > 0 && (
+            img.includes('youtube.com') || 
+            img.includes('youtu.be') || 
+            img.includes('video') || 
+            img.includes('.mp4')
+          )
+        )
+        
+        if (videoIndex !== -1) {
+          videoUrlInput = v.images[videoIndex]
+          additionalImagesList = v.images.filter((_: any, idx: number) => idx !== 0 && idx !== videoIndex)
+        } else {
+          additionalImagesList = v.images ? v.images.slice(1) : []
+        }
+      }
+      
+      if (additionalImagesList.length === 0) {
+        additionalImagesList = ['']
+      }
+      
+      return {
+        ...v,
+        mainImageInput,
+        videoUrlInput,
+        additionalImagesList,
+        newSizeInput: ''
+      }
+    })
+
     productModal.value.form = {
       name: prod.name,
       slug: prod.slug,
@@ -4529,7 +4700,7 @@ const openProductModal = (prod: any | null) => {
       deliveryDays: prod.deliveryDays || 3,
       stockCount: prod.stockCount || 0,
       inStock: prod.inStock !== undefined ? prod.inStock : true,
-      variants: prod.variants ? JSON.parse(JSON.stringify(prod.variants)) : [],
+      variants: parsedVariants,
       tags: prod.tags || [],
       images: prod.images || [],
       videoUrl: prod.videoUrl || '',
@@ -4565,12 +4736,15 @@ const openProductModal = (prod: any | null) => {
         {
           color: 'Default Color',
           colorHex: '#1a1a1a',
-          sizes: ['S', 'M', 'L'],
-          images: ['']
+          sizes: ['M'],
+          mainImageInput: '',
+          videoUrlInput: '',
+          additionalImagesList: [''],
+          newSizeInput: ''
         }
       ],
       tags: [],
-      images: [''],
+      images: [],
       videoUrl: '',
       availableOffer: '',
       features: [''],
@@ -4593,8 +4767,88 @@ const addProductVariant = () => {
     color: '',
     colorHex: '#ffffff',
     sizes: ['M'],
-    images: ['']
+    mainImageInput: '',
+    videoUrlInput: '',
+    additionalImagesList: [''],
+    newSizeInput: ''
   })
+}
+
+const addCustomSizeToVariant = (v: any) => {
+  const size = (v.newSizeInput || '').trim()
+  if (!size) return
+  if (!v.sizes) v.sizes = []
+  if (!v.sizes.includes(size)) {
+    v.sizes.push(size)
+  }
+  v.newSizeInput = ''
+}
+
+const createQuickCategory = async () => {
+  const name = prompt('Enter new category name:')
+  if (!name || !name.trim()) return
+  
+  const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  const config = useRuntimeConfig()
+  
+  try {
+    const newCat = await $fetch<any>(`${config.public.apiBase}/categories`, {
+      method: 'POST',
+      headers: adminStore.getHeaders(),
+      body: {
+        name: name.trim(),
+        slug,
+        description: `${name.trim()} collection`,
+        image: 'https://images.unsplash.com/photo-1541300112-29c3d8f84c82?w=800',
+        subcategories: []
+      }
+    })
+    categories.value.push(newCat)
+    uiStore.addToast('success', `Category "${name}" created and loaded.`)
+  } catch (err: any) {
+    uiStore.addToast('error', err.message || 'Failed to create category')
+  }
+}
+
+const createQuickSubcategory = async () => {
+  const current = productModal.value.form.category || ''
+  const selectedCats = current.split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
+  
+  if (selectedCats.length === 0) {
+    alert('Please select at least one category to add this subcategory to.')
+    return
+  }
+  
+  const name = prompt('Enter new subcategory name:')
+  if (!name || !name.trim()) return
+  
+  const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  const config = useRuntimeConfig()
+  
+  const targetCategories = categories.value.filter(c => selectedCats.includes(c.name.toLowerCase()))
+  
+  try {
+    for (const cat of targetCategories) {
+      const currentSubs = Array.isArray(cat.subcategories) ? [...cat.subcategories] : []
+      if (!currentSubs.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+        currentSubs.push({ name: name.trim(), slug })
+        await $fetch<any>(`${config.public.apiBase}/categories/${cat._id}`, {
+          method: 'PUT',
+          headers: adminStore.getHeaders(),
+          body: {
+            ...cat,
+            subcategories: currentSubs
+          }
+        })
+        cat.subcategories = currentSubs
+      }
+    }
+    
+    toggleFormSubcategory(name.trim())
+    uiStore.addToast('success', `Subcategory "${name}" created and associated.`)
+  } catch (err: any) {
+    uiStore.addToast('error', err.message || 'Failed to create subcategory')
+  }
 }
 
 const isCategorySelected = (catName: string) => {
@@ -4602,6 +4856,118 @@ const isCategorySelected = (catName: string) => {
   const cats = current.split(',').map((s: string) => s.trim().toLowerCase())
   return cats.includes(catName.toLowerCase())
 }
+
+const CATEGORY_PRESETS = [
+  {
+    name: 'Lingerie',
+    subcategories: [
+      'Lingerie Set',
+      'Sports Bra',
+      'Everyday Bra',
+      'Bralette',
+      'Push-up Bra',
+      'Strapless Bra',
+      'Underwired Bra',
+      'Wireless Bra',
+      'Panties',
+      'Thong',
+      'Briefs',
+      'Boyshorts',
+      'Hipsters',
+      'Bodysuit',
+      'Corset',
+      'Bustier',
+      'Garter Belt',
+      'Teddy'
+    ]
+  },
+  {
+    name: 'Nightwear',
+    subcategories: [
+      'Babydoll',
+      'Slip Dress',
+      'Nightgown',
+      'Pajama Set',
+      'Robe',
+      'Kimono',
+      'Camisole',
+      'Camisole Set',
+      'Sleep Shorts'
+    ]
+  },
+  {
+    name: 'Loungewear',
+    subcategories: [
+      'Crop Top',
+      'Lounge Pants',
+      'Lounge Shorts',
+      'Sweatshirt',
+      'Hoodie',
+      'Cardigan',
+      'Leggings'
+    ]
+  },
+  {
+    name: 'Shapewear',
+    subcategories: [
+      'Control Panties',
+      'Waist Trainer',
+      'Body Shaper',
+      'Thigh Slimmer'
+    ]
+  },
+  {
+    name: 'Accessories',
+    subcategories: [
+      'Nipple Covers',
+      'Bra Accessories',
+      'Laundry Bag',
+      'Silk Eye Mask'
+    ]
+  }
+]
+
+const allAvailableCategories = computed(() => {
+  const list = CATEGORY_PRESETS.map(preset => {
+    const dbMatch = categories.value.find(c => c.name.toLowerCase() === preset.name.toLowerCase())
+    const dbSubcats = dbMatch ? (dbMatch.subcategories || []).map((s: any) => typeof s === 'string' ? s : s.name) : []
+    const mergedSubcats = Array.from(new Set([...preset.subcategories, ...dbSubcats]))
+    return {
+      name: preset.name,
+      subcategories: mergedSubcats
+    }
+  })
+  
+  categories.value.forEach(dbCat => {
+    if (dbCat.slug === 'all') return
+    const alreadyPreset = CATEGORY_PRESETS.some(p => p.name.toLowerCase() === dbCat.name.toLowerCase())
+    if (!alreadyPreset) {
+      const dbSubcats = (dbCat.subcategories || []).map((s: any) => typeof s === 'string' ? s : s.name)
+      list.push({
+        name: dbCat.name,
+        subcategories: dbSubcats
+      })
+    }
+  })
+  return list
+})
+
+const selectedCategorySubcategories = computed(() => {
+  const current = productModal.value.form.category || ''
+  const selectedCats = current.split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
+  
+  const subcats: string[] = []
+  allAvailableCategories.value.forEach(c => {
+    if (selectedCats.includes(c.name.toLowerCase())) {
+      c.subcategories.forEach((subName: string) => {
+        if (!subcats.some(s => s.toLowerCase() === subName.toLowerCase())) {
+          subcats.push(subName)
+        }
+      })
+    }
+  })
+  return subcats
+})
 
 const toggleFormCategory = (catName: string) => {
   const current = productModal.value.form.category || ''
@@ -4614,8 +4980,14 @@ const toggleFormCategory = (catName: string) => {
   }
   productModal.value.form.category = cats.join(', ')
   
-  // Clear any subcategories that no longer belong to selected categories
-  const allowedSubcats = selectedCategorySubcategories.value.map(s => s.name.toLowerCase())
+  const selectedCatsLower = cats.map(c => c.toLowerCase())
+  const allowedSubcats: string[] = []
+  allAvailableCategories.value.forEach(c => {
+    if (selectedCatsLower.includes(c.name.toLowerCase())) {
+      c.subcategories.forEach(sub => allowedSubcats.push(sub.toLowerCase()))
+    }
+  })
+  
   let subs = (productModal.value.form.subcategory || '').split(',').map((s: string) => s.trim()).filter(Boolean)
   subs = subs.filter(s => allowedSubcats.includes(s.toLowerCase()))
   productModal.value.form.subcategory = subs.join(', ')
@@ -4638,23 +5010,6 @@ const toggleFormSubcategory = (subName: string) => {
   }
   productModal.value.form.subcategory = subs.join(', ')
 }
-
-const selectedCategorySubcategories = computed(() => {
-  const current = productModal.value.form.category || ''
-  const selectedCats = current.split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
-  
-  const subcats: any[] = []
-  categories.value.forEach(c => {
-    if (selectedCats.includes(c.name.toLowerCase())) {
-      (c.subcategories || []).forEach((sub: any) => {
-        if (!subcats.some(s => s.name.toLowerCase() === sub.name.toLowerCase())) {
-          subcats.push(sub)
-        }
-      })
-    }
-  })
-  return subcats
-})
 
 const toggleSizePreset = (variant: any, size: string) => {
   const idx = variant.sizes.indexOf(size)
@@ -4701,10 +5056,46 @@ const saveProductItem = async () => {
     discount = Math.round(((original - price) / original) * 100)
   }
 
+  const compiledVariants = productModal.value.form.variants.map((v: any) => {
+    const compiledImages = []
+    
+    if (v.mainImageInput && v.mainImageInput.trim() !== '') {
+      compiledImages.push(v.mainImageInput.trim())
+    }
+    
+    if (v.videoUrlInput && v.videoUrlInput.trim() !== '') {
+      compiledImages.push(v.videoUrlInput.trim())
+    }
+    
+    if (Array.isArray(v.additionalImagesList)) {
+      v.additionalImagesList.forEach((img: string) => {
+        if (img && img.trim() !== '') {
+          compiledImages.push(img.trim())
+        }
+      })
+    }
+    
+    const { mainImageInput, videoUrlInput, additionalImagesList, newSizeInput, ...rest } = v
+    return {
+      ...rest,
+      images: compiledImages
+    }
+  })
+
+  const firstVariantImages = compiledVariants[0]?.images || []
+  const productVideoUrl = firstVariantImages.find(img => 
+    img.includes('youtube.com') || 
+    img.includes('youtu.be') || 
+    img.includes('video') || 
+    img.includes('.mp4')
+  ) || ''
+
   const payload = {
     ...productModal.value.form,
     discount,
-    images: productModal.value.form.images.filter(img => img.trim() !== ''),
+    variants: compiledVariants,
+    images: firstVariantImages,
+    videoUrl: productVideoUrl,
     features: productModal.value.form.features.filter(f => f.trim() !== ''),
     descriptiveImages: productModal.value.form.descriptiveImages.filter(img => img.trim() !== ''),
     faqs: productModal.value.form.faqs.filter(faq => faq.question.trim() !== '' && faq.answer.trim() !== '')
