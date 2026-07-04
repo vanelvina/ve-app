@@ -669,6 +669,8 @@ import { useCartStore } from '~/stores/cart'
 import reviewsData from '~/data/reviews.json'
 import faqsData from '~/data/faqs.json'
 
+definePageMeta({ pageTransition: false })
+
 const route = useRoute()
 const ui = useUIStore()
 const { getBySlug, all, addRecentlyViewed } = useProducts()

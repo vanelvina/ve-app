@@ -59,10 +59,16 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#2A1B18' },
         { property: 'og:site_name', content: 'Van Elvina' },
         { property: 'og:type', content: 'website' },
+        { property: 'og:image', content: 'https://vanelvina.com/icons/icon-512x512.png' },
+        { property: 'og:image:width', content: '512' },
+        { property: 'og:image:height', content: '512' },
         { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:image', content: 'https://vanelvina.com/icons/icon-512x512.png' },
       ],
       link: [
-        { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon.png' },
+        { rel: 'shortcut icon', href: '/favicon.png' },
+        { rel: 'apple-touch-icon', sizes: '192x192', href: '/icons/icon-192x192.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {

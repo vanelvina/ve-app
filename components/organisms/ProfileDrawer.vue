@@ -46,6 +46,13 @@
                   <h3 class="font-serif text-lg font-bold text-deep-plum leading-tight truncate group-hover/name:text-[#CBA39E] transition-colors">{{ auth.user?.name || 'My Account' }}</h3>
                   <p class="text-xs text-mid-gray/80 mt-0.5 font-ui truncate">{{ auth.user?.email }}</p>
                 </NuxtLink>
+                <!-- Edit profile icon -->
+                <NuxtLink to="/myaccount" @click="ui.closeProfileDrawer" class="mt-1 inline-flex items-center gap-1 text-[10px] font-bold text-deep-plum/60 hover:text-deep-plum transition-colors" aria-label="Edit profile">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Edit Profile
+                </NuxtLink>
                 <p class="text-xs text-mid-gray/80 mt-1 font-ui">
                   <span class="underline decoration-charcoal/30 font-semibold text-charcoal/70 hover:text-deep-plum cursor-pointer">Total Balance 0</span>
                   <span class="mx-1.5 text-charcoal/20">|</span>
@@ -116,7 +123,7 @@
               </NuxtLink>
 
               <!-- Fitcode -->
-              <NuxtLink to="/account/fitcode" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
+              <NuxtLink to="/size-guide" @click="ui.closeProfileDrawer" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,7 +143,7 @@
           <div class="border border-rose-blush/30 rounded-2xl bg-white shadow-sm overflow-hidden">
             <div class="divide-y divide-rose-blush/20">
               <!-- Loyalty -->
-              <NuxtLink to="/account/loyalty" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
+              <NuxtLink to="/account/loyalty" @click="ui.closeProfileDrawer" class="flex items-center justify-between p-3.5 hover:bg-rose-blush/10 transition-colors group">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-warm-ivory/50 flex items-center justify-center text-charcoal/70 group-hover:text-deep-plum transition-colors">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

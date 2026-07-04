@@ -2,11 +2,11 @@
   <Transition name="slide-down">
     <div
       v-if="showPrompt"
-      class="fixed top-0 left-0 right-0 z-[100] w-full bg-white border-b border-rose-blush/30 shadow-md p-4 animate-fade-in md:px-8"
+      class="fixed top-0 left-0 right-0 z-[100] w-full bg-white border-b border-rose-blush/30 shadow-md animate-fade-in"
       role="dialog"
       aria-label="Notification Prompt"
     >
-      <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-4 py-3 md:px-8">
         <!-- Message -->
         <div class="flex items-center gap-3 text-left">
           <div class="w-10 h-10 rounded-full bg-rose-blush/20 flex items-center justify-center text-deep-plum shrink-0">
@@ -34,9 +34,14 @@
           </button>
           <button
             @click="acceptNotifications"
-            class="flex-1 md:flex-initial px-4 py-2 text-xs font-ui font-semibold text-white bg-deep-plum rounded-xl shadow-md shadow-deep-plum/20 hover:bg-[#473021] transition-all"
+            :disabled="accepting"
+            class="flex-1 md:flex-initial px-4 py-2 text-xs font-ui font-semibold text-white bg-deep-plum rounded-xl shadow-md shadow-deep-plum/20 hover:bg-[#473021] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            Allow
+            <svg v-if="accepting" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            {{ accepting ? 'Enabling...' : 'Allow' }}
           </button>
         </div>
       </div>
@@ -48,6 +53,7 @@
 import { ref, onMounted } from 'vue'
 
 const showPrompt = ref(false)
+const accepting = ref(false)
 
 const declineNotifications = () => {
   showPrompt.value = false
@@ -55,39 +61,50 @@ const declineNotifications = () => {
 }
 
 const acceptNotifications = async () => {
-  showPrompt.value = false
+  accepting.value = true
   localStorage.setItem('ve_soft_push_prompt', 'allowed')
-  
-  if (typeof window === 'undefined') return
-  
+
   try {
-    const permission = await Notification.requestPermission()
-    if (permission === 'granted') {
-      const { $registerPush } = useNuxtApp()
-      if ($registerPush) {
-        await $registerPush()
-      }
+    const { $registerPush } = useNuxtApp()
+    if ($registerPush) {
+      // $registerPush triggers permission request if not yet granted, then subscribes
+      await ($registerPush as Function)()
     }
   } catch (err) {
-    console.error('Error requesting notification permission:', err)
+    console.error('[Prompt] Error enabling notifications:', err)
+  } finally {
+    accepting.value = false
+    showPrompt.value = false
   }
 }
 
 onMounted(() => {
   if (!import.meta.client) return
+  if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) return
 
-  // Verify support & state
-  if (!('Notification' in window) || !('serviceWorker' in navigator)) return
-  if (Notification.permission !== 'default') return
-
-  // Prevent double prompt if already answered
+  const permission = Notification.permission
   const softPromptChoice = localStorage.getItem('ve_soft_push_prompt')
-  if (softPromptChoice) return
 
-  // Display prompt after a subtle delay
-  setTimeout(() => {
-    showPrompt.value = true
-  }, 4000)
+  // Case 1: Never answered → show prompt to ask
+  if (permission === 'default' && !softPromptChoice) {
+    setTimeout(() => { showPrompt.value = true }, 4000)
+    return
+  }
+
+  // Case 2: User previously clicked "Allow" on our prompt but maybe didn't get subscribed
+  // (e.g. VAPID keys were missing before). Re-try silently if permission is granted.
+  if (permission === 'granted' && softPromptChoice === 'allowed') {
+    // The push plugin handles re-sync automatically, nothing to show here
+    return
+  }
+
+  // Case 3: Browser permission is granted but user never saw our soft prompt
+  // (e.g. they allowed via some other trigger). Mark it and sync silently.
+  if (permission === 'granted' && !softPromptChoice) {
+    localStorage.setItem('ve_soft_push_prompt', 'allowed')
+    // The plugin will handle sync on load
+    return
+  }
 })
 </script>
 

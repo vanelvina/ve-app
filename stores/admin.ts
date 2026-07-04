@@ -34,6 +34,9 @@ export const useAdminStore = defineStore('admin', {
 
         if (import.meta.client) {
           localStorage.setItem('ve_admin_token', response.token)
+          // Persist admin identity for push notification plugin
+          if (response.admin?.email) localStorage.setItem('ve_admin_email', response.admin.email)
+          if (response.admin?.name) localStorage.setItem('ve_admin_name', response.admin.name)
         }
         return true
       } catch (error: any) {
@@ -50,6 +53,8 @@ export const useAdminStore = defineStore('admin', {
       this.adminUser = null
       if (import.meta.client) {
         localStorage.removeItem('ve_admin_token')
+        localStorage.removeItem('ve_admin_email')
+        localStorage.removeItem('ve_admin_name')
       }
       navigateTo('/')
     },
@@ -69,6 +74,11 @@ export const useAdminStore = defineStore('admin', {
         })
         this.isAuthenticated = true
         this.adminUser = response.admin
+        // Refresh persisted identity for push notifications
+        if (import.meta.client && response.admin?.email) {
+          localStorage.setItem('ve_admin_email', response.admin.email)
+          localStorage.setItem('ve_admin_name', response.admin.name || 'Admin')
+        }
         return true
       } catch (error) {
         console.error('Session verification failed:', error)

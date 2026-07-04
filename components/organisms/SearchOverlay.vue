@@ -37,7 +37,7 @@
         <!-- Results -->
         <div class="max-h-80 overflow-y-auto">
           <!-- Search results -->
-          <template v-if="query.length > 1">
+          <template v-if="debouncedQuery.length > 1">
             <div v-if="results.length" class="p-3 space-y-1">
               <NuxtLink
                 v-for="product in results"
@@ -59,7 +59,7 @@
               </NuxtLink>
             </div>
             <div v-else class="py-10 text-center text-mid-gray font-ui text-sm">
-              No results for "{{ query }}"
+              No results for "{{ debouncedQuery }}"
             </div>
           </template>
 
@@ -84,14 +84,37 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue'
 import { formatPrice } from '~/utils/formatters'
 
 const ui = useUIStore()
-const { searchProducts } = useProducts()
+const store = useProductsStore()
 const searchInput = ref<HTMLInputElement | null>(null)
 const query = ref('')
+const debouncedQuery = ref('')
 
-const results = computed(() => (query.value.length > 1 ? searchProducts(query.value) : []))
+// Debounce: update debouncedQuery 100ms after user stops typing
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+watch(query, (val) => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    debouncedQuery.value = val
+  }, 100)
+})
+
+// Search matching on name, description, category, and subcategory
+const results = computed(() => {
+  const q = debouncedQuery.value.trim().toLowerCase()
+  if (q.length < 2) return []
+  return store.all.filter(p => {
+    return (
+      p.name?.toLowerCase().includes(q) ||
+      p.description?.toLowerCase().includes(q) ||
+      p.category?.toLowerCase().includes(q) ||
+      p.subcategory?.toLowerCase().includes(q)
+    )
+  }).slice(0, 12)
+})
 
 const popularSearches = ['Cotton Bra', 'Push-Up', 'Seamless', 'Sports Bra', 'Lace Brief', 'Nursing Bra', 'Shapewear', 'Bamboo']
 
@@ -99,6 +122,7 @@ watch(() => ui.searchOverlayOpen, (open) => {
   if (open) {
     nextTick(() => searchInput.value?.focus())
     query.value = ''
+    debouncedQuery.value = ''
   }
 })
 </script>

@@ -67,15 +67,15 @@
           <AppButton @click="store.resetFilters">Clear All Filters</AppButton>
         </div>
 
-        <!-- Infinite Scroll Sentinel -->
+        <!-- Infinite Scroll Sentinel — always shows loading dots, never ends -->
         <div v-if="store.totalCount > 0" ref="sentinel" class="w-full py-8 flex items-center justify-center select-none" aria-live="polite">
-          <div v-if="hasMore" class="flex gap-2.5 items-center justify-center">
+          <div class="flex gap-2.5 items-center justify-center">
             <div class="dot w-2.5 h-2.5 rounded-full bg-dusty-rose dot-bounce dot-delay-1" />
             <div class="dot w-2.5 h-2.5 rounded-full bg-mid-gray dot-bounce dot-delay-2" />
             <div class="dot w-2.5 h-2.5 rounded-full bg-dusty-rose dot-bounce dot-delay-3" />
           </div>
-          <p v-else class="text-xs text-mid-gray/70 font-ui text-center">You have reached the end of the collection.</p>
         </div>
+      
       </main>
     </div>
 
@@ -181,6 +181,8 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import categoriesData from '~/data/categories.json'
 import type { SortOption } from '~/types'
 
+definePageMeta({ pageTransition: false })
+
 const store = useProductsStore()
 const ui = useUIStore()
 
@@ -192,16 +194,12 @@ const displayedProducts = computed(() => {
   if (!base || base.length === 0) return []
 
   const totalWanted = store.page * store.pageSize
-  // Cap display at MAX_CYCLES worth of products to avoid infinite memory growth
-  const maxDisplay = base.length * 3
-  const actualWanted = Math.min(totalWanted, maxDisplay)
   const result = []
 
-  for (let i = 0; i < actualWanted; i++) {
+  for (let i = 0; i < totalWanted; i++) {
     const product = base[i % base.length]
     result.push({
       ...product,
-      // Use a custom property for Vue's :key so we do not mutate the product's actual ID
       cycleKey: `${product.id}-cycle-${Math.floor(i / base.length)}`
     })
   }
@@ -212,13 +210,11 @@ const displayedProducts = computed(() => {
 const sentinel = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 
-// hasMore = true only if we haven't reached the cycle limit yet
-const hasMore = computed(() => store.infiniteCycleBase.length > 0 && !store.hasReachedCycleLimit)
+// hasMore is always true when products exist — no cycle limit
+const hasMore = computed(() => store.infiniteCycleBase.length > 0)
 
 const loadMore = () => {
-  if (hasMore.value) {
-    store.setPage(store.page + 1)
-  }
+  store.setPage(store.page + 1)
 }
 
 const setupObserver = () => {

@@ -4316,8 +4316,31 @@ onMounted(async () => {
     return
   }
 
+  // Trigger push notification registration for admin
+  // If browser already granted permission, re-sync subscription silently
+  // If not yet granted, prompt the admin to allow
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    const { $registerPush } = useNuxtApp()
+    if (Notification.permission === 'granted') {
+      // Silent re-sync — ensures admin subscription is always up to date
+      setTimeout(() => {
+        if ($registerPush) ($registerPush as Function)()
+      }, 1500)
+    } else if (Notification.permission === 'default') {
+      // Prompt admin to allow
+      setTimeout(async () => {
+        const permission = await Notification.requestPermission()
+        if (permission === 'granted' && $registerPush) {
+          await ($registerPush as Function)()
+          uiStore.addToast('success', '🔔 Push notifications enabled! You will now receive order alerts.')
+        }
+      }, 2000)
+    }
+  }
+
   loadAllData()
 })
+
 
 const loadAllData = async () => {
   loadingData.value = true

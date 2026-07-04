@@ -2,8 +2,6 @@ import { defineStore } from 'pinia'
 import { shallowRef } from 'vue'
 import type { Product, FilterState, SortOption } from '~/types'
 
-const MAX_CYCLES = 3 // After 3 full loops through all products, show "end of collection"
-
 export const useProductsStore = defineStore('products', {
   state: () => ({
     all: shallowRef<Product[]>([]),
@@ -156,12 +154,9 @@ export const useProductsStore = defineStore('products', {
       return result
     },
 
-    // Returns true when we've shown MAX_CYCLES full cycles through the base
+    // hasReachedCycleLimit is always false — products cycle endlessly
     hasReachedCycleLimit(): boolean {
-      const base = this.infiniteCycleBase
-      if (!base || base.length === 0) return false
-      const totalWanted = this.page * this.pageSize
-      return totalWanted >= base.length * MAX_CYCLES
+      return false
     },
 
     getBySlug: (state) => (slug: string) => state.all.find((p) => p.slug === slug),
