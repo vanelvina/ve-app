@@ -2482,495 +2482,642 @@
     </div>
 
     <!-- 5. PRODUCT MODAL (SECTIONED TABS) -->
-    <div v-if="productModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
-      <div class="bg-white rounded-3xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh] border border-charcoal/20 shadow-modal space-y-4 relative">
-        <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
-        
-        <div class="relative z-10 flex items-center justify-between border-b border-rose-blush/10 pb-2">
-          <h3 class="text-base font-serif text-deep-plum font-bold">{{ productModal.isEdit ? 'Edit Product Item' : 'Create Store Product' }}</h3>
-          <button @click="productModal.show = false" class="text-charcoal/45 hover:text-deep-plum text-sm">✕</button>
-        </div>
+    <!-- PRODUCT MODAL — Full-screen premium redesign -->
+    <div v-if="productModal.show" class="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in p-0 md:p-4">
+      <div class="bg-white w-full md:max-w-7xl md:rounded-3xl overflow-hidden flex flex-col shadow-2xl border border-charcoal/10" style="height: 95vh;">
 
-        <!-- Inner Tabs Selector -->
-        <div class="flex flex-wrap border-b border-rose-blush/20 text-xs relative z-10">
-          <button 
-            type="button" 
-            @click="productFormTab = 'general'" 
-            class="px-4 py-2 font-bold focus:outline-none transition-colors border-b-2"
-            :class="productFormTab === 'general' ? 'border-deep-plum text-deep-plum font-semibold' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
-          >
-            General Specs
-          </button>
-          <button 
-            type="button" 
-            @click="productFormTab = 'pricing'" 
-            class="px-4 py-2 font-bold focus:outline-none transition-colors border-b-2"
-            :class="productFormTab === 'pricing' ? 'border-deep-plum text-deep-plum font-semibold' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
-          >
-            Pricing &amp; Inventory
-          </button>
-          <button 
-            type="button" 
-            @click="productFormTab = 'variants'" 
-            class="px-4 py-2 font-bold focus:outline-none transition-colors border-b-2"
-            :class="productFormTab === 'variants' ? 'border-deep-plum text-deep-plum font-semibold' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
-          >
-            Color Variants
-          </button>
-          <button 
-            type="button" 
-            @click="productFormTab = 'media'" 
-            class="px-4 py-2 font-bold focus:outline-none transition-colors border-b-2"
-            :class="productFormTab === 'media' ? 'border-deep-plum text-deep-plum font-semibold' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
-          >
-            Media &amp; Features
-          </button>
-          <button 
-            type="button" 
-            @click="productFormTab = 'details'" 
-            class="px-4 py-2 font-bold focus:outline-none transition-colors border-b-2"
-            :class="productFormTab === 'details' ? 'border-deep-plum text-deep-plum font-semibold' : 'border-transparent text-charcoal/60 hover:text-deep-plum'"
-          >
-            Details &amp; FAQs
-          </button>
-        </div>
-
-        <form @submit.prevent="saveProductItem" class="space-y-4 text-xs font-ui relative z-10">
-          
-          <!-- TAB A: GENERAL -->
-          <div v-show="productFormTab === 'general'" class="space-y-4 animate-fade-in">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold mb-1 text-charcoal/70">Product Name *</label>
-                <div class="relative">
-                  <input v-model="productModal.form.name" type="text" required placeholder="e.g. Everyday Comfort Bralette" class="w-full p-2.5 pr-8 border border-charcoal/20 rounded-xl focus:outline-none focus:border-deep-plum" />
-                  <button v-if="productModal.form.name" type="button" @click="productModal.form.name = ''" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-charcoal/40 hover:text-deep-plum text-sm focus:outline-none" title="Clear Name">✕</button>
-                </div>
-              </div>
-              <div>
-                <label class="block font-semibold mb-1 text-charcoal/70">Url Slug *</label>
-                <input v-model="productModal.form.slug" type="text" required placeholder="e.g. everyday-comfort-bralette" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
-              </div>
+        <!-- ── Sticky Header ─────────────────────────────────────────── -->
+        <div class="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-deep-plum to-[#5a3228] shrink-0">
+          <div class="flex items-center gap-4">
+            <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+              <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
             </div>
-
-            <!-- Category and Subcategory Multi-select Section -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border border-charcoal/10 bg-warm-ivory/10 p-4 rounded-2xl">
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <label class="block font-bold text-xs uppercase tracking-wide text-charcoal/70">Categories (Select Multiple) *</label>
-                  <button type="button" @click="createQuickCategory" class="text-deep-plum hover:underline font-bold text-[9px] uppercase tracking-wide">+ Create Category</button>
-                </div>
-                <div class="grid grid-cols-2 gap-2 max-h-[120px] overflow-y-auto p-3 bg-white border border-charcoal/20 rounded-xl">
-                  <label 
-                    v-for="cat in allAvailableCategories" 
-                    :key="cat.name"
-                    class="flex items-center gap-2 text-xs font-semibold text-charcoal cursor-pointer select-none hover:text-deep-plum transition-colors"
-                  >
-                    <input 
-                      type="checkbox"
-                      :value="cat.name"
-                      :checked="isCategorySelected(cat.name)"
-                      @change="toggleFormCategory(cat.name)"
-                      class="w-4 h-4 rounded border-charcoal/20 text-deep-plum focus:ring-deep-plum/20 cursor-pointer"
-                    />
-                    <span>{{ cat.name }}</span>
-                  </label>
-                </div>
-              </div>
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <label class="block font-bold text-xs uppercase tracking-wide text-charcoal/70">Subcategories (Select Multiple)</label>
-                  <button type="button" @click="createQuickSubcategory" class="text-deep-plum hover:underline font-bold text-[9px] uppercase tracking-wide">+ Create Subcategory</button>
-                </div>
-                <div v-if="selectedCategorySubcategories.length === 0" class="flex items-center justify-center h-[120px] text-[11px] text-charcoal/40 italic bg-white border border-charcoal/20 rounded-xl">
-                  Select a category first to see options
-                </div>
-                <div v-else class="grid grid-cols-2 gap-2 max-h-[120px] overflow-y-auto p-3 bg-white border border-charcoal/20 rounded-xl">
-                  <label 
-                    v-for="sub in selectedCategorySubcategories" 
-                    :key="sub"
-                    class="flex items-center gap-2 text-xs font-semibold text-charcoal cursor-pointer select-none hover:text-deep-plum transition-colors"
-                  >
-                    <input 
-                      type="checkbox"
-                      :value="sub"
-                      :checked="isSubcategorySelected(sub)"
-                      @change="toggleFormSubcategory(sub)"
-                      class="w-4 h-4 rounded border-charcoal/20 text-deep-plum focus:ring-deep-plum/20 cursor-pointer"
-                    />
-                    <span>{{ sub }}</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold mb-1 text-charcoal/70">Fabric Details</label>
-                <input v-model="productModal.form.fabric" type="text" class="w-full p-2.5 border border-charcoal/20 rounded-xl" placeholder="e.g. 90% organic modal cotton, 10% lycra" />
-              </div>
-              <div>
-                <label class="block font-semibold mb-1 text-charcoal/70">Special Badge Indicator</label>
-                <select v-model="productModal.form.badge" class="w-full p-2.5 border border-charcoal/20 rounded-xl">
-                  <option :value="null">-- None --</option>
-                  <option value="new">New</option>
-                  <option value="bestseller">Best Seller</option>
-                  <option value="sale">Sale</option>
-                  <option value="trending">Trending</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold mb-1 text-charcoal/70">SKU ID</label>
-                <input v-model="productModal.form.sku" type="text" class="w-full p-2.5 border border-charcoal/20 rounded-xl" placeholder="e.g. VE-BRA-001" />
-              </div>
-              <div>
-                <label class="block font-semibold mb-1 text-charcoal/70">Style ID</label>
-                <input v-model="productModal.form.styleId" type="text" class="w-full p-2.5 border border-charcoal/20 rounded-xl" placeholder="e.g. VE-STYLE-001" />
-              </div>
-            </div>
-
             <div>
-              <label class="block font-semibold mb-1 text-charcoal/70">Product Description</label>
-              <textarea v-model="productModal.form.description" rows="4" placeholder="Describe fit, padding options, and texture qualities..." class="w-full p-2.5 border border-charcoal/20 rounded-xl"></textarea>
+              <h3 class="text-white font-serif font-bold text-lg leading-tight">
+                {{ productModal.isEdit ? 'Edit Product' : 'Add New Product' }}
+              </h3>
+              <p class="text-white/60 text-[11px] font-ui mt-0.5 truncate max-w-xs">
+                {{ productModal.form.name || 'Fill in the details below to list your product' }}
+              </p>
             </div>
           </div>
+          <button @click="productModal.show = false" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
 
-          <!-- TAB B: PRICING & INVENTORY -->
-          <div v-show="productFormTab === 'pricing'" class="space-y-4 animate-fade-in">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- ── Body: Sidebar + Content ──────────────────────────────── -->
+        <div class="flex flex-1 overflow-hidden">
+
+          <!-- Left Sidebar Navigation -->
+          <div class="w-52 shrink-0 bg-warm-ivory border-r border-rose-blush/20 flex flex-col py-3 overflow-y-auto hidden md:flex">
+            <p class="text-[9px] font-bold text-charcoal/35 uppercase tracking-widest px-4 mb-2">Form Sections</p>
+
+            <button
+              v-for="tab in [
+                { key: 'general',  icon: '📋', label: 'General Specs',       desc: 'Name, category, desc' },
+                { key: 'pricing',  icon: '💰', label: 'Pricing & Inventory', desc: 'Price, stock, policies' },
+                { key: 'variants', icon: '🎨', label: 'Color Variants',      desc: 'Colors, sizes, images' },
+                { key: 'media',    icon: '✨', label: 'Media & Features',    desc: 'Highlights, care, bullets' },
+                { key: 'details',  icon: '📄', label: 'Details & FAQs',      desc: 'Tags, info, questions' },
+              ]"
+              :key="tab.key"
+              type="button"
+              @click="productFormTab = tab.key"
+              class="w-full text-left px-4 py-3 flex items-start gap-3 transition-all relative group"
+              :class="productFormTab === tab.key
+                ? 'bg-deep-plum/10 border-r-2 border-deep-plum'
+                : 'hover:bg-rose-blush/10 border-r-2 border-transparent'"
+            >
+              <span class="text-base shrink-0 mt-0.5">{{ tab.icon }}</span>
               <div>
-                <label class="block font-semibold mb-1 text-charcoal/70">Retail Selling Price (INR) *</label>
-                <input v-model.number="productModal.form.price" type="number" required placeholder="e.g. 899" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
+                <p class="text-[11px] font-bold leading-tight" :class="productFormTab === tab.key ? 'text-deep-plum' : 'text-charcoal/70'">{{ tab.label }}</p>
+                <p class="text-[9px] text-charcoal/40 mt-0.5">{{ tab.desc }}</p>
               </div>
-              <div>
-                <label class="block font-semibold mb-1 text-charcoal/70">M.R.P Original Price (INR) *</label>
-                <input v-model.number="productModal.form.originalPrice" type="number" required placeholder="e.g. 1299" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
-              </div>
-            </div>
+            </button>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
-              <div>
-                <label class="block font-semibold mb-1 text-charcoal/70">Delivery Promise Days</label>
-                <input v-model.number="productModal.form.deliveryDays" type="number" placeholder="e.g. 3" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
-              </div>
-              <div>
-                <label class="block font-semibold mb-1 text-charcoal/70">Warehouse stock count</label>
-                <input v-model.number="productModal.form.stockCount" type="number" placeholder="e.g. 25" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
-              </div>
-              <div class="pt-5 flex items-center justify-start sm:justify-center">
-                <span class="text-charcoal/70 font-semibold mr-2">Visible (In Stock):</span>
-                <!-- Custom Slide Toggle Switch -->
-                <button
-                  type="button"
-                  @click="productModal.form.inStock = !productModal.form.inStock"
-                  class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                  :class="productModal.form.inStock ? 'bg-green-600' : 'bg-gray-200'"
-                >
-                  <span
-                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-soft ring-0 transition duration-200 ease-in-out"
-                    :class="productModal.form.inStock ? 'translate-x-5' : 'translate-x-0'"
-                  />
-                </button>
-              </div>
-            </div>
-
-            <!-- Availability & Sourcing Policies Toggles -->
-            <div class="border-t border-rose-blush/10 pt-4 mt-2">
-              <span class="block text-xs font-bold text-deep-plum uppercase tracking-wider mb-3">Service &amp; Sourcing Policies</span>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                
-                <!-- COD Toggle -->
-                <div class="flex items-center justify-between bg-warm-ivory/30 p-3 rounded-xl border border-rose-blush/10">
-                  <span class="text-charcoal/70 font-semibold">COD Available:</span>
-                  <button
-                    type="button"
-                    @click="productModal.form.isCodAvailable = !productModal.form.isCodAvailable"
-                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                    :class="productModal.form.isCodAvailable ? 'bg-green-600' : 'bg-gray-200'"
-                  >
-                    <span
-                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-soft ring-0 transition duration-200 ease-in-out"
-                      :class="productModal.form.isCodAvailable ? 'translate-x-5' : 'translate-x-0'"
-                    />
-                  </button>
-                </div>
-
-                <!-- Return Toggle -->
-                <div class="flex items-center justify-between bg-warm-ivory/30 p-3 rounded-xl border border-rose-blush/10">
-                  <span class="text-charcoal/70 font-semibold">Returnable:</span>
-                  <button
-                    type="button"
-                    @click="productModal.form.isReturnable = !productModal.form.isReturnable"
-                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                    :class="productModal.form.isReturnable ? 'bg-green-600' : 'bg-gray-200'"
-                  >
-                    <span
-                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-soft ring-0 transition duration-200 ease-in-out"
-                      :class="productModal.form.isReturnable ? 'translate-x-5' : 'translate-x-0'"
-                    />
-                  </button>
-                </div>
-
-                <!-- Exchange Toggle -->
-                <div class="flex items-center justify-between bg-warm-ivory/30 p-3 rounded-xl border border-rose-blush/10">
-                  <span class="text-charcoal/70 font-semibold">Exchangeable:</span>
-                  <button
-                    type="button"
-                    @click="productModal.form.isExchangeable = !productModal.form.isExchangeable"
-                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                    :class="productModal.form.isExchangeable ? 'bg-green-600' : 'bg-gray-200'"
-                  >
-                    <span
-                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-soft ring-0 transition duration-200 ease-in-out"
-                      :class="productModal.form.isExchangeable ? 'translate-x-5' : 'translate-x-0'"
-                    />
-                  </button>
-                </div>
-
-                <!-- Free Shipping Toggle -->
-                <div class="flex items-center justify-between bg-warm-ivory/30 p-3 rounded-xl border border-rose-blush/10">
-                  <span class="text-charcoal/70 font-semibold">Free Shipping:</span>
-                  <button
-                    type="button"
-                    @click="productModal.form.isFreeShipping = !productModal.form.isFreeShipping"
-                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                    :class="productModal.form.isFreeShipping ? 'bg-green-600' : 'bg-gray-200'"
-                  >
-                    <span
-                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-soft ring-0 transition duration-200 ease-in-out"
-                      :class="productModal.form.isFreeShipping ? 'translate-x-5' : 'translate-x-0'"
-                    />
-                  </button>
-                </div>
-
+            <!-- Spacer + quick tip -->
+            <div class="mt-auto px-4 pb-4">
+              <div class="bg-rose-blush/20 rounded-xl p-3">
+                <p class="text-[9px] font-bold text-deep-plum uppercase tracking-wide mb-1">💡 Tip</p>
+                <p class="text-[9px] text-charcoal/55 leading-relaxed">Fill all tabs before saving. Required fields are marked with *</p>
               </div>
             </div>
           </div>
 
-          <!-- TAB C: DYNAMIC VARIANTS -->
-          <div v-show="productFormTab === 'variants'" class="space-y-4 animate-fade-in">
-            <div class="flex items-center justify-between border-b border-rose-blush/10 pb-2">
-              <p class="font-bold text-deep-plum">Product Colors &amp; Variant Specifications</p>
-              <button type="button" @click="addProductVariant" class="px-2.5 py-1 bg-rose-blush text-deep-plum rounded-lg text-[10px] font-bold border border-rose-blush hover:bg-deep-plum hover:text-white transition-all">+ Add Color Variant</button>
-            </div>
+          <!-- Mobile Tab Strip (visible on small screens only) -->
+          <div class="md:hidden flex border-b border-rose-blush/20 bg-warm-ivory overflow-x-auto shrink-0 w-full absolute top-16 left-0 z-10">
+            <button v-for="tab in [
+                { key: 'general', label: '📋 General' },
+                { key: 'pricing', label: '💰 Pricing' },
+                { key: 'variants', label: '🎨 Variants' },
+                { key: 'media', label: '✨ Media' },
+                { key: 'details', label: '📄 Details' },
+              ]"
+              :key="tab.key" type="button" @click="productFormTab = tab.key"
+              class="px-4 py-2.5 text-[10px] font-bold whitespace-nowrap border-b-2 transition-colors"
+              :class="productFormTab === tab.key ? 'border-deep-plum text-deep-plum' : 'border-transparent text-charcoal/55'">
+              {{ tab.label }}
+            </button>
+          </div>
 
-            <div v-if="!productModal.form.variants?.length" class="p-6 text-center text-xs text-charcoal/45 italic bg-rose-blush/10 rounded-xl border border-charcoal/20">
-              No variant mapped. Add at least one color variant to list product.
-            </div>
+          <!-- Main Form Content -->
+          <div class="flex-1 overflow-y-auto">
+            <form @submit.prevent="saveProductItem" class="h-full flex flex-col">
+              <div class="flex-1 p-6 space-y-0">
 
-            <div class="space-y-3 max-h-[340px] overflow-y-auto pr-1">
-              <div v-for="(v, vIdx) in productModal.form.variants" :key="vIdx" class="bg-warm-ivory p-3.5 rounded-2xl border border-charcoal/20 space-y-3 relative">
-                <button type="button" @click="productModal.form.variants.splice(vIdx, 1)" class="absolute top-2.5 right-2.5 text-red-500 hover:text-red-700 text-xs font-bold">Remove</button>
-                
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-charcoal/50 font-bold mb-1">Color Title (e.g. Classic Black)</label>
-                    <input v-model="v.color" required placeholder="Color Name" class="w-full p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
+                <!-- ══ TAB A: GENERAL ══════════════════════════════════ -->
+                <div v-show="productFormTab === 'general'" class="space-y-5 animate-fade-in">
+                  <div class="flex items-center gap-2 mb-1 pb-3 border-b border-rose-blush/15">
+                    <span class="text-lg">📋</span>
+                    <div>
+                      <h4 class="font-bold text-deep-plum text-sm">General Specifications</h4>
+                      <p class="text-[10px] text-charcoal/45">Core product identity — name, URL, category, and description.</p>
+                    </div>
                   </div>
-                  <div>
-                    <label class="block text-charcoal/50 font-bold mb-1">Color Palette HEX (e.g. #000000)</label>
-                    <div class="flex gap-2">
-                      <input v-model="v.colorHex" type="color" class="w-8 h-8 rounded border border-charcoal/20 cursor-pointer" />
-                      <input v-model="v.colorHex" placeholder="#Hex" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white font-mono" />
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                      <label class="block text-[11px] font-bold text-charcoal/60 uppercase tracking-wide">Product Name <span class="text-red-400">*</span></label>
+                      <div class="relative">
+                        <input v-model="productModal.form.name" type="text" required placeholder="e.g. Everyday Comfort Bralette"
+                          class="w-full px-3.5 py-2.5 pr-9 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
+                        <button v-if="productModal.form.name" type="button" @click="productModal.form.name = ''"
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/30 hover:text-deep-plum transition text-xs">✕</button>
+                      </div>
+                    </div>
+                    <div class="space-y-1">
+                      <div class="flex items-center gap-1.5">
+                        <label class="block text-[11px] font-bold text-charcoal/60 uppercase tracking-wide">URL Slug <span class="text-red-400">*</span></label>
+                        <span v-if="!productModal.isEdit" class="text-[8px] bg-deep-plum/10 text-deep-plum px-1.5 py-0.5 rounded font-bold">✨ Auto</span>
+                      </div>
+                      <input v-model="productModal.form.slug" type="text" required placeholder="e.g. everyday-comfort-bralette"
+                        class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition font-mono" />
+                      <p class="text-[9px] text-charcoal/35">
+                        {{ productModal.isEdit ? 'Changing slug will break existing links — edit with care.' : 'Auto-filled from product name. You can edit it manually.' }}
+                      </p>
+                    </div>
+
+                  </div>
+
+                  <!-- Category + Subcategory -->
+                  <div class="bg-warm-ivory/60 rounded-2xl p-4 border border-rose-blush/15 space-y-4">
+                    <p class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Category Classification</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <!-- Categories -->
+                      <div>
+                        <div class="flex items-center justify-between mb-2">
+                          <label class="text-[11px] font-bold text-charcoal/70">Categories <span class="text-red-400">*</span></label>
+                          <button type="button" @click="showCreateCategoryModal = true" class="text-[9px] font-bold text-deep-plum hover:underline">+ Create Category</button>
+                        </div>
+                        <div class="bg-white rounded-xl border border-charcoal/15 p-2.5 max-h-36 overflow-y-auto space-y-1">
+                          <label v-for="cat in categories" :key="cat._id || cat.id"
+                            class="flex items-center gap-2 text-xs font-semibold text-charcoal cursor-pointer select-none hover:text-deep-plum transition-colors px-1 py-0.5 rounded-lg hover:bg-rose-blush/10">
+                            <input type="checkbox" :value="cat.name" :checked="isCategorySelected(cat.name)"
+                              @change="toggleFormCategory(cat.name)"
+                              class="w-3.5 h-3.5 rounded border-charcoal/20 text-deep-plum focus:ring-deep-plum/20 cursor-pointer" />
+                            <span>{{ cat.name }}</span>
+                          </label>
+                          <p v-if="!categories.length" class="text-[10px] text-charcoal/35 italic py-1">No categories yet.</p>
+                        </div>
+                      </div>
+                      <!-- Subcategories -->
+                      <div>
+                        <div class="flex items-center justify-between mb-2">
+                          <label class="text-[11px] font-bold text-charcoal/70">Subcategories</label>
+                          <button type="button" @click="showCreateSubcategoryModal = true" class="text-[9px] font-bold text-deep-plum hover:underline">+ Create Subcategory</button>
+                        </div>
+                        <div class="bg-white rounded-xl border border-charcoal/15 p-2.5 max-h-36 overflow-y-auto space-y-1">
+                          <label v-for="sub in selectedCategorySubcategories" :key="sub"
+                            class="flex items-center gap-2 text-xs font-semibold text-charcoal cursor-pointer select-none hover:text-deep-plum transition-colors px-1 py-0.5 rounded-lg hover:bg-rose-blush/10">
+                            <input type="checkbox" :value="sub" :checked="isSubcategorySelected(sub)"
+                              @change="toggleFormSubcategory(sub)"
+                              class="w-3.5 h-3.5 rounded border-charcoal/20 text-deep-plum focus:ring-deep-plum/20 cursor-pointer" />
+                            <span>{{ sub }}</span>
+                          </label>
+                          <p v-if="!selectedCategorySubcategories.length" class="text-[10px] text-charcoal/35 italic py-1">Select a category to see subcategories.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Fabric + Badge -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                      <label class="block text-[11px] font-bold text-charcoal/60 uppercase tracking-wide">Fabric Details</label>
+                      <input v-model="productModal.form.fabric" type="text" placeholder="e.g. 90% organic modal cotton, 10% lycra"
+                        class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
+                    </div>
+                    <div class="space-y-1">
+                      <label class="block text-[11px] font-bold text-charcoal/60 uppercase tracking-wide">Special Badge</label>
+                      <select v-model="productModal.form.badge"
+                        class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition">
+                        <option :value="null">— None —</option>
+                        <option value="new">🆕 New</option>
+                        <option value="bestseller">🏆 Best Seller</option>
+                        <option value="sale">🔖 Sale</option>
+                        <option value="trending">🔥 Trending</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Style Code (with editable prefix) -->
+                  <div class="space-y-1">
+                    <label class="block text-[11px] font-bold text-charcoal/60 uppercase tracking-wide">Style Code <span class="text-charcoal/35 font-normal normal-case">— used as prefix for all variant SKUs (fully editable)</span></label>
+                    <input
+                      v-model="productModal.form.styleId"
+                      type="text"
+                      placeholder="e.g. VE-BRA-001"
+                      class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition font-mono"
+                    />
+                    <p class="text-[9px] text-charcoal/35">Style code: <span class="font-mono text-deep-plum">{{ productModal.form.styleId || 'VE-BRA-001' }}</span> — variant SKUs will inherit this prefix.</p>
+                  </div>
+
+                  <!-- Description -->
+                  <div class="space-y-1">
+                    <label class="block text-[11px] font-bold text-charcoal/60 uppercase tracking-wide">Product Description</label>
+                    <textarea v-model="productModal.form.description" rows="5" placeholder="Describe the fit, padding options, texture qualities, and why customers will love it..."
+                      class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition resize-none leading-relaxed" />
+                    <p class="text-[9px] text-charcoal/35">{{ (productModal.form.description || '').length }}/160 chars shown in SEO preview</p>
+                  </div>
+                </div>
+
+                <!-- ══ TAB B: PRICING & INVENTORY ══════════════════════ -->
+                <div v-show="productFormTab === 'pricing'" class="space-y-5 animate-fade-in">
+                  <div class="flex items-center gap-2 mb-1 pb-3 border-b border-rose-blush/15">
+                    <span class="text-lg">💰</span>
+                    <div>
+                      <h4 class="font-bold text-deep-plum text-sm">Pricing & Inventory</h4>
+                      <p class="text-[10px] text-charcoal/45">Set selling price, stock count, and fulfillment policies.</p>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-warm-ivory/60 rounded-2xl p-4 border border-rose-blush/15 space-y-3">
+                      <p class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">💵 Pricing</p>
+                      <div class="space-y-1">
+                        <label class="block text-[11px] font-bold text-charcoal/60">Selling Price (INR) <span class="text-red-400">*</span></label>
+                        <div class="relative">
+                          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40 text-xs font-bold">₹</span>
+                          <input v-model.number="productModal.form.price" type="number" required placeholder="0"
+                            class="w-full pl-7 pr-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
+                        </div>
+                      </div>
+                      <div class="space-y-1">
+                        <label class="block text-[11px] font-bold text-charcoal/60">M.R.P / Original Price (INR) <span class="text-red-400">*</span></label>
+                        <div class="relative">
+                          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40 text-xs font-bold">₹</span>
+                          <input v-model.number="productModal.form.originalPrice" type="number" required placeholder="0"
+                            class="w-full pl-7 pr-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
+                        </div>
+                      </div>
+                      <div v-if="productModal.form.originalPrice > 0" class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl p-2.5">
+                        <span class="text-emerald-600 font-bold text-sm">🏷️</span>
+                        <p class="text-xs text-emerald-700 font-semibold">
+                          {{ productModal.form.originalPrice > productModal.form.price ? Math.round((1 - productModal.form.price / productModal.form.originalPrice) * 100) : 0 }}% off — customer saves
+                          ₹{{ Math.max(0, productModal.form.originalPrice - productModal.form.price).toLocaleString('en-IN') }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="bg-warm-ivory/60 rounded-2xl p-4 border border-rose-blush/15 space-y-3">
+                      <p class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">📦 Inventory</p>
+                      <div class="space-y-1">
+                        <label class="block text-[11px] font-bold text-charcoal/60">Warehouse Stock Count</label>
+                        <input v-model.number="productModal.form.stockCount" type="number" placeholder="25"
+                          class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
+                      </div>
+                      <div class="space-y-1">
+                        <label class="block text-[11px] font-bold text-charcoal/60">Delivery Promise (Days)</label>
+                        <input v-model.number="productModal.form.deliveryDays" type="number" placeholder="3"
+                          class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
+                      </div>
+                      <div class="flex items-center justify-between bg-white rounded-xl border border-charcoal/15 px-3.5 py-2.5">
+                        <div>
+                          <p class="text-[11px] font-bold text-charcoal/70">Visible (In Stock)</p>
+                          <p class="text-[9px] text-charcoal/35">Product shows on storefront</p>
+                        </div>
+                        <button type="button" @click="productModal.form.inStock = !productModal.form.inStock"
+                          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                          :class="productModal.form.inStock ? 'bg-emerald-500' : 'bg-gray-200'">
+                          <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                            :class="productModal.form.inStock ? 'translate-x-5' : 'translate-x-0'" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Policies -->
+                  <div class="bg-warm-ivory/60 rounded-2xl p-4 border border-rose-blush/15">
+                    <p class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider mb-3">🛡️ Service & Fulfillment Policies</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div v-for="policy in [
+                        { key: 'isCodAvailable', label: 'COD', icon: '💵' },
+                        { key: 'isReturnable',   label: 'Returnable', icon: '↩️' },
+                        { key: 'isExchangeable', label: 'Exchangeable', icon: '🔄' },
+                        { key: 'isFreeShipping', label: 'Free Shipping', icon: '🚚' },
+                      ]" :key="policy.key"
+                        class="flex items-center justify-between bg-white rounded-xl border border-charcoal/10 px-3 py-2.5">
+                        <div class="flex items-center gap-1.5">
+                          <span class="text-sm">{{ policy.icon }}</span>
+                          <p class="text-[10px] font-bold text-charcoal/70">{{ policy.label }}</p>
+                        </div>
+                        <button type="button" @click="(productModal.form as any)[policy.key] = !(productModal.form as any)[policy.key]"
+                          class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none"
+                          :class="(productModal.form as any)[policy.key] ? 'bg-emerald-500' : 'bg-gray-200'">
+                          <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200"
+                            :class="(productModal.form as any)[policy.key] ? 'translate-x-4' : 'translate-x-0'" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Sizes section -->
-                <div>
-                  <label class="block text-charcoal/50 font-bold mb-1.5">Variant Sizes (Click S, M, L... to delete, or add any custom size below)</label>
-                  <div class="flex flex-wrap gap-1.5 mb-2">
-                    <span 
-                      v-for="sz in v.sizes" 
-                      :key="sz"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-deep-plum text-white text-[10px] font-bold rounded-lg shadow-soft border border-deep-plum/20"
-                    >
-                      {{ sz }}
-                      <button 
-                        type="button" 
-                        @click="toggleSizePreset(v, sz)" 
-                        class="text-white/60 hover:text-white font-bold text-[9px] focus:outline-none"
-                      >✕</button>
-                    </span>
-                    <span v-if="!v.sizes || !v.sizes.length" class="text-[10px] text-charcoal/40 italic">No sizes added yet. Use input below to add sizes.</span>
-                  </div>
-                  <!-- Quick add input -->
-                  <div class="flex gap-2">
-                    <input 
-                      v-model="v.newSizeInput" 
-                      @keydown.enter.prevent="addCustomSizeToVariant(v)"
-                      placeholder="Type custom size (e.g. 32B, 34C, S, XL) and click Add" 
-                      class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white font-semibold" 
-                    />
-                    <button 
-                      type="button" 
-                      @click="addCustomSizeToVariant(v)" 
-                      class="px-3 py-2 bg-deep-plum text-white hover:bg-plum-800 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors shrink-0"
-                    >
-                      Add Size
+                <!-- ══ TAB C: COLOR VARIANTS ════════════════════════════ -->
+                <div v-show="productFormTab === 'variants'" class="space-y-5 animate-fade-in">
+                  <div class="flex items-center justify-between pb-3 border-b border-rose-blush/15">
+                    <div class="flex items-center gap-2">
+                      <span class="text-lg">🎨</span>
+                      <div>
+                        <h4 class="font-bold text-deep-plum text-sm">Color Variants & Media</h4>
+                        <p class="text-[10px] text-charcoal/45">Add one entry per color. Each variant has its own sizes and images.</p>
+                      </div>
+                    </div>
+                    <button type="button" @click="addProductVariant"
+                      class="px-3.5 py-2 bg-deep-plum text-white rounded-xl text-[10px] font-bold hover:bg-[#473021] transition-all shadow-sm">
+                      + Add Color Variant
                     </button>
                   </div>
-                </div>
 
-                <!-- Media inputs (Main image, video url, additional images list) -->
-                <div class="border-t border-rose-blush/10 pt-3.5 space-y-3">
-                  <!-- Main image -->
-                  <div>
-                    <label class="block text-charcoal/50 font-bold mb-1">Color Variant Main Image URL *</label>
-                    <div class="flex gap-2 items-center">
-                      <div class="w-8 h-8 shrink-0 rounded bg-white border border-rose-blush flex items-center justify-center overflow-hidden shadow-soft">
-                        <img v-if="v.mainImageInput" :src="v.mainImageInput" class="w-full h-full object-cover" />
-                        <span v-else class="text-[8px] text-charcoal/30">Main</span>
-                      </div>
-                      <input v-model="v.mainImageInput" required placeholder="https://example.com/main-color.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
-                    </div>
+                  <div v-if="!productModal.form.variants?.length" class="py-12 text-center text-charcoal/35 border-2 border-dashed border-rose-blush/30 rounded-2xl">
+                    <p class="text-3xl mb-2">🎨</p>
+                    <p class="text-sm font-semibold">No variants yet</p>
+                    <p class="text-[10px] mt-1">Click "+ Add Color Variant" above to start</p>
                   </div>
 
-                  <!-- Video URL -->
-                  <div>
-                    <label class="block text-charcoal/50 font-bold mb-1">YouTube Video Link (Watch URL or Embed Link - Optional)</label>
-                    <input v-model="v.videoUrlInput" placeholder="https://www.youtube.com/watch?v=..." class="w-full p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
-                  </div>
-
-                  <!-- Additional Images -->
-                  <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                      <label class="block text-charcoal/50 font-bold">Additional Images (Optional)</label>
-                      <button type="button" @click="v.additionalImagesList.push('')" class="text-deep-plum font-bold text-[9px] hover:underline">+ Add More Image URL</button>
-                    </div>
-                    <div v-if="!v.additionalImagesList || !v.additionalImagesList.length" class="text-[10px] text-charcoal/40 italic">
-                      No additional images added.
-                    </div>
-                    <div class="space-y-2 max-h-[140px] overflow-y-auto pr-1">
-                      <div v-for="(_, imgIdx) in v.additionalImagesList" :key="imgIdx" class="flex gap-2 items-center">
-                        <div class="w-8 h-8 shrink-0 rounded bg-white border border-rose-blush flex items-center justify-center overflow-hidden shadow-soft">
-                          <img v-if="v.additionalImagesList[imgIdx]" :src="v.additionalImagesList[imgIdx]" class="w-full h-full object-cover" />
-                          <span v-else class="text-[8px] text-charcoal/30">Extra</span>
+                  <div class="space-y-4 max-h-[calc(95vh-220px)] overflow-y-auto pr-1">
+                    <div v-for="(v, vIdx) in productModal.form.variants" :key="vIdx"
+                      class="bg-warm-ivory/50 rounded-2xl border border-charcoal/10 overflow-hidden">
+                      <!-- Variant Header -->
+                      <div class="flex items-center justify-between px-4 py-3 bg-white border-b border-rose-blush/10">
+                        <div class="flex items-center gap-2.5">
+                          <div class="w-5 h-5 rounded-full border border-charcoal/20 shadow-sm shrink-0" :style="{ background: v.colorHex || '#ccc' }" />
+                          <p class="text-xs font-bold text-deep-plum">{{ v.color || `Variant ${vIdx + 1}` }}</p>
                         </div>
-                        <input v-model="v.additionalImagesList[imgIdx]" placeholder="https://example.com/extra-view.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
-                        <button type="button" @click="v.additionalImagesList.splice(imgIdx, 1)" class="text-red-500 text-xs">✕</button>
+                        <button type="button" @click="productModal.form.variants.splice(vIdx, 1)"
+                          class="text-[10px] text-red-400 hover:text-red-600 font-bold transition-colors">Remove</button>
+                      </div>
+
+                      <div class="p-4 space-y-4">
+                        <!-- Color name + hex -->
+                        <div class="grid grid-cols-2 gap-3">
+                          <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-charcoal/50 uppercase tracking-wide">Color Title</label>
+                            <input v-model="v.color" required placeholder="e.g. Classic Black"
+                              class="w-full px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                          </div>
+                          <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-charcoal/50 uppercase tracking-wide">Color HEX</label>
+                            <div class="flex gap-2">
+                              <input v-model="v.colorHex" type="color" class="w-9 h-9 rounded-lg border border-charcoal/15 cursor-pointer p-0.5" />
+                              <input v-model="v.colorHex" placeholder="#000000"
+                                class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white font-mono focus:outline-none focus:border-deep-plum transition" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Sizes, Stock & SKU per Size -->
+                        <div class="space-y-2">
+                          <div class="flex items-center justify-between">
+                            <label class="block text-[10px] font-bold text-charcoal/50 uppercase tracking-wide">Sizes, Stock &amp; SKU</label>
+                            <span class="text-[9px] text-charcoal/35">Edit qty/SKU inline · ✕ removes size</span>
+                          </div>
+
+                          <!-- Size rows with stock + SKU -->
+                          <div class="space-y-1.5">
+                            <div v-for="sz in v.sizes" :key="sz"
+                              class="flex items-center gap-2 bg-white rounded-xl border border-charcoal/10 px-2.5 py-1.5">
+                              <!-- Size label -->
+                              <span class="min-w-[36px] text-center px-2 py-1 bg-deep-plum text-white text-[10px] font-bold rounded-lg shrink-0">{{ sz }}</span>
+                              <!-- Stock -->
+                              <div class="flex items-center gap-1 shrink-0">
+                                <span class="text-[9px] text-charcoal/40 font-bold">Qty:</span>
+                                <input
+                                  type="number" min="0"
+                                  :value="v.stockPerSize?.[sz] ?? 0"
+                                  @change="(e: Event) => { if(!v.stockPerSize) v.stockPerSize = {}; v.stockPerSize[sz] = Math.max(0, parseInt((e.target as HTMLInputElement).value) || 0) }"
+                                  class="w-12 text-xs font-mono text-center border border-charcoal/15 rounded-lg px-1 py-0.5 focus:outline-none focus:border-deep-plum bg-white"
+                                />
+                              </div>
+                              <!-- SKU ID -->
+                              <div class="flex items-center gap-1 flex-1 min-w-0">
+                                <span class="text-[9px] text-charcoal/40 font-bold shrink-0">SKU:</span>
+                                <input
+                                  :value="v.skuPerSize?.[sz] ?? ''"
+                                  @input="(e: Event) => { if(!v.skuPerSize) v.skuPerSize = {}; v.skuPerSize[sz] = (e.target as HTMLInputElement).value }"
+                                  placeholder="e.g. VE-BRA-001-BLACK-M"
+                                  class="flex-1 min-w-0 px-2 py-1 text-xs font-mono border border-charcoal/15 rounded-lg focus:outline-none focus:border-deep-plum bg-white text-charcoal"
+                                />
+                              </div>
+                              <!-- Remove -->
+                              <button type="button" @click="toggleSizePreset(v, sz)" class="text-charcoal/30 hover:text-red-500 text-xs shrink-0">✕</button>
+                            </div>
+                            <p v-if="!v.sizes?.length" class="text-[10px] text-charcoal/35 italic py-2 text-center">No sizes added yet</p>
+                          </div>
+
+                          <!-- Add size + stock input row -->
+                          <div class="flex gap-2 items-center pt-1">
+                            <input v-model="v.newSizeInput" @keydown.enter.prevent="addCustomSizeToVariant(v)"
+                              placeholder="Size (e.g. 32B, XL)"
+                              class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                            <div class="relative">
+                              <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-charcoal/35 text-[9px] font-bold">Qty</span>
+                              <input
+                                v-model.number="v.newSizeStock"
+                                type="number" min="0" placeholder="0"
+                                class="w-20 pl-8 pr-2 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition text-center"
+                              />
+                            </div>
+                            <button type="button" @click="addCustomSizeToVariant(v)"
+                              class="px-3.5 py-2 bg-deep-plum text-white rounded-xl text-[10px] font-bold hover:bg-[#473021] transition shrink-0">Add</button>
+                          </div>
+                          <p class="text-[9px] text-charcoal/35">Individual SKU value. Prefilled with style code but completely editable.</p>
+                        </div>
+
+
+                        <!-- Media -->
+                        <div class="space-y-3 border-t border-rose-blush/10 pt-3">
+                          <p class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wide">📸 Variant Images & Video</p>
+                          <!-- Main image -->
+                          <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-charcoal/50">Main Image URL <span class="text-red-400">*</span></label>
+                            <div class="flex gap-2 items-center">
+                              <div class="w-9 h-9 shrink-0 rounded-xl bg-white border border-rose-blush/30 overflow-hidden flex items-center justify-center shadow-sm">
+                                <img v-if="v.mainImageInput" :src="v.mainImageInput" class="w-full h-full object-cover" />
+                                <span v-else class="text-[8px] text-charcoal/25">Main</span>
+                              </div>
+                              <input v-model="v.mainImageInput" required placeholder="https://example.com/front-image.jpg"
+                                class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                            </div>
+                          </div>
+                          <!-- Video -->
+                          <div class="space-y-1">
+                            <label class="block text-[10px] font-bold text-charcoal/50">YouTube Video URL (Optional)</label>
+                            <input v-model="v.videoUrlInput" placeholder="https://www.youtube.com/watch?v=..."
+                              class="w-full px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                          </div>
+                          <!-- Additional images -->
+                          <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                              <label class="block text-[10px] font-bold text-charcoal/50">Additional Images</label>
+                              <button type="button" @click="v.additionalImagesList.push('')" class="text-[9px] text-deep-plum font-bold hover:underline">+ Add Image URL</button>
+                            </div>
+                            <div class="space-y-2 max-h-36 overflow-y-auto pr-1">
+                              <div v-for="(_, imgIdx) in v.additionalImagesList" :key="imgIdx" class="flex gap-2 items-center">
+                                <div class="w-7 h-7 shrink-0 rounded-lg bg-white border border-rose-blush/20 overflow-hidden flex items-center justify-center">
+                                  <img v-if="v.additionalImagesList[imgIdx]" :src="v.additionalImagesList[imgIdx]" class="w-full h-full object-cover" />
+                                  <span v-else class="text-[7px] text-charcoal/25">+</span>
+                                </div>
+                                <input v-model="v.additionalImagesList[imgIdx]" placeholder="https://example.com/angle-2.jpg"
+                                  class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                                <button type="button" @click="v.additionalImagesList.splice(imgIdx, 1)" class="text-red-400 hover:text-red-600 text-xs">✕</button>
+                              </div>
+                              <p v-if="!v.additionalImagesList.length" class="text-[10px] text-charcoal/30 italic">No extra images added.</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <!-- TAB D: MEDIA & FEATURES -->
-          <div v-show="productFormTab === 'media'" class="space-y-4 animate-fade-in">
-            <!-- Available Offer -->
-            <div>
-              <label class="block font-semibold mb-1 text-charcoal/70">Available Offer Promo Text</label>
-              <input v-model="productModal.form.availableOffer" type="text" placeholder="e.g. Buy 2 Get 1 Free, or Flat 10% Off with code VANELVINA" class="w-full p-2.5 border border-charcoal/20 rounded-xl" />
-            </div>
-
-            <!-- Product Features / Highlights (Multiple) -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <label class="block font-semibold text-charcoal/70">Product Key Features (Multiple Bullets)</label>
-                <button type="button" @click="productModal.form.features.push('')" class="text-deep-plum font-bold text-[10px] hover:underline">+ Add Feature Bullet</button>
-              </div>
-              <div v-if="!productModal.form.features?.length" class="p-3 text-center text-charcoal/40 bg-warm-ivory/20 rounded-xl border border-dashed border-rose-blush/30">
-                No key features added. Click "+ Add Feature Bullet" above.
-              </div>
-              <div class="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-                <div v-for="(_, fIdx) in productModal.form.features" :key="fIdx" class="flex gap-2 items-center">
-                  <span class="text-charcoal/40 font-bold">•</span>
-                  <input v-model="productModal.form.features[fIdx]" placeholder="e.g. Ultra-soft seam-free elastic band" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
-                  <button type="button" @click="productModal.form.features.splice(fIdx, 1)" class="text-red-500 text-xs">✕</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB E: DETAILS & FAQS -->
-          <div v-show="productFormTab === 'details'" class="space-y-4 animate-fade-in">
-            <!-- Additional Info -->
-            <div>
-              <label class="block font-semibold mb-1 text-charcoal/70">Additional Information</label>
-              <textarea v-model="productModal.form.additionalInfo" rows="3" placeholder="Fabric composition, care instructions, or certification details..." class="w-full p-2.5 border border-charcoal/20 rounded-xl"></textarea>
-            </div>
-
-            <!-- Product Tags (Comma separated or presets check) -->
-            <div class="space-y-2">
-              <label class="block font-semibold text-charcoal/70">Search Tags (Comma separated or select presets)</label>
-              <div class="flex flex-wrap gap-2 mb-2">
-                <button 
-                  v-for="pTag in ['new arrival', 'bestseller', 'trending', 'comfort', 'premium', 'daily-wear']" 
-                  :key="pTag"
-                  type="button"
-                  @click="togglePresetTag(pTag)"
-                  class="px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-colors font-ui"
-                  :class="productModal.form.tags.includes(pTag) ? 'bg-deep-plum text-white border-deep-plum shadow' : 'bg-white text-charcoal/60 border-charcoal/20 hover:border-deep-plum'"
-                >
-                  {{ pTag }}
-                </button>
-              </div>
-              <input 
-                :value="productModal.form.tags.join(', ')" 
-                @input="productModal.form.tags = ($event.target as HTMLInputElement).value.split(',').map(s => s.trim()).filter(Boolean)" 
-                placeholder="e.g. new arrival, bestseller, trending" 
-                class="w-full p-2.5 border border-charcoal/20 rounded-xl font-mono text-xs"
-              />
-            </div>
-
-            <!-- Descriptive / Lifestyle Images (Multiple) -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <label class="block font-semibold text-charcoal/70">Descriptive / Lifestyle Images (Multiple URLs)</label>
-                <button type="button" @click="productModal.form.descriptiveImages.push('')" class="text-deep-plum font-bold text-[10px] hover:underline">+ Add Lifestyle Image URL</button>
-              </div>
-              <div v-if="!productModal.form.descriptiveImages?.length" class="p-3 text-center text-charcoal/40 bg-warm-ivory/20 rounded-xl border border-dashed border-rose-blush/30">
-                No lifestyle images added. Click "+ Add Lifestyle Image URL" above.
-              </div>
-              <div class="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-                <div v-for="(_, imgIdx) in productModal.form.descriptiveImages" :key="imgIdx" class="flex gap-2 items-center">
-                  <div class="w-8 h-8 rounded bg-white border border-rose-blush flex items-center justify-center overflow-hidden shrink-0 shadow-soft">
-                    <img v-if="productModal.form.descriptiveImages[imgIdx]" :src="productModal.form.descriptiveImages[imgIdx]" class="w-full h-full object-cover" />
-                    <span v-else class="text-[8px] text-charcoal/30">Null</span>
+                <!-- ══ TAB D: MEDIA & FEATURES ═════════════════════════ -->
+                <div v-show="productFormTab === 'media'" class="space-y-5 animate-fade-in">
+                  <div class="flex items-center gap-2 mb-1 pb-3 border-b border-rose-blush/15">
+                    <span class="text-lg">✨</span>
+                    <div>
+                      <h4 class="font-bold text-deep-plum text-sm">Media & Features</h4>
+                      <p class="text-[10px] text-charcoal/45">Product selling points, wash care steps, and key feature bullets.</p>
+                    </div>
                   </div>
-                  <input v-model="productModal.form.descriptiveImages[imgIdx]" placeholder="https://example.com/lifestyle-pic.jpg" class="flex-1 p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
-                  <button type="button" @click="productModal.form.descriptiveImages.splice(imgIdx, 1)" class="text-red-500 text-xs">✕</button>
-                </div>
-              </div>
-            </div>
 
-            <!-- Product FAQs (Multiple) -->
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <label class="block font-semibold text-charcoal/70">Product Specific FAQs (Question &amp; Answer)</label>
-                <button type="button" @click="productModal.form.faqs.push({ question: '', answer: '' })" class="text-deep-plum font-bold text-[10px] hover:underline">+ Add FAQ Pair</button>
-              </div>
-              <div v-if="!productModal.form.faqs?.length" class="p-3 text-center text-charcoal/40 bg-warm-ivory/20 rounded-xl border border-dashed border-rose-blush/30">
-                No product specific FAQs added. Click "+ Add FAQ Pair" above.
-              </div>
-              <div class="space-y-3 max-h-[180px] overflow-y-auto pr-1">
-                <div v-for="(faq, fIdx) in productModal.form.faqs" :key="fIdx" class="bg-warm-ivory/50 p-3 rounded-xl border border-rose-blush/20 space-y-2 relative">
-                  <button type="button" @click="productModal.form.faqs.splice(fIdx, 1)" class="absolute top-2 right-2 text-red-500 text-xs hover:underline">Remove</button>
-                  <div class="space-y-1 pr-12">
-                    <label class="block text-[10px] text-charcoal/45 uppercase font-bold">Question</label>
-                    <input v-model="faq.question" placeholder="e.g. Is this bra padded?" class="w-full p-2 border border-charcoal/20 rounded-lg text-xs bg-white" />
-                  </div>
+                  <!-- Offer -->
                   <div class="space-y-1">
-                    <label class="block text-[10px] text-charcoal/45 uppercase font-bold">Answer</label>
-                    <textarea v-model="faq.answer" rows="2" placeholder="e.g. Yes, it comes with removable foam pads..." class="w-full p-2 border border-charcoal/20 rounded-lg text-xs bg-white"></textarea>
+                    <label class="block text-[11px] font-bold text-charcoal/60 uppercase tracking-wide">🎁 Available Offer Promo Text</label>
+                    <input v-model="productModal.form.availableOffer" type="text" placeholder="e.g. Buy 2 Get 1 Free, or Flat 10% Off with code VANELVINA"
+                      class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Highlights -->
+                    <div class="bg-warm-ivory/60 rounded-2xl p-4 border border-rose-blush/15 space-y-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-[11px] font-bold text-charcoal/80">✨ Product Highlights</p>
+                          <p class="text-[9px] text-charcoal/40 mt-0.5">Short selling-point bullets near top of product page</p>
+                        </div>
+                        <button type="button" @click="productModal.form.highlights.push('')" class="text-[9px] text-deep-plum font-bold hover:underline shrink-0">+ Add</button>
+                      </div>
+                      <div v-if="!productModal.form.highlights?.length" class="py-4 text-center text-[10px] text-charcoal/30 border border-dashed border-rose-blush/30 rounded-xl">
+                        No highlights yet
+                      </div>
+                      <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <div v-for="(_, hIdx) in productModal.form.highlights" :key="hIdx" class="flex gap-2 items-center">
+                          <span class="text-deep-plum font-black text-sm shrink-0">✓</span>
+                          <input v-model="productModal.form.highlights[hIdx]" placeholder="e.g. Seam-free comfort"
+                            class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                          <button type="button" @click="productModal.form.highlights.splice(hIdx, 1)" class="text-red-400 hover:text-red-600 text-xs">✕</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Wash Care -->
+                    <div class="bg-warm-ivory/60 rounded-2xl p-4 border border-rose-blush/15 space-y-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <p class="text-[11px] font-bold text-charcoal/80">🏷️ Wash Care Guide</p>
+                          <p class="text-[9px] text-charcoal/40 mt-0.5">Steps shown in "Fabric, Care & Origin" tab on PDP</p>
+                        </div>
+                        <button type="button" @click="productModal.form.care.push('')" class="text-[9px] text-deep-plum font-bold hover:underline shrink-0">+ Add</button>
+                      </div>
+                      <div v-if="!productModal.form.care?.length" class="py-4 text-center text-[10px] text-charcoal/30 border border-dashed border-rose-blush/30 rounded-xl">
+                        No care steps yet
+                      </div>
+                      <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <div v-for="(_, cIdx) in productModal.form.care" :key="cIdx" class="flex gap-2 items-center">
+                          <span class="text-base shrink-0">🏷️</span>
+                          <input v-model="productModal.form.care[cIdx]" placeholder="e.g. Hand wash in cold water"
+                            class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                          <button type="button" @click="productModal.form.care.splice(cIdx, 1)" class="text-red-400 hover:text-red-600 text-xs">✕</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Key Features -->
+                  <div class="bg-warm-ivory/60 rounded-2xl p-4 border border-rose-blush/15 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-[11px] font-bold text-charcoal/80">⭐ Product Key Features</p>
+                        <p class="text-[9px] text-charcoal/40 mt-0.5">Detailed bullets shown further down the product page</p>
+                      </div>
+                      <button type="button" @click="productModal.form.features.push('')" class="text-[9px] text-deep-plum font-bold hover:underline">+ Add Feature</button>
+                    </div>
+                    <div v-if="!productModal.form.features?.length" class="py-4 text-center text-[10px] text-charcoal/30 border border-dashed border-rose-blush/30 rounded-xl">
+                      No key features yet
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                      <div v-for="(_, fIdx) in productModal.form.features" :key="fIdx" class="flex gap-2 items-center">
+                        <span class="text-charcoal/30 font-bold shrink-0 text-sm">•</span>
+                        <input v-model="productModal.form.features[fIdx]" placeholder="e.g. Ultra-soft seam-free elastic"
+                          class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                        <button type="button" @click="productModal.form.features.splice(fIdx, 1)" class="text-red-400 hover:text-red-600 text-xs">✕</button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="flex justify-end gap-2 pt-3 border-t border-rose-blush/10">
-            <button type="button" @click="productModal.show = false" class="px-4 py-2 border border-charcoal/20 rounded-xl text-charcoal">Cancel</button>
-            <button type="submit" class="px-5 py-2 bg-deep-plum text-white rounded-xl shadow-premium">Save Product Specs</button>
+                <!-- ══ TAB E: DETAILS & FAQs ════════════════════════════ -->
+                <div v-show="productFormTab === 'details'" class="space-y-5 animate-fade-in">
+                  <div class="flex items-center gap-2 mb-1 pb-3 border-b border-rose-blush/15">
+                    <span class="text-lg">📄</span>
+                    <div>
+                      <h4 class="font-bold text-deep-plum text-sm">Details & FAQs</h4>
+                      <p class="text-[10px] text-charcoal/45">Search tags, additional info, and customer questions.</p>
+                    </div>
+                  </div>
+
+                  <div class="space-y-1">
+                    <label class="block text-[11px] font-bold text-charcoal/60 uppercase tracking-wide">Additional Information</label>
+                    <textarea v-model="productModal.form.additionalInfo" rows="3" placeholder="Fabric composition, certifications, or any extra product details..."
+                      class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition resize-none" />
+                  </div>
+
+                  <!-- Tags -->
+                  <div class="bg-warm-ivory/60 rounded-2xl p-4 border border-rose-blush/15 space-y-3">
+                    <p class="text-[11px] font-bold text-charcoal/70">🏷️ Search Tags</p>
+                    <div class="flex flex-wrap gap-1.5">
+                      <button v-for="pTag in ['new arrival', 'bestseller', 'trending', 'comfort', 'premium', 'daily-wear', 'bridal', 'sports', 'seamless']"
+                        :key="pTag" type="button" @click="togglePresetTag(pTag)"
+                        class="px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-colors"
+                        :class="productModal.form.tags.includes(pTag) ? 'bg-deep-plum text-white border-deep-plum' : 'bg-white text-charcoal/55 border-charcoal/20 hover:border-deep-plum'">
+                        {{ pTag }}
+                      </button>
+                    </div>
+                    <input
+                      :value="productModal.form.tags.join(', ')"
+                      @input="productModal.form.tags = ($event.target as HTMLInputElement).value.split(',').map(s => s.trim()).filter(Boolean)"
+                      placeholder="Or type custom tags, comma separated..."
+                      class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white font-mono focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
+                  </div>
+
+                  <!-- FAQs -->
+                  <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-[11px] font-bold text-charcoal/70">❓ Product FAQs</p>
+                        <p class="text-[9px] text-charcoal/40">Shown in the FAQ accordion on the product page</p>
+                      </div>
+                      <button type="button" @click="productModal.form.faqs.push({ question: '', answer: '' })" class="text-[9px] text-deep-plum font-bold hover:underline">+ Add FAQ</button>
+                    </div>
+                    <div class="space-y-3 max-h-64 overflow-y-auto pr-1">
+                      <div v-for="(faq, fIdx) in productModal.form.faqs" :key="fIdx"
+                        class="bg-warm-ivory/60 rounded-xl border border-rose-blush/20 p-3.5 space-y-2.5 relative">
+                        <button type="button" @click="productModal.form.faqs.splice(fIdx, 1)"
+                          class="absolute top-2.5 right-2.5 text-red-400 hover:text-red-600 text-[10px] font-bold">Remove</button>
+                        <div class="pr-14 space-y-1">
+                          <label class="block text-[9px] text-charcoal/40 uppercase font-bold tracking-wide">Question</label>
+                          <input v-model="faq.question" placeholder="e.g. Is this bra padded?"
+                            class="w-full px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                        </div>
+                        <div class="space-y-1">
+                          <label class="block text-[9px] text-charcoal/40 uppercase font-bold tracking-wide">Answer</label>
+                          <textarea v-model="faq.answer" rows="2" placeholder="e.g. Yes, it comes with removable foam pads..."
+                            class="w-full px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition resize-none" />
+                        </div>
+                      </div>
+                      <div v-if="!productModal.form.faqs.length" class="py-6 text-center text-[10px] text-charcoal/30 border border-dashed border-rose-blush/20 rounded-xl">
+                        No FAQs added yet
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- ── Sticky Footer ──────────────────────────────────── -->
+              <div class="shrink-0 px-6 py-4 border-t border-rose-blush/10 bg-white flex items-center justify-between gap-3">
+                <!-- Tab progress dots (desktop) -->
+                <div class="hidden md:flex items-center gap-2">
+                  <div v-for="tab in ['general', 'pricing', 'variants', 'media', 'details']" :key="tab"
+                    class="h-1.5 rounded-full transition-all"
+                    :class="productFormTab === tab ? 'w-6 bg-deep-plum' : 'w-2 bg-charcoal/15'" />
+                </div>
+                <div class="flex items-center gap-2 ml-auto">
+                  <button type="button" @click="productModal.show = false"
+                    class="px-5 py-2.5 border border-charcoal/20 rounded-xl text-xs font-semibold text-charcoal hover:bg-warm-ivory transition-colors">
+                    Cancel
+                  </button>
+                  <button type="submit"
+                    class="px-6 py-2.5 bg-deep-plum text-white rounded-xl text-xs font-bold shadow-lg shadow-deep-plum/25 hover:bg-[#473021] transition-all flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    {{ productModal.isEdit ? 'Update Product' : 'Create Product' }}
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </div>
+
+
+    <!-- 6. WIDGET CONFIGURATION MODAL (CONTEXTUAL FIELDS) -->
+
 
     <!-- 6. WIDGET CONFIGURATION MODAL (CONTEXTUAL FIELDS) -->
     <div v-if="widgetModal.show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
@@ -3851,6 +3998,87 @@ const fetchAnalyticsSummary = async () => {
 // Re-fetch when timeframe changes
 watch(analyticsTimeframe, () => { fetchAnalyticsSummary() })
 
+// Auto-generate URL slug from product name (only when creating, not editing)
+const generateSlug = (name: string) =>
+  name.trim().toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')   // strip special chars
+    .replace(/\s+/g, '-')           // spaces → hyphens
+    .replace(/-+/g, '-')            // collapse multiple hyphens
+    .replace(/^-|-$/g, '')          // trim leading/trailing hyphens
+
+const getDefaultSku = (styleId: string, color: string, size: string) => {
+  const cleanStyle = (styleId || 'VE').trim().toUpperCase()
+  const cleanColor = (color || '').trim().replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
+  const cleanSize = (size || '').trim().replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
+  return cleanColor ? `${cleanStyle}-${cleanColor}-${cleanSize}` : `${cleanStyle}-${cleanSize}`
+}
+
+watch(
+  () => productModal.value.form.name,
+  (newName) => {
+    // Only auto-fill slug when creating a new product
+    if (!productModal.value.isEdit && newName) {
+      productModal.value.form.slug = generateSlug(newName)
+    }
+  }
+)
+
+watch(
+  () => productModal.value.form.styleId,
+  (newStyle, oldStyle) => {
+    if (!productModal.value.form.variants) return
+    productModal.value.form.variants.forEach((v: any) => {
+      if (!v.sizes) return
+      if (!v.skuPerSize) v.skuPerSize = {}
+      v.sizes.forEach((sz: string) => {
+        const current = v.skuPerSize[sz] || ''
+        const oldDefault = getDefaultSku(oldStyle || '', v.color, sz)
+        if (!current || current === oldDefault) {
+          v.skuPerSize[sz] = getDefaultSku(newStyle || '', v.color, sz)
+        }
+      })
+    })
+  }
+)
+
+const lastKnownColors = new Map<any, string>()
+
+watch(
+  () => productModal.value.form.variants,
+  (newVariants) => {
+    if (!newVariants) return
+    const styleId = productModal.value.form.styleId || 'VE-'
+    newVariants.forEach((v: any) => {
+      const prevColor = lastKnownColors.get(v)
+      if (prevColor !== undefined && prevColor !== v.color) {
+        // Color changed! Update default SKUs that used the previous color
+        if (v.sizes && v.skuPerSize) {
+          v.sizes.forEach((sz: string) => {
+            const current = v.skuPerSize[sz] || ''
+            const oldDefault = getDefaultSku(styleId, prevColor, sz)
+            if (!current || current === oldDefault) {
+              v.skuPerSize[sz] = getDefaultSku(styleId, v.color, sz)
+            }
+          })
+        }
+      }
+      lastKnownColors.set(v, v.color || '')
+      
+      // Auto-fill any empty SKUs
+      if (v.sizes) {
+        if (!v.skuPerSize) v.skuPerSize = {}
+        v.sizes.forEach((sz: string) => {
+          if (!v.skuPerSize[sz]) {
+            v.skuPerSize[sz] = getDefaultSku(styleId, v.color, sz)
+          }
+        })
+      }
+    })
+  },
+  { deep: true }
+)
+
+
 // Units Sold list aggregated from real orders
 const unitsSoldList = computed(() => {
   const counts: Record<string, { id: string; name: string; category: string; quantity: number; totalSales: number; image: string }> = {}
@@ -4191,6 +4419,8 @@ const productModal = ref({
     videoUrl: '',
     availableOffer: '',
     features: [] as string[],
+    highlights: [] as string[],
+    care: [] as string[],
     additionalInfo: '',
     descriptiveImages: [] as string[],
     faqs: [] as { question: string; answer: string }[],
@@ -4701,12 +4931,23 @@ const openProductModal = (prod: any | null) => {
         additionalImagesList = ['']
       }
       
+      const skuPerSize = v.skuPerSize || {}
+      const sizes = v.sizes || []
+      sizes.forEach((sz: string) => {
+        if (!skuPerSize[sz]) {
+          skuPerSize[sz] = getDefaultSku(prod.styleId || 'VE-', v.color, sz)
+        }
+      })
+      
       return {
         ...v,
         mainImageInput,
         videoUrlInput,
         additionalImagesList,
-        newSizeInput: ''
+        stockPerSize: v.stockPerSize || {},
+        skuPerSize,
+        newSizeInput: '',
+        newSizeStock: 0
       }
     })
 
@@ -4729,6 +4970,8 @@ const openProductModal = (prod: any | null) => {
       videoUrl: prod.videoUrl || '',
       availableOffer: prod.availableOffer || '',
       features: prod.features || [],
+      highlights: prod.highlights || [],
+      care: prod.care || [],
       additionalInfo: prod.additionalInfo || '',
       descriptiveImages: prod.descriptiveImages || [],
       faqs: prod.faqs ? JSON.parse(JSON.stringify(prod.faqs)) : [],
@@ -4737,7 +4980,7 @@ const openProductModal = (prod: any | null) => {
       isExchangeable: prod.isExchangeable !== undefined ? prod.isExchangeable : true,
       isFreeShipping: prod.isFreeShipping !== undefined ? prod.isFreeShipping : false,
       sku: prod.sku || '',
-      styleId: prod.styleId || ''
+      styleId: prod.styleId ? (prod.styleId.startsWith('VE-') ? prod.styleId : `VE-${prod.styleId}`) : 'VE-BRA-001'
     }
   } else {
     productModal.value.isEdit = false
@@ -4760,10 +5003,13 @@ const openProductModal = (prod: any | null) => {
           color: 'Default Color',
           colorHex: '#1a1a1a',
           sizes: ['M'],
+          stockPerSize: { 'M': 10 },
+          skuPerSize: { 'M': 'VE-BRA-001-DEFAULTCOLOR-M' },
           mainImageInput: '',
           videoUrlInput: '',
           additionalImagesList: [''],
-          newSizeInput: ''
+          newSizeInput: '',
+          newSizeStock: 0
         }
       ],
       tags: [],
@@ -4771,6 +5017,8 @@ const openProductModal = (prod: any | null) => {
       videoUrl: '',
       availableOffer: '',
       features: [''],
+      highlights: [''],
+      care: [''],
       additionalInfo: '',
       descriptiveImages: [''],
       faqs: [],
@@ -4779,21 +5027,29 @@ const openProductModal = (prod: any | null) => {
       isExchangeable: true,
       isFreeShipping: false,
       sku: '',
-      styleId: ''
+      styleId: 'VE-BRA-001'
     }
   }
   productModal.value.show = true
 }
 
 const addProductVariant = () => {
+  const styleId = productModal.value.form.styleId || 'VE-'
+  const color = 'New Color'
+  const sizes = ['M']
+  const skuPerSize = { 'M': getDefaultSku(styleId, color, 'M') }
+  
   productModal.value.form.variants.push({
-    color: '',
+    color,
     colorHex: '#ffffff',
-    sizes: ['M'],
+    sizes,
+    stockPerSize: { 'M': 10 },
+    skuPerSize,
     mainImageInput: '',
     videoUrlInput: '',
     additionalImagesList: [''],
-    newSizeInput: ''
+    newSizeInput: '',
+    newSizeStock: 0
   })
 }
 
@@ -4801,10 +5057,16 @@ const addCustomSizeToVariant = (v: any) => {
   const size = (v.newSizeInput || '').trim()
   if (!size) return
   if (!v.sizes) v.sizes = []
+  if (!v.stockPerSize) v.stockPerSize = {}
+  if (!v.skuPerSize) v.skuPerSize = {}
   if (!v.sizes.includes(size)) {
     v.sizes.push(size)
+    v.stockPerSize[size] = Math.max(0, v.newSizeStock || 0)
+    const styleId = productModal.value.form.styleId || 'VE-'
+    v.skuPerSize[size] = getDefaultSku(styleId, v.color, size)
   }
   v.newSizeInput = ''
+  v.newSizeStock = 0
 }
 
 const createQuickCategory = async () => {
@@ -5038,8 +5300,15 @@ const toggleSizePreset = (variant: any, size: string) => {
   const idx = variant.sizes.indexOf(size)
   if (idx === -1) {
     variant.sizes.push(size)
+    if (!variant.stockPerSize) variant.stockPerSize = {}
+    variant.stockPerSize[size] = 0
+    if (!variant.skuPerSize) variant.skuPerSize = {}
+    const styleId = productModal.value.form.styleId || 'VE-'
+    variant.skuPerSize[size] = getDefaultSku(styleId, variant.color, size)
   } else {
     variant.sizes.splice(idx, 1)
+    if (variant.stockPerSize) delete variant.stockPerSize[size]
+    if (variant.skuPerSize) delete variant.skuPerSize[size]
   }
 }
 
@@ -5098,7 +5367,7 @@ const saveProductItem = async () => {
       })
     }
     
-    const { mainImageInput, videoUrlInput, additionalImagesList, newSizeInput, ...rest } = v
+    const { mainImageInput, videoUrlInput, additionalImagesList, newSizeInput, newSizeStock, ...rest } = v
     return {
       ...rest,
       images: compiledImages
@@ -5120,6 +5389,8 @@ const saveProductItem = async () => {
     images: firstVariantImages,
     videoUrl: productVideoUrl,
     features: productModal.value.form.features.filter(f => f.trim() !== ''),
+    highlights: productModal.value.form.highlights.filter(h => h.trim() !== ''),
+    care: productModal.value.form.care.filter(c => c.trim() !== ''),
     descriptiveImages: productModal.value.form.descriptiveImages.filter(img => img.trim() !== ''),
     faqs: productModal.value.form.faqs.filter(faq => faq.question.trim() !== '' && faq.answer.trim() !== '')
   }

@@ -10,7 +10,7 @@
           @scroll="handleScroll"
         >
           <div 
-            v-for="(img, idx) in allProductImages" 
+            v-for="(img, idx) in activeVariantImages" 
             :key="idx" 
             class="w-full h-full shrink-0 snap-start snap-always"
           >
@@ -33,11 +33,11 @@
 
         <!-- Dots Indicator -->
         <div 
-          v-if="allProductImages.length > 1"
+          v-if="activeVariantImages.length > 1"
           class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none"
         >
           <span 
-            v-for="(_, index) in allProductImages" 
+            v-for="(_, index) in activeVariantImages" 
             :key="index"
             class="w-1.2 h-1.2 rounded-full transition-all duration-200"
             :class="index === activeImageIndex ? 'bg-deep-plum w-2.5' : 'bg-charcoal/20'"
@@ -51,11 +51,11 @@
         class="hidden md:block w-full h-full relative" 
         @click="trackProductClick(product.id || (product as any)._id, product.name, product.category, product.price)"
       >
-        <!-- Main Image -->
+        <!-- Main Image — switches per active variant -->
         <img
           :src="primaryImage"
           :alt="product.name"
-          class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+          class="w-full h-full object-cover object-center transition-all duration-500 group-hover:scale-105"
           loading="lazy"
           width="300"
           height="400"
@@ -65,7 +65,7 @@
           v-if="secondaryImage"
           :src="secondaryImage"
           :alt="`${product.name} alternate view`"
-          class="absolute inset-0 w-full h-full object-cover object-center opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+          class="absolute inset-0 w-full h-full object-cover object-center opacity-0 transition-opacity duration-500 group-hover:opacity-100"
           loading="lazy"
           width="300"
           height="400"
@@ -115,13 +115,6 @@
         </h3>
       </NuxtLink>
 
-      <!-- Star Rating (Temporarily Hidden) -->
-      <!--
-      <div class="flex items-center gap-1 md:gap-2 mb-1 md:mb-2">
-        <AppRating :rating="product.rating" :count="product.reviewCount" show-count />
-      </div>
-      -->
-
       <!-- Price Layout -->
       <div class="flex items-baseline gap-1.5 md:gap-2 flex-wrap">
         <span class="font-sans font-bold text-deep-plum text-xs sm:text-sm md:text-base">
@@ -132,30 +125,28 @@
         </span>
       </div>
 
-      <!-- Color Variant Swatches -->
+      <!-- Color Variant Swatches — clickable, switch images -->
       <div class="flex items-center gap-1 md:gap-1.5 mt-2 md:mt-3">
-        <div
-          v-for="variant in product.variants.slice(0, 4)"
+        <button
+          v-for="(variant, vIdx) in product.variants.slice(0, 5)"
           :key="variant.color"
-          class="w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border border-charcoal/15 shadow-sm transition-transform hover:scale-110 cursor-pointer"
+          type="button"
+          class="rounded-full border transition-all duration-200 cursor-pointer hover:scale-110 focus:outline-none"
+          :class="[
+            activeVariantIdx === vIdx
+              ? 'w-3.5 h-3.5 md:w-4 md:h-4 border-2 border-deep-plum ring-1 ring-deep-plum ring-offset-1 scale-110'
+              : 'w-3 h-3 md:w-3.5 md:h-3.5 border border-charcoal/15 shadow-sm'
+          ]"
           :style="{ backgroundColor: variant.colorHex }"
           :title="variant.color"
+          :aria-label="`View in ${variant.color}`"
+          :aria-pressed="activeVariantIdx === vIdx"
+          @click.prevent="selectVariant(vIdx)"
         />
-        <span v-if="product.variants.length > 4" class="text-[9px] md:text-[10px] text-mid-gray font-ui">
-          +{{ product.variants.length - 4 }}
+        <span v-if="product.variants.length > 5" class="text-[9px] md:text-[10px] text-mid-gray font-ui">
+          +{{ product.variants.length - 5 }}
         </span>
       </div>
-
-      <!-- Add to Cart (mobile visible) - Temporarily Hidden -->
-      <!--
-      <button
-        class="mt-2.5 md:mt-3 w-full py-1.5 md:py-2.5 rounded-lg bg-rose-blush text-deep-plum text-[10px] md:text-xs font-ui font-semibold hover:bg-deep-plum hover:text-white transition-all duration-250 md:hidden"
-        :aria-label="`Add ${product.name} to cart`"
-        @click.prevent="handleQuickAdd"
-      >
-        Add to Cart
-      </button>
-      -->
     </div>
   </article>
 </template>
@@ -175,42 +166,49 @@ const isWishlisted = computed(() => {
   return pId ? isWishlistedFn(pId) : false
 })
 
-const primaryImage = computed(
-  () => props.product.variants[0]?.images[0] || 'https://via.placeholder.com/300x400?text=Van+Elvina',
-)
-const secondaryImage = computed(() => props.product.variants[0]?.images[1] || null)
+// ─── Active variant tracking ──────────────────────────────────────────────────
+const activeVariantIdx = ref(0)
 
-// Extract swipeable image set for mobile
-const allProductImages = computed(() => {
+const selectVariant = (idx: number) => {
+  activeVariantIdx.value = idx
+  activeImageIndex.value = 0 // reset scroll position on mobile
+}
+
+// Images for the currently active variant
+const activeVariantImages = computed(() => {
+  const variant = props.product.variants[activeVariantIdx.value]
   const imgs: string[] = []
-  if (props.product.variants && Array.isArray(props.product.variants)) {
-    props.product.variants.forEach((v: any) => {
-      if (v.images && Array.isArray(v.images)) {
-        v.images.forEach((img: string) => {
-          if (img && !imgs.includes(img)) {
-            imgs.push(img)
-          }
-        })
-      }
+
+  if (variant?.images?.length) {
+    variant.images.forEach((img: string) => {
+      if (img && !imgs.includes(img)) imgs.push(img)
     })
   }
 
-  if (imgs.length === 0 && props.product.images && Array.isArray(props.product.images)) {
-    props.product.images.forEach((img: string) => {
-      if (img && !imgs.includes(img)) {
-        imgs.push(img)
-      }
-    })
-  }
-
+  // Fallback: all variant images then product-level images
   if (imgs.length === 0) {
-    if (primaryImage.value) imgs.push(primaryImage.value)
-    if (secondaryImage.value) imgs.push(secondaryImage.value)
+    props.product.variants?.forEach((v: any) => {
+      v.images?.forEach((img: string) => {
+        if (img && !imgs.includes(img)) imgs.push(img)
+      })
+    })
+  }
+  if (imgs.length === 0) {
+    props.product.images?.forEach((img: string) => {
+      if (img && !imgs.includes(img)) imgs.push(img)
+    })
   }
 
-  return imgs.slice(0, 4) // limit to 4 for performance
+  return imgs.slice(0, 4)
 })
 
+// Desktop: primary = first image, secondary = second image of active variant
+const primaryImage = computed(
+  () => activeVariantImages.value[0] || 'https://via.placeholder.com/300x400?text=Van+Elvina',
+)
+const secondaryImage = computed(() => activeVariantImages.value[1] || null)
+
+// ─── Mobile scroll tracking ───────────────────────────────────────────────────
 const activeImageIndex = ref(0)
 const handleScroll = (event: Event) => {
   const el = event.target as HTMLElement

@@ -183,29 +183,56 @@
               <button
                 v-for="size in product.variants[selectedVariant].sizes"
                 :key="size"
-                class="min-w-[44px] px-2.5 py-1.5 border rounded-lg text-xs font-ui font-semibold transition-all duration-200 cursor-pointer"
-                :class="selectedSize === size
-                  ? 'border-deep-plum bg-deep-plum text-white shadow-sm'
-                  : 'border-border-gray text-charcoal hover:border-deep-plum'"
+                class="min-w-[44px] px-2.5 py-1.5 border rounded-lg text-xs font-ui font-semibold transition-all duration-200 relative"
+                :class="[
+                  (product.variants[selectedVariant].stockPerSize?.[size] === 0)
+                    ? 'border-border-gray text-charcoal/30 bg-gray-50 cursor-not-allowed line-through'
+                    : selectedSize === size
+                      ? 'border-deep-plum bg-deep-plum text-white shadow-sm cursor-pointer'
+                      : 'border-border-gray text-charcoal hover:border-deep-plum cursor-pointer'
+                ]"
+                :disabled="product.variants[selectedVariant].stockPerSize?.[size] === 0"
                 :aria-pressed="selectedSize === size"
-                :aria-label="`Size ${size}`"
-                @click="selectedSize = size"
+                :aria-label="`Size ${size}${product.variants[selectedVariant].stockPerSize?.[size] === 0 ? ' - Out of Stock' : ''}`"
+                @click="product.variants[selectedVariant].stockPerSize?.[size] !== 0 && (selectedSize = size)"
               >
                 {{ size }}
+                <span
+                  v-if="product.variants[selectedVariant].stockPerSize?.[size] !== undefined && product.variants[selectedVariant].stockPerSize?.[size] !== null && product.variants[selectedVariant].stockPerSize?.[size] > 0 && product.variants[selectedVariant].stockPerSize?.[size] <= 2"
+                  class="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-amber-500 border border-white"
+                  title="Only a few left!"
+                />
               </button>
             </div>
             <p v-if="sizeError" class="mt-1 text-xs text-red-500 font-ui" role="alert">Please select a size to continue.</p>
           </div>
 
           <!-- Quantity + Add to Cart (inline on mobile) -->
-          <div class="flex items-center gap-3 pb-4 border-b border-border-gray">
-            <div class="flex items-center border border-border-gray rounded-lg overflow-hidden">
-              <button class="w-9 h-9 flex items-center justify-center text-charcoal hover:bg-light-gray transition-colors text-lg font-light" aria-label="Decrease quantity" @click="qty = Math.max(1, qty - 1)">−</button>
-              <span class="w-8 text-center text-sm font-semibold text-charcoal border-x border-border-gray h-9 flex items-center justify-center" aria-live="polite">{{ qty }}</span>
-              <button class="w-9 h-9 flex items-center justify-center text-charcoal hover:bg-light-gray transition-colors text-lg font-light" aria-label="Increase quantity" @click="qty = Math.min(10, qty + 1)">+</button>
+          <div class="space-y-2 pb-4 border-b border-border-gray">
+            <!-- Low-stock urgency banner -->
+            <div
+              v-if="selectedSizeStock !== null && selectedSizeStock > 0 && selectedSizeStock <= 2"
+              class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 animate-pulse"
+            >
+              <svg class="w-4 h-4 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+              <span class="text-xs font-semibold text-amber-700">Hurry, only {{ selectedSizeStock }} left in stock!</span>
             </div>
-            <span class="text-xs text-mid-gray font-ui">{{ product.stockCount }} in stock</span>
-            <div class="flex-1 flex items-center gap-2">
+            <div
+              v-else-if="selectedSizeStock === 0"
+              class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2"
+            >
+              <svg class="w-4 h-4 text-red-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+              <span class="text-xs font-semibold text-red-600">This size is currently out of stock</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center border border-border-gray rounded-lg overflow-hidden">
+                <button class="w-9 h-9 flex items-center justify-center text-charcoal hover:bg-light-gray transition-colors text-lg font-light" aria-label="Decrease quantity" @click="qty = Math.max(1, qty - 1)">−</button>
+                <span class="w-8 text-center text-sm font-semibold text-charcoal border-x border-border-gray h-9 flex items-center justify-center" aria-live="polite">{{ qty }}</span>
+                <button class="w-9 h-9 flex items-center justify-center text-charcoal hover:bg-light-gray transition-colors text-lg font-light" aria-label="Increase quantity"
+                  @click="qty = Math.min(selectedSizeStock !== null ? Math.min(selectedSizeStock, 10) : 10, qty + 1)">+</button>
+              </div>
+              <span v-if="selectedSizeStock === null" class="text-xs text-mid-gray font-ui">{{ product.stockCount }} in stock</span>
+              <div class="flex-1 flex items-center gap-2">
               <AppButton size="md" :full="true" :loading="adding" @click="handleAddToCart" class="hidden md:inline-flex flex-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -229,9 +256,10 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
               </button>
-            </div>
+              </div><!-- end flex-1 buttons -->
+            </div><!-- end flex items-center gap-3 qty row -->
+          </div><!-- end space-y-2 pb-4 section -->
 
-          </div>
 
           <!-- Delivery check -->
           <div class="bg-light-gray rounded-lg p-3">
@@ -693,6 +721,15 @@ const activeImageIdx = ref(0)
 const activeTab = ref('Description')
 const openFaq = ref<number | null>(null)
 
+// Per-size stock: reads from variant.stockPerSize[selectedSize] — null means no tracking set
+const selectedSizeStock = computed(() => {
+  if (!product.value || !selectedSize.value) return null
+  const variant = product.value.variants?.[selectedVariant.value]
+  if (!variant?.stockPerSize) return null
+  const stock = variant.stockPerSize[selectedSize.value]
+  return typeof stock === 'number' ? stock : null
+})
+
 // Lightbox and Swipe functionality states
 const showLightbox = ref(false)
 const lightboxRef = ref<HTMLElement | null>(null)
@@ -990,24 +1027,85 @@ onBeforeUnmount(() => {
   saveScroll()
 })
 
-// SEO
-watchEffect(() => {
-  if (!product.value) return
-  useSeoMeta({
-    title: `${product.value.name} – Van Elvina`,
-    description: product.value.description.slice(0, 160),
-    ogTitle: product.value.name,
-    ogDescription: product.value.description.slice(0, 160),
-    ogImage: product.value.variants[0]?.images[0],
-  })
-  useHead({
-    script: [
-      { type: 'application/ld+json', children: JSON.stringify(productSchema(product.value, `https://vanelvina.com/products/${product.value.slug}`)) },
-      { type: 'application/ld+json', children: JSON.stringify(breadcrumbSchema([{ name: 'Home', url: 'https://vanelvina.com' }, { name: 'Products', url: 'https://vanelvina.com/products' }, { name: product.value.name, url: `https://vanelvina.com/products/${product.value.slug}` }])) },
-      { type: 'application/ld+json', children: JSON.stringify(faqSchema(productFaqs.value)) },
-    ],
-  })
+// ── SSR-compatible SEO meta tags ─────────────────────────────────────────────
+// WhatsApp / Telegram / Twitter crawlers scrape the raw server HTML.
+// They never run JavaScript, so useSeoMeta inside a watchEffect (client-only) is
+// invisible to them. We use useAsyncData to fetch the product on the SERVER so the
+// og:image tag is baked into the initial HTML response.
+const config = useRuntimeConfig()
+const ssrApiBase = config.public.apiBase
+
+const { data: ssrProduct } = await useAsyncData(
+  `product-seo-${route.params.slug}`,
+  async () => {
+    try {
+      const res = await $fetch<any>(`${ssrApiBase}/products/slug/${route.params.slug}`)
+      return res
+    } catch {
+      // SSR fetch failed — client-side computed fallback will handle rendering
+      return null
+    }
+  },
+  {
+    // Only fetch on server; client reads from the Pinia store computed above
+    server: true,
+    lazy: false,
+    getCachedData: (key, nuxtApp) => nuxtApp.payload.data[key] ?? null,
+  }
+)
+
+// Resolve the best available image — prefer the SSR-fetched product's first variant
+// image; fall back to the client-store product when SSR returned null
+const ogImage = computed(() => {
+  const p = ssrProduct.value ?? product.value
+  if (!p) return 'https://vanelvina.com/icons/icon-512x512.png'
+  const img = p.variants?.[0]?.images?.[0]
+  if (!img) return 'https://vanelvina.com/icons/icon-512x512.png'
+  // Ensure absolute URL — some CDN URLs may already be absolute
+  return img.startsWith('http') ? img : `https://vanelvina.com${img}`
 })
+
+const ogTitle = computed(() => {
+  const p = ssrProduct.value ?? product.value
+  return p ? `${p.name} – Van Elvina` : 'Van Elvina'
+})
+
+const ogDescription = computed(() => {
+  const p = ssrProduct.value ?? product.value
+  if (!p) return 'Shop premium women\'s innerwear at Van Elvina.'
+  return (p.description || '').slice(0, 160)
+})
+
+// Set meta using computed refs — Nuxt will SSR these correctly when refs are
+// resolved at the top level (not inside a watch)
+useSeoMeta({
+  title: ogTitle,
+  description: ogDescription,
+  ogTitle: ogTitle,
+  ogDescription: ogDescription,
+  ogImage: ogImage,
+  ogImageWidth: '800',
+  ogImageHeight: '800',
+  ogUrl: `https://vanelvina.com/products/${route.params.slug}`,
+  ogType: 'product',
+  twitterCard: 'summary_large_image',
+  twitterTitle: ogTitle,
+  twitterDescription: ogDescription,
+  twitterImage: ogImage,
+})
+
+useHead({
+  script: computed(() => {
+    const p = ssrProduct.value ?? product.value
+    if (!p) return []
+    return [
+      { type: 'application/ld+json', children: JSON.stringify(productSchema(p, `https://vanelvina.com/products/${p.slug}`)) },
+      { type: 'application/ld+json', children: JSON.stringify(breadcrumbSchema([{ name: 'Home', url: 'https://vanelvina.com' }, { name: 'Products', url: 'https://vanelvina.com/products' }, { name: p.name, url: `https://vanelvina.com/products/${p.slug}` }])) },
+      { type: 'application/ld+json', children: JSON.stringify(faqSchema(productFaqs.value)) },
+    ]
+  }),
+})
+
 </script>
 
 <style scoped>
