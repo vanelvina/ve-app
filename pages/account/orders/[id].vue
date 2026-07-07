@@ -82,8 +82,8 @@
         <div class="bg-white rounded-3xl p-6 shadow-card border border-rose-blush/30 overflow-hidden">
           <h3 class="text-xs font-bold text-charcoal/40 font-ui tracking-wide uppercase mb-6">Delivery Timeline</h3>
           
-          <!-- Standard Status Steps -->
-          <div v-if="order.orderStatus !== 'cancelled'" class="relative">
+          <!-- Timeline Steps -->
+          <div class="relative">
             <!-- Desktop Horizontal Timeline -->
             <div class="hidden md:flex relative items-center justify-between">
               <!-- Background Line -->
@@ -104,7 +104,7 @@
                   class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
                   :class="getStepClass(step.id)"
                 >
-                  <svg v-if="step.id === normalizeStatus(order.orderStatus)" class="w-4 h-4 text-deep-plum" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="isStepCompleted(step.id)" :class="step.id === normalizeStatus(order.orderStatus) ? (step.id === 'cancelled' ? 'text-red-600' : 'text-deep-plum') : 'text-white'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                   </svg>
                   <span v-else>{{ idx + 1 }}</span>
@@ -138,7 +138,7 @@
                   class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
                   :class="getStepClass(step.id)"
                 >
-                  <svg v-if="step.id === normalizeStatus(order.orderStatus)" class="w-4 h-4 text-deep-plum" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="isStepCompleted(step.id)" :class="step.id === normalizeStatus(order.orderStatus) ? (step.id === 'cancelled' ? 'text-red-600' : 'text-deep-plum') : 'text-white'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                   </svg>
                   <span v-else>{{ idx + 1 }}</span>
@@ -156,7 +156,7 @@
           </div>
 
           <!-- Cancelled State Timeline -->
-          <div v-else class="flex items-center gap-4 px-4 py-3 bg-red-50 rounded-2xl border border-red-200 text-red-800">
+          <div v-if="order.orderStatus === 'cancelled'" class="mt-6 flex items-center gap-4 px-4 py-3 bg-red-50 rounded-2xl border border-red-200 text-red-800">
             <svg class="w-6 h-6 shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -291,7 +291,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 definePageMeta({
   middleware: [
@@ -317,15 +317,29 @@ const loading = ref(true)
 const error = ref('')
 
 // ── Timeline steps config ──────────────────────────────────────────────────────
-const timelineSteps = [
-  { id: 'placed', label: 'Placed' },
-  { id: 'accepted', label: 'Accepted' },
-  { id: 'label_created', label: 'Label Created' },
-  { id: 'ready_to_ship', label: 'Ready to Ship' },
-  { id: 'shipped', label: 'Shipped' },
-  { id: 'in_transit', label: 'In Transit' },
-  { id: 'delivered', label: 'Delivered' }
-]
+const timelineSteps = computed(() => {
+  const baseSteps = [
+    { id: 'placed', label: 'Placed' },
+    { id: 'accepted', label: 'Accepted' },
+    { id: 'label_created', label: 'Label Created' },
+    { id: 'ready_to_ship', label: 'Ready to Ship' },
+    { id: 'shipped', label: 'Shipped' },
+    { id: 'in_transit', label: 'In Transit' },
+    { id: 'delivered', label: 'Delivered' }
+  ]
+  
+  if (order.value?.orderStatus === 'cancelled') {
+    const history = order.value.statusHistory || []
+    const nonCancelHistory = history.filter((h: any) => h.status !== 'cancelled')
+    const lastStatus = nonCancelHistory.length > 0 ? nonCancelHistory[nonCancelHistory.length - 1].status : 'placed'
+    const lastIdx = baseSteps.findIndex(s => s.id === normalizeStatus(lastStatus))
+    const steps = baseSteps.slice(0, lastIdx + 1)
+    steps.push({ id: 'cancelled', label: 'Cancelled' })
+    return steps
+  }
+  
+  return baseSteps
+})
 
 // ── Fetch order details ───────────────────────────────────────────────────────
 onMounted(async () => {
@@ -390,39 +404,59 @@ const normalizeStatus = (status: string) => {
 }
 
 // ── Timeline calculations ──────────────────────────────────────────────────────
-const statusLevels: Record<string, number> = {
-  'placed': 1,
-  'accepted': 2,
-  'label_created': 3,
-  'ready_to_ship': 4,
-  'shipped': 5,
-  'in_transit': 6,
-  'delivered': 7
-}
+const statusLevels = computed(() => {
+  const base: Record<string, number> = {
+    'placed': 1,
+    'accepted': 2,
+    'label_created': 3,
+    'ready_to_ship': 4,
+    'shipped': 5,
+    'in_transit': 6,
+    'delivered': 7
+  }
+  
+  if (order.value?.orderStatus === 'cancelled') {
+    const steps = timelineSteps.value
+    const levels: Record<string, number> = {}
+    steps.forEach((step, idx) => {
+      levels[step.id] = idx + 1
+    })
+    return levels
+  }
+  
+  return base
+})
 
 const getProgressWidth = (status: string) => {
   const s = normalizeStatus(status)
-  const level = statusLevels[s] || 1
-  return `${((level - 1) / 6) * 100}%`
+  const levels = statusLevels.value
+  const level = levels[s] || 1
+  const total = Object.keys(levels).length
+  return total > 1 ? `${((level - 1) / (total - 1)) * 100}%` : '0%'
 }
 
 const isStepCompleted = (stepId: string) => {
   if (!order.value) return false
   const currentStatus = normalizeStatus(order.value.orderStatus)
-  const stepLevel = statusLevels[stepId]
-  const currentLevel = statusLevels[currentStatus] || 1
+  const levels = statusLevels.value
+  const stepLevel = levels[stepId] || 1
+  const currentLevel = levels[currentStatus] || 1
   return stepLevel <= currentLevel
 }
 
 const getStepClass = (stepId: string) => {
   if (!order.value) return 'border-charcoal/20 bg-white text-charcoal/40'
   const currentStatus = normalizeStatus(order.value.orderStatus)
-  const stepLevel = statusLevels[stepId]
-  const currentLevel = statusLevels[currentStatus] || 1
+  const levels = statusLevels.value
+  const stepLevel = levels[stepId] || 1
+  const currentLevel = levels[currentStatus] || 1
 
   if (stepLevel < currentLevel) {
     return 'border-deep-plum bg-deep-plum text-white scale-100 shadow-sm'
   } else if (stepLevel === currentLevel) {
+    if (currentStatus === 'cancelled') {
+      return 'border-red-600 bg-white text-red-600 scale-110 ring-4 ring-red-600/10 font-bold'
+    }
     return 'border-deep-plum bg-white text-deep-plum scale-110 ring-4 ring-deep-plum/10 font-bold'
   } else {
     return 'border-charcoal/15 bg-white text-charcoal/40'

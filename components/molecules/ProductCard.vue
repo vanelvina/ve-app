@@ -51,25 +51,29 @@
         class="hidden md:block w-full h-full relative" 
         @click="trackProductClick(product.id || (product as any)._id, product.name, product.category, product.price)"
       >
-        <!-- Main Image — switches per active variant -->
-        <img
-          :src="primaryImage"
-          :alt="product.name"
-          class="w-full h-full object-cover object-center transition-all duration-500 group-hover:scale-105"
-          loading="lazy"
-          width="300"
-          height="400"
-        />
-        <!-- Hover secondary image -->
-        <img
-          v-if="secondaryImage"
-          :src="secondaryImage"
-          :alt="`${product.name} alternate view`"
-          class="absolute inset-0 w-full h-full object-cover object-center opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-          loading="lazy"
-          width="300"
-          height="400"
-        />
+        <!-- Main Image Container — transitions via slide direction per active variant -->
+        <Transition :name="slideDirection">
+          <div :key="activeVariantIdx" class="absolute inset-0 w-full h-full overflow-hidden">
+            <img
+              :src="primaryImage"
+              :alt="product.name"
+              class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+              width="300"
+              height="400"
+            />
+            <!-- Hover secondary image - hidden during active transition so it doesn't mask the slide animation -->
+            <img
+              v-if="secondaryImage && !isTransitioning"
+              :src="secondaryImage"
+              :alt="`${product.name} alternate view`"
+              class="absolute inset-0 w-full h-full object-cover object-center opacity-0 transition-opacity duration-500 group-hover:opacity-100 transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+              width="300"
+              height="400"
+            />
+          </div>
+        </Transition>
       </NuxtLink>
 
       <!-- Status Badges Stack (Top-Left) -->
@@ -131,11 +135,11 @@
           v-for="(variant, vIdx) in product.variants.slice(0, 5)"
           :key="variant.color"
           type="button"
-          class="rounded-full border transition-all duration-200 cursor-pointer hover:scale-110 focus:outline-none"
+          class="w-3.5 h-3.5 rounded-full border transition-all duration-200 cursor-pointer focus:outline-none"
           :class="[
             activeVariantIdx === vIdx
-              ? 'w-3.5 h-3.5 md:w-4 md:h-4 border-2 border-deep-plum ring-1 ring-deep-plum ring-offset-1 scale-110'
-              : 'w-3 h-3 md:w-3.5 md:h-3.5 border border-charcoal/15 shadow-sm'
+              ? 'border-deep-plum scale-110 ring-1 ring-deep-plum/60'
+              : 'border border-charcoal/15 hover:scale-105'
           ]"
           :style="{ backgroundColor: variant.colorHex }"
           :title="variant.color"
@@ -168,10 +172,19 @@ const isWishlisted = computed(() => {
 
 // ─── Active variant tracking ──────────────────────────────────────────────────
 const activeVariantIdx = ref(0)
+const slideDirection = ref('slide-left')
+const isTransitioning = ref(false)
 
 const selectVariant = (idx: number) => {
+  if (idx === activeVariantIdx.value) return
+  slideDirection.value = idx > activeVariantIdx.value ? 'slide-left' : 'slide-right'
   activeVariantIdx.value = idx
   activeImageIndex.value = 0 // reset scroll position on mobile
+  
+  isTransitioning.value = true
+  setTimeout(() => {
+    isTransitioning.value = false
+  }, 400)
 }
 
 // Images for the currently active variant
@@ -234,3 +247,18 @@ const handleQuickAdd = () => {
   scrollbar-width: none;
 }
 </style>
+
+<style>
+/* Global horizontal slide animations for PLP/PDP card color switches to avoid scoped style attributes mismatches */
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.slide-left-enter-from { transform: translateX(100%) !important; }
+.slide-left-leave-to { transform: translateX(-100%) !important; }
+.slide-right-enter-from { transform: translateX(-100%) !important; }
+.slide-right-leave-to { transform: translateX(100%) !important; }
+</style>
+

@@ -301,8 +301,32 @@ const hasTestProduct = computed(() => {
   return checkoutItems.value.some((item: any) => item.product?.name?.toLowerCase().includes('test'))
 })
 
+const shippingOptions = computed(() => [
+  {
+    id: 'standard',
+    name: 'Standard Delivery',
+    desc: '3–5 business days',
+    price: (checkoutSubtotal.value >= 999 || hasTestProduct.value) ? 0 : 40,
+  },
+  {
+    id: 'express',
+    name: 'Express Delivery',
+    desc: '1–2 business days (Metro cities)',
+    price: 149,
+  },
+])
+
+const shippingFee = computed(() => shippingOptions.value.find(o => o.id === selectedShipping.value)?.price ?? 0)
+const orderTotal = computed(() => checkoutSubtotal.value - checkoutDiscount.value + shippingFee.value)
+
 const codEligible = computed(() => {
-  return checkoutSubtotal.value > 499 && checkoutItems.value.every((item: any) => item.product?.isCodAvailable !== false)
+  return orderTotal.value > 499 && checkoutItems.value.every((item: any) => item.product?.isCodAvailable !== false)
+})
+
+watch(codEligible, (eligible) => {
+  if (!eligible && selectedPayment.value === 'cod') {
+    selectedPayment.value = 'razorpay'
+  }
 })
 
 const paymentOptions = computed(() => [
@@ -319,30 +343,6 @@ const paymentOptions = computed(() => [
     disabled: false,
   },
 ])
-
-const shippingOptions = computed(() => [
-  {
-    id: 'standard',
-    name: 'Standard Delivery',
-    desc: '3–5 business days',
-    price: (checkoutSubtotal.value >= 999 || hasTestProduct.value) ? 0 : 40,
-  },
-  {
-    id: 'express',
-    name: 'Express Delivery',
-    desc: '1–2 business days (Metro cities)',
-    price: 149,
-  },
-])
-
-watch(codEligible, (eligible) => {
-  if (!eligible && selectedPayment.value === 'cod') {
-    selectedPayment.value = 'razorpay'
-  }
-})
-
-const shippingFee = computed(() => shippingOptions.value.find(o => o.id === selectedShipping.value)?.price ?? 0)
-const orderTotal = computed(() => checkoutSubtotal.value - checkoutDiscount.value + shippingFee.value)
 
 const getStepClass = (idx: number) => {
   if (currentStep.value > idx) return 'completed'

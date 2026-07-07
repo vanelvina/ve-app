@@ -56,6 +56,20 @@ const ui = useUIStore()
 onMounted(async () => {
   auth.init()
 
+  // Handle auth_trigger and redirect query parameters for cold entries (e.g. from email buttons)
+  if (route.query.auth_trigger === 'true') {
+    const redirectPath = route.query.redirect as string
+    if (redirectPath) {
+      if (auth.isLoggedIn) {
+        navigateTo(redirectPath)
+      } else {
+        ui.openAuthModal(redirectPath)
+      }
+    }
+    // Remove query parameters to keep address bar clean
+    router.replace({ query: {} })
+  }
+
   // Google Login URL hash interception (fail-safe for any page redirect)
   let googleLoginCompleted = false
   if (import.meta.client && typeof window !== 'undefined' && route.path !== '/auth/google/callback') {
