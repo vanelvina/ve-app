@@ -4433,6 +4433,17 @@ const productModal = ref({
   }
 })
 
+watch(() => productModal.value.form.name, (newName) => {
+  if (!productModal.value.isEdit && newName) {
+    productModal.value.form.slug = newName
+      .toLowerCase()
+      .trim()
+      .replace(/[\s_]+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-')
+  }
+})
+
 const widgetModal = ref({
   show: false,
   isNew: false,
