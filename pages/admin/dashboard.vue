@@ -2610,7 +2610,7 @@
                       <div>
                         <div class="flex items-center justify-between mb-2">
                           <label class="text-[11px] font-bold text-charcoal/70">Categories <span class="text-red-400">*</span></label>
-                          <button type="button" @click="showCreateCategoryModal = true" class="text-[9px] font-bold text-deep-plum hover:underline">+ Create Category</button>
+                          <button type="button" @click="openCategoryModal(null)" class="text-[9px] font-bold text-deep-plum hover:underline">+ Create Category</button>
                         </div>
                         <div class="bg-white rounded-xl border border-charcoal/15 p-2.5 max-h-36 overflow-y-auto space-y-1">
                           <label v-for="cat in categories" :key="cat._id || cat.id"
@@ -2627,7 +2627,7 @@
                       <div>
                         <div class="flex items-center justify-between mb-2">
                           <label class="text-[11px] font-bold text-charcoal/70">Subcategories</label>
-                          <button type="button" @click="showCreateSubcategoryModal = true" class="text-[9px] font-bold text-deep-plum hover:underline">+ Create Subcategory</button>
+                          <button type="button" @click="openCategoryModal(null)" class="text-[9px] font-bold text-deep-plum hover:underline">+ Manage Subcategories</button>
                         </div>
                         <div class="bg-white rounded-xl border border-charcoal/15 p-2.5 max-h-36 overflow-y-auto space-y-1">
                           <label v-for="sub in selectedCategorySubcategories" :key="sub"
