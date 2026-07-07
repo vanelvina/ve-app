@@ -89,7 +89,7 @@ export default defineNuxtConfig({
         { src: 'https://checkout.razorpay.com/v1/checkout.js' },
       ],
     },
-    pageTransition: { name: 'page', mode: 'out-in' },
+    pageTransition: { name: 'page' },
   },
 
   // Route Cache Control Rules (Bypass CDNs and browser cache for SW)
@@ -119,7 +119,7 @@ export default defineNuxtConfig({
 
   // PWA Configuration
   pwa: {
-    registerType: 'prompt',
+    registerType: 'autoUpdate',
     manifest: {
       name: 'Van Elvina – Women Comfort First',
       short_name: 'Van Elvina',
@@ -143,10 +143,11 @@ export default defineNuxtConfig({
     },
     workbox: {
       navigateFallback: null,
-      globPatterns: ['**/*.{js,css,html,png,svg,ico,woff2}'],
+      globPatterns: ['**/*.{js,css,png,svg,ico,woff2}'],
       importScripts: ['/sw-push.js'],
       skipWaiting: true,
       clientsClaim: true,
+      cleanupOutdatedCaches: true,
       runtimeCaching: [
         {
           urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

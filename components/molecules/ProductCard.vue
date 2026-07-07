@@ -1,73 +1,26 @@
 <template>
   <article class="group relative card cursor-pointer flex flex-col h-full bg-white rounded-none overflow-hidden hover:shadow-premium transition-all duration-300 border border-charcoal/15 hover:border-charcoal/40" :aria-label="product.name">
     <!-- Image Container -->
-    <div class="relative overflow-hidden aspect-product bg-warm-ivory shrink-0">
-      
-      <!-- Mobile Swipeable Image Gallery -->
-      <div class="md:hidden w-full h-full relative">
-        <div 
-          class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar"
-          @scroll="handleScroll"
-        >
-          <div 
-            v-for="(img, idx) in activeVariantImages" 
-            :key="idx" 
-            class="w-full h-full shrink-0 snap-start snap-always"
-          >
-            <NuxtLink 
-              :to="`/products/${product.slug}`" 
-              class="block w-full h-full" 
-              @click="trackProductClick(product.id || (product as any)._id, product.name, product.category, product.price)"
-            >
-              <img
-                :src="img"
-                :alt="`${product.name} view ${idx + 1}`"
-                class="w-full h-full object-cover object-center"
-                loading="lazy"
-                width="300"
-                height="400"
-              />
-            </NuxtLink>
-          </div>
-        </div>
-
-        <!-- Dots Indicator -->
-        <div 
-          v-if="activeVariantImages.length > 1"
-          class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none"
-        >
-          <span 
-            v-for="(_, index) in activeVariantImages" 
-            :key="index"
-            class="w-1.2 h-1.2 rounded-full transition-all duration-200"
-            :class="index === activeImageIndex ? 'bg-deep-plum w-2.5' : 'bg-charcoal/20'"
-          />
-        </div>
-      </div>
-
-      <!-- Desktop Hover Layout -->
+    <div 
+      class="relative overflow-hidden aspect-product bg-warm-ivory shrink-0"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
+    >
       <NuxtLink 
         :to="`/products/${product.slug}`" 
-        class="hidden md:block w-full h-full relative" 
+        class="block w-full h-full relative" 
         @click="trackProductClick(product.id || (product as any)._id, product.name, product.category, product.price)"
+        @touchstart="onTouchStart"
+        @touchmove="onTouchMove"
+        @touchend="onTouchEnd"
       >
-        <!-- Main Image Container — transitions via slide direction per active variant -->
+        <!-- Main Image Container — transitions via slide direction per active variant or image change -->
         <Transition :name="slideDirection">
-          <div :key="activeVariantIdx" class="absolute inset-0 w-full h-full overflow-hidden">
+          <div :key="activeVariantIdx + '-' + activeImageIndex" class="absolute inset-0 w-full h-full overflow-hidden">
             <img
-              :src="primaryImage"
+              :src="activeVariantImages[activeImageIndex] || 'https://via.placeholder.com/300x400?text=Van+Elvina'"
               :alt="product.name"
-              class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
-              loading="lazy"
-              width="300"
-              height="400"
-            />
-            <!-- Hover secondary image - hidden during active transition so it doesn't mask the slide animation -->
-            <img
-              v-if="secondaryImage && !isTransitioning"
-              :src="secondaryImage"
-              :alt="`${product.name} alternate view`"
-              class="absolute inset-0 w-full h-full object-cover object-center opacity-0 transition-opacity duration-500 group-hover:opacity-100 transition-transform duration-700 group-hover:scale-105"
+              class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 md:group-hover:scale-105"
               loading="lazy"
               width="300"
               height="400"
@@ -75,6 +28,19 @@
           </div>
         </Transition>
       </NuxtLink>
+
+      <!-- Dots Indicator -->
+      <div 
+        v-if="activeVariantImages.length > 1"
+        class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none"
+      >
+        <span 
+          v-for="(_, index) in activeVariantImages" 
+          :key="index"
+          class="w-1.2 h-1.2 rounded-full transition-all duration-200"
+          :class="index === activeImageIndex ? 'bg-deep-plum w-2.5' : 'bg-charcoal/20'"
+        />
+      </div>
 
       <!-- Status Badges Stack (Top-Left) -->
       <div class="absolute top-2 left-2 md:top-2.5 md:left-2.5 z-10 flex flex-col gap-1 items-start">
@@ -156,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import type { Product } from '~/types'
 import { formatPrice } from '~/utils/formatters'
 
@@ -174,12 +140,21 @@ const isWishlisted = computed(() => {
 const activeVariantIdx = ref(0)
 const slideDirection = ref('slide-left')
 const isTransitioning = ref(false)
+const activeImageIndex = ref(0)
 
 const selectVariant = (idx: number) => {
   if (idx === activeVariantIdx.value) return
   slideDirection.value = idx > activeVariantIdx.value ? 'slide-left' : 'slide-right'
   activeVariantIdx.value = idx
-  activeImageIndex.value = 0 // reset scroll position on mobile
+  activeImageIndex.value = 0 // Reset image index to first image on variant switch
+  
+  if (hoverInterval) {
+    clearInterval(hoverInterval)
+    hoverInterval = setInterval(() => {
+      slideDirection.value = 'slide-left'
+      activeImageIndex.value = (activeImageIndex.value + 1) % activeVariantImages.value.length
+    }, 2000)
+  }
   
   isTransitioning.value = true
   setTimeout(() => {
@@ -215,19 +190,65 @@ const activeVariantImages = computed(() => {
   return imgs.slice(0, 4)
 })
 
-// Desktop: primary = first image, secondary = second image of active variant
-const primaryImage = computed(
-  () => activeVariantImages.value[0] || 'https://via.placeholder.com/300x400?text=Van+Elvina',
-)
-const secondaryImage = computed(() => activeVariantImages.value[1] || null)
+// ─── Desktop Hover & Slideshow Tracking ──────────────────────────────────────────
+let hoverInterval: any = null
 
-// ─── Mobile scroll tracking ───────────────────────────────────────────────────
-const activeImageIndex = ref(0)
-const handleScroll = (event: Event) => {
-  const el = event.target as HTMLElement
-  const scrollPosition = el.scrollLeft
-  const width = el.clientWidth
-  activeImageIndex.value = Math.round(scrollPosition / width)
+const handleMouseEnter = () => {
+  if (activeVariantImages.value.length > 1) {
+    // Show the next image immediately on hover to make it feel responsive
+    slideDirection.value = 'slide-left'
+    activeImageIndex.value = (activeImageIndex.value + 1) % activeVariantImages.value.length
+
+    // Then start the 2-second cycle
+    hoverInterval = setInterval(() => {
+      slideDirection.value = 'slide-left'
+      activeImageIndex.value = (activeImageIndex.value + 1) % activeVariantImages.value.length
+    }, 2000)
+  }
+}
+
+const handleMouseLeave = () => {
+  if (hoverInterval) {
+    clearInterval(hoverInterval)
+    hoverInterval = null
+  }
+  slideDirection.value = 'slide-right'
+  activeImageIndex.value = 0
+}
+
+onBeforeUnmount(() => {
+  if (hoverInterval) {
+    clearInterval(hoverInterval)
+  }
+})
+
+// ─── Mobile Touch Swipe Tracking ───────────────────────────────────────────────
+const touchStartX = ref(0)
+const touchEndX = ref(0)
+
+const onTouchStart = (e: TouchEvent) => {
+  touchStartX.value = e.touches[0].clientX
+  touchEndX.value = e.touches[0].clientX
+}
+
+const onTouchMove = (e: TouchEvent) => {
+  touchEndX.value = e.touches[0].clientX
+}
+
+const onTouchEnd = () => {
+  const diff = touchStartX.value - touchEndX.value
+  const swipeThreshold = 50
+  if (Math.abs(diff) > swipeThreshold) {
+    if (diff > 0) {
+      // swipe left -> next image
+      slideDirection.value = 'slide-left'
+      activeImageIndex.value = (activeImageIndex.value + 1) % activeVariantImages.value.length
+    } else {
+      // swipe right -> prev image
+      slideDirection.value = 'slide-right'
+      activeImageIndex.value = (activeImageIndex.value - 1 + activeVariantImages.value.length) % activeVariantImages.value.length
+    }
+  }
 }
 
 const handleWishlist = () => toggle(props.product)

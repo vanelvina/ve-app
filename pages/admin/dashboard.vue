@@ -2607,10 +2607,10 @@
                     <p class="text-[10px] font-bold text-charcoal/50 uppercase tracking-wider">Category Classification</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <!-- Categories -->
+                      <!-- Categories -->
                       <div>
                         <div class="flex items-center justify-between mb-2">
                           <label class="text-[11px] font-bold text-charcoal/70">Categories <span class="text-red-400">*</span></label>
-                          <button type="button" @click="openCategoryModal(null)" class="text-[9px] font-bold text-deep-plum hover:underline">+ Create Category</button>
                         </div>
                         <div class="bg-white rounded-xl border border-charcoal/15 p-2.5 max-h-36 overflow-y-auto space-y-1">
                           <label v-for="cat in categories" :key="cat._id || cat.id"
@@ -2622,12 +2622,16 @@
                           </label>
                           <p v-if="!categories.length" class="text-[10px] text-charcoal/35 italic py-1">No categories yet.</p>
                         </div>
+                        <!-- Inline Input Box to add category -->
+                        <div class="mt-2 flex gap-1.5">
+                          <input v-model="quickCategoryInput" type="text" placeholder="Add new category..." class="flex-1 px-2.5 py-1.5 border border-charcoal/15 rounded-lg text-xs focus:outline-none focus:border-deep-plum bg-white" @keydown.enter.prevent="handleQuickCategoryAdd" />
+                          <button type="button" @click="handleQuickCategoryAdd" class="px-3 py-1.5 bg-deep-plum text-white text-[10px] font-bold rounded-lg hover:bg-plum-800 transition-colors">Add</button>
+                        </div>
                       </div>
                       <!-- Subcategories -->
                       <div>
                         <div class="flex items-center justify-between mb-2">
                           <label class="text-[11px] font-bold text-charcoal/70">Subcategories</label>
-                          <button type="button" @click="openCategoryModal(null)" class="text-[9px] font-bold text-deep-plum hover:underline">+ Manage Subcategories</button>
                         </div>
                         <div class="bg-white rounded-xl border border-charcoal/15 p-2.5 max-h-36 overflow-y-auto space-y-1">
                           <label v-for="sub in selectedCategorySubcategories" :key="sub"
@@ -2638,6 +2642,11 @@
                             <span>{{ sub }}</span>
                           </label>
                           <p v-if="!selectedCategorySubcategories.length" class="text-[10px] text-charcoal/35 italic py-1">Select a category to see subcategories.</p>
+                        </div>
+                        <!-- Inline Input Box to add subcategory -->
+                        <div v-if="hasSelectedCategory" class="mt-2 flex gap-1.5">
+                          <input v-model="quickSubcategoryInput" type="text" placeholder="Add new subcategory..." class="flex-1 px-2.5 py-1.5 border border-charcoal/15 rounded-lg text-xs focus:outline-none focus:border-deep-plum bg-white" @keydown.enter.prevent="handleQuickSubcategoryAdd" />
+                          <button type="button" @click="handleQuickSubcategoryAdd" class="px-3 py-1.5 bg-deep-plum text-white text-[10px] font-bold rounded-lg hover:bg-plum-800 transition-colors">Add</button>
                         </div>
                       </div>
                     </div>
@@ -3641,7 +3650,8 @@ import { useAdminStore } from '~/stores/admin'
 import { useUIStore } from '~/stores/ui'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'admin-auth'
 })
 
 const adminStore = useAdminStore()
@@ -4013,70 +4023,6 @@ const getDefaultSku = (styleId: string, color: string, size: string) => {
   return cleanColor ? `${cleanStyle}-${cleanColor}-${cleanSize}` : `${cleanStyle}-${cleanSize}`
 }
 
-watch(
-  () => productModal.value.form.name,
-  (newName) => {
-    // Only auto-fill slug when creating a new product
-    if (!productModal.value.isEdit && newName) {
-      productModal.value.form.slug = generateSlug(newName)
-    }
-  }
-)
-
-watch(
-  () => productModal.value.form.styleId,
-  (newStyle, oldStyle) => {
-    if (!productModal.value.form.variants) return
-    productModal.value.form.variants.forEach((v: any) => {
-      if (!v.sizes) return
-      if (!v.skuPerSize) v.skuPerSize = {}
-      v.sizes.forEach((sz: string) => {
-        const current = v.skuPerSize[sz] || ''
-        const oldDefault = getDefaultSku(oldStyle || '', v.color, sz)
-        if (!current || current === oldDefault) {
-          v.skuPerSize[sz] = getDefaultSku(newStyle || '', v.color, sz)
-        }
-      })
-    })
-  }
-)
-
-const lastKnownColors = new Map<any, string>()
-
-watch(
-  () => productModal.value.form.variants,
-  (newVariants) => {
-    if (!newVariants) return
-    const styleId = productModal.value.form.styleId || 'VE-'
-    newVariants.forEach((v: any) => {
-      const prevColor = lastKnownColors.get(v)
-      if (prevColor !== undefined && prevColor !== v.color) {
-        // Color changed! Update default SKUs that used the previous color
-        if (v.sizes && v.skuPerSize) {
-          v.sizes.forEach((sz: string) => {
-            const current = v.skuPerSize[sz] || ''
-            const oldDefault = getDefaultSku(styleId, prevColor, sz)
-            if (!current || current === oldDefault) {
-              v.skuPerSize[sz] = getDefaultSku(styleId, v.color, sz)
-            }
-          })
-        }
-      }
-      lastKnownColors.set(v, v.color || '')
-      
-      // Auto-fill any empty SKUs
-      if (v.sizes) {
-        if (!v.skuPerSize) v.skuPerSize = {}
-        v.sizes.forEach((sz: string) => {
-          if (!v.skuPerSize[sz]) {
-            v.skuPerSize[sz] = getDefaultSku(styleId, v.color, sz)
-          }
-        })
-      }
-    })
-  },
-  { deep: true }
-)
 
 
 // Units Sold list aggregated from real orders
@@ -4544,19 +4490,6 @@ const saveCategoryBanners = async () => {
 }
 
 onMounted(async () => {
-  adminStore.init()
-  if (!adminStore.isAuthenticated) {
-    navigateTo('/admin/login')
-    return
-  }
-
-  const valid = await adminStore.checkAuth()
-  if (!valid) {
-    uiStore.addToast('error', 'Session expired. Please login again.')
-    navigateTo('/admin/login')
-    return
-  }
-
   // Trigger push notification registration for admin
   // If browser already granted permission, re-sync subscription silently
   // If not yet granted, prompt the admin to allow
@@ -5305,6 +5238,79 @@ const toggleFormSubcategory = (subName: string) => {
     subs.splice(idx, 1)
   }
   productModal.value.form.subcategory = subs.join(', ')
+}
+
+// Inline Category/Subcategory Creation
+const quickCategoryInput = ref('')
+const quickSubcategoryInput = ref('')
+
+const hasSelectedCategory = computed(() => {
+  return !!productModal.value.form.category
+})
+
+const handleQuickCategoryAdd = async () => {
+  const name = quickCategoryInput.value.trim()
+  if (!name) return
+  
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  const config = useRuntimeConfig()
+  
+  try {
+    const newCat = await $fetch<any>(`${config.public.apiBase}/categories`, {
+      method: 'POST',
+      headers: adminStore.getHeaders(),
+      body: {
+        name,
+        slug,
+        description: `${name} collection`,
+        image: 'https://images.unsplash.com/photo-1541300112-29c3d8f84c82?w=800',
+        subcategories: []
+      }
+    })
+    categories.value.push(newCat)
+    toggleFormCategory(newCat.name)
+    quickCategoryInput.value = ''
+    uiStore.addToast('success', `Category "${name}" created and loaded.`)
+  } catch (err: any) {
+    uiStore.addToast('error', err.message || 'Failed to create category')
+  }
+}
+
+const handleQuickSubcategoryAdd = async () => {
+  const name = quickSubcategoryInput.value.trim()
+  if (!name) return
+
+  const current = productModal.value.form.category || ''
+  const selectedCats = current.split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
+  
+  if (selectedCats.length === 0) {
+    uiStore.addToast('error', 'Please select at least one category to add this subcategory to.')
+    return
+  }
+  
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  
+  const targetCategories = categories.value.filter(c => selectedCats.includes(c.name.toLowerCase()))
+  
+  try {
+    for (const cat of targetCategories) {
+      const currentSubs = Array.isArray(cat.subcategories) ? [...cat.subcategories] : []
+      if (!currentSubs.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+        currentSubs.push({ name, slug })
+        await adminStore.updateCategory(cat._id, {
+          ...cat,
+          subcategories: currentSubs
+        })
+        cat.subcategories = currentSubs
+      }
+    }
+    
+    toggleFormSubcategory(name)
+    quickSubcategoryInput.value = ''
+    uiStore.addToast('success', `Subcategory "${name}" created and associated.`)
+  } catch (err: any) {
+    uiStore.addToast('error', err.message || 'Failed to create subcategory')
+  }
 }
 
 const toggleSizePreset = (variant: any, size: string) => {

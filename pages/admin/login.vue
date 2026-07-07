@@ -113,12 +113,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useAdminStore } from '~/stores/admin'
 import { useUIStore } from '~/stores/ui'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'admin-guest'
 })
 
 const adminStore = useAdminStore()
@@ -129,16 +130,6 @@ const password = ref('')
 const showPassword = ref(false)
 const loading = ref(false)
 const errorMsg = ref('')
-
-onMounted(async () => {
-  adminStore.init()
-  if (adminStore.isAuthenticated) {
-    const valid = await adminStore.checkAuth()
-    if (valid) {
-      navigateTo('/admin/dashboard')
-    }
-  }
-})
 
 const handleLogin = async () => {
   errorMsg.value = ''
@@ -153,7 +144,12 @@ const handleLogin = async () => {
         nuxtApp.$registerPush().catch((err: any) => console.error('Push error:', err))
       }
       
-      navigateTo('/admin/dashboard')
+      // Use hard navigation to ensure fresh page load with credentials in localStorage
+      if (import.meta.client) {
+        window.location.href = '/admin/dashboard'
+      } else {
+        await navigateTo('/admin/dashboard')
+      }
     }
   } catch (err: any) {
     errorMsg.value = err.message || 'Invalid username or password'

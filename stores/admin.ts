@@ -12,9 +12,17 @@ export const useAdminStore = defineStore('admin', {
     init() {
       if (import.meta.client) {
         const storedToken = localStorage.getItem('ve_admin_token')
+        const storedUser = localStorage.getItem('ve_admin_user')
         if (storedToken) {
           this.token = storedToken
           this.isAuthenticated = true
+        }
+        if (storedUser) {
+          try {
+            this.adminUser = JSON.parse(storedUser)
+          } catch {
+            this.adminUser = null
+          }
         }
       }
     },
@@ -34,6 +42,7 @@ export const useAdminStore = defineStore('admin', {
 
         if (import.meta.client) {
           localStorage.setItem('ve_admin_token', response.token)
+          localStorage.setItem('ve_admin_user', JSON.stringify(response.admin))
           // Persist admin identity for push notification plugin
           if (response.admin?.email) localStorage.setItem('ve_admin_email', response.admin.email)
           if (response.admin?.name) localStorage.setItem('ve_admin_name', response.admin.name)
@@ -53,6 +62,7 @@ export const useAdminStore = defineStore('admin', {
       this.adminUser = null
       if (import.meta.client) {
         localStorage.removeItem('ve_admin_token')
+        localStorage.removeItem('ve_admin_user')
         localStorage.removeItem('ve_admin_email')
         localStorage.removeItem('ve_admin_name')
       }
@@ -74,15 +84,25 @@ export const useAdminStore = defineStore('admin', {
         })
         this.isAuthenticated = true
         this.adminUser = response.admin
-        // Refresh persisted identity for push notifications
-        if (import.meta.client && response.admin?.email) {
-          localStorage.setItem('ve_admin_email', response.admin.email)
-          localStorage.setItem('ve_admin_name', response.admin.name || 'Admin')
+        if (import.meta.client) {
+          localStorage.setItem('ve_admin_user', JSON.stringify(response.admin))
+          if (response.admin?.email) localStorage.setItem('ve_admin_email', response.admin.email)
+          if (response.admin?.name) localStorage.setItem('ve_admin_name', response.admin.name || 'Admin')
         }
         return true
-      } catch (error) {
+      } catch (error: any) {
         console.error('Session verification failed:', error)
-        this.logout()
+        const statusCode = error.response?.status || error.status
+        if (statusCode === 401 || statusCode === 403) {
+          this.token = null
+          this.isAuthenticated = false
+          this.adminUser = null
+          if (import.meta.client) {
+            localStorage.removeItem('ve_admin_token')
+            localStorage.removeItem('ve_admin_email')
+            localStorage.removeItem('ve_admin_name')
+          }
+        }
         return false
       }
     },

@@ -61,7 +61,9 @@ onMounted(async () => {
     const redirectPath = route.query.redirect as string
     if (redirectPath) {
       if (auth.isLoggedIn) {
-        navigateTo(redirectPath)
+        // Hard navigate to bypass vue-router middleware cache on cold entry
+        window.location.href = redirectPath
+        return
       } else {
         ui.openAuthModal(redirectPath)
       }
