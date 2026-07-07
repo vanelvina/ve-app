@@ -162,14 +162,17 @@ const selectVariant = (idx: number) => {
   }, 400)
 }
 
-// Images for the currently active variant
+// Images for the currently active variant (excludes YouTube/video URLs)
 const activeVariantImages = computed(() => {
   const variant = props.product.variants[activeVariantIdx.value]
   const imgs: string[] = []
 
+  const isVideoUrl = (url: string) =>
+    url.includes('youtube.com') || url.includes('youtu.be') || url.endsWith('.mp4') || url.includes('/video')
+
   if (variant?.images?.length) {
     variant.images.forEach((img: string) => {
-      if (img && !imgs.includes(img)) imgs.push(img)
+      if (img && !imgs.includes(img) && !isVideoUrl(img)) imgs.push(img)
     })
   }
 
@@ -177,13 +180,13 @@ const activeVariantImages = computed(() => {
   if (imgs.length === 0) {
     props.product.variants?.forEach((v: any) => {
       v.images?.forEach((img: string) => {
-        if (img && !imgs.includes(img)) imgs.push(img)
+        if (img && !imgs.includes(img) && !isVideoUrl(img)) imgs.push(img)
       })
     })
   }
   if (imgs.length === 0) {
     props.product.images?.forEach((img: string) => {
-      if (img && !imgs.includes(img)) imgs.push(img)
+      if (img && !imgs.includes(img) && !isVideoUrl(img)) imgs.push(img)
     })
   }
 

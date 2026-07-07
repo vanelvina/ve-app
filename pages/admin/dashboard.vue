@@ -2806,17 +2806,82 @@
                     <p class="text-[10px] mt-1">Click "+ Add Color Variant" above to start</p>
                   </div>
 
-                  <div class="space-y-4 max-h-[calc(95vh-220px)] overflow-y-auto pr-1">
+                  <!-- ══ Shared Media (applies to ALL variants) ═══════════════ -->
+                  <div class="bg-white rounded-2xl border border-deep-plum/15 p-4 space-y-3">
+                    <div class="flex items-center gap-2 pb-2 border-b border-rose-blush/15">
+                      <span class="text-base">🎥</span>
+                      <div>
+                        <p class="text-[11px] font-bold text-deep-plum">Shared Media — Applied to All Variants</p>
+                        <p class="text-[9px] text-charcoal/40">These fields apply to every color variant equally</p>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <!-- Shared YouTube Video -->
+                      <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-charcoal/60 uppercase tracking-wide">🎬 YouTube Video URL <span class="text-charcoal/35">(optional, all variants)</span></label>
+                        <div class="flex gap-2 items-center">
+                          <input v-model="productModal.form.videoUrl"
+                            placeholder="https://www.youtube.com/watch?v=..."
+                            class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                          <div v-if="productModal.form.videoUrl" class="shrink-0 w-8 h-8 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                            <span class="text-base">▶️</span>
+                          </div>
+                        </div>
+                        <p class="text-[9px] text-charcoal/35">Appears as 2nd image slot for all variants on product page</p>
+                      </div>
+                      <!-- Common Last Image -->
+                      <div class="space-y-1">
+                        <label class="block text-[10px] font-bold text-charcoal/60 uppercase tracking-wide">🖼️ Common Last Image URL <span class="text-charcoal/35">(optional, all variants)</span></label>
+                        <div class="flex gap-2 items-center">
+                          <div class="w-8 h-8 shrink-0 rounded-xl bg-white border border-rose-blush/30 overflow-hidden flex items-center justify-center shadow-sm">
+                            <img v-if="productModal.form.commonLastImage" :src="productModal.form.commonLastImage" class="w-full h-full object-cover" />
+                            <span v-else class="text-[8px] text-charcoal/25">Last</span>
+                          </div>
+                          <input v-model="productModal.form.commonLastImage"
+                            placeholder="https://example.com/lifestyle-shot.jpg"
+                            class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                        </div>
+                        <p class="text-[9px] text-charcoal/35">Appended as the very last image for every variant</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="space-y-4 max-h-[calc(95vh-320px)] overflow-y-auto pr-1">
                     <div v-for="(v, vIdx) in productModal.form.variants" :key="vIdx"
                       class="bg-warm-ivory/50 rounded-2xl border border-charcoal/10 overflow-hidden">
-                      <!-- Variant Header -->
-                      <div class="flex items-center justify-between px-4 py-3 bg-white border-b border-rose-blush/10">
-                        <div class="flex items-center gap-2.5">
-                          <div class="w-5 h-5 rounded-full border border-charcoal/20 shadow-sm shrink-0" :style="{ background: v.colorHex || '#ccc' }" />
+                      <!-- Variant Header with Reorder Controls -->
+                      <div class="flex items-center justify-between px-3 py-2.5 bg-white border-b border-rose-blush/10">
+                        <!-- Left: position + color swatch + name -->
+                        <div class="flex items-center gap-2">
+                          <!-- Up/Down arrows -->
+                          <div class="flex flex-col gap-0.5">
+                            <button type="button" @click="moveVariantUp(vIdx)"
+                              :disabled="vIdx === 0"
+                              class="w-5 h-4 flex items-center justify-center rounded text-[9px] font-bold transition"
+                              :class="vIdx === 0 ? 'text-charcoal/20 cursor-not-allowed' : 'text-charcoal/50 hover:bg-deep-plum hover:text-white'"
+                            >▲</button>
+                            <button type="button" @click="moveVariantDown(vIdx)"
+                              :disabled="vIdx === productModal.form.variants.length - 1"
+                              class="w-5 h-4 flex items-center justify-center rounded text-[9px] font-bold transition"
+                              :class="vIdx === productModal.form.variants.length - 1 ? 'text-charcoal/20 cursor-not-allowed' : 'text-charcoal/50 hover:bg-deep-plum hover:text-white'"
+                            >▼</button>
+                          </div>
+                          <!-- Position number input -->
+                          <input
+                            type="number" min="1" :max="productModal.form.variants.length"
+                            :value="vIdx + 1"
+                            @change="(e: Event) => moveVariantToPosition(vIdx, parseInt((e.target as HTMLInputElement).value) || 1)"
+                            @keydown.up.prevent="moveVariantUp(vIdx)"
+                            @keydown.down.prevent="moveVariantDown(vIdx)"
+                            class="w-9 text-center text-[10px] font-bold border border-charcoal/20 rounded-lg bg-white focus:outline-none focus:border-deep-plum py-0.5 text-charcoal"
+                          />
+                          <!-- Color swatch + name -->
+                          <div class="w-4 h-4 rounded-full border border-charcoal/20 shadow-sm shrink-0" :style="{ background: v.colorHex || '#ccc' }" />
                           <p class="text-xs font-bold text-deep-plum">{{ v.color || `Variant ${vIdx + 1}` }}</p>
                         </div>
+                        <!-- Right: remove button -->
                         <button type="button" @click="productModal.form.variants.splice(vIdx, 1)"
-                          class="text-[10px] text-red-400 hover:text-red-600 font-bold transition-colors">Remove</button>
+                          class="text-[10px] text-red-400 hover:text-red-600 font-bold transition-colors px-2 py-1 rounded-lg hover:bg-red-50">Remove</button>
                       </div>
 
                       <div class="p-4 space-y-4">
@@ -2910,12 +2975,6 @@
                               <input v-model="v.mainImageInput" required placeholder="https://example.com/front-image.jpg"
                                 class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
                             </div>
-                          </div>
-                          <!-- Video -->
-                          <div class="space-y-1">
-                            <label class="block text-[10px] font-bold text-charcoal/50">YouTube Video URL (Optional)</label>
-                            <input v-model="v.videoUrlInput" placeholder="https://www.youtube.com/watch?v=..."
-                              class="w-full px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
                           </div>
                           <!-- Additional images -->
                           <div class="space-y-2">
@@ -3023,6 +3082,32 @@
                         <input v-model="productModal.form.features[fIdx]" placeholder="e.g. Ultra-soft seam-free elastic"
                           class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
                         <button type="button" @click="productModal.form.features.splice(fIdx, 1)" class="text-red-400 hover:text-red-600 text-xs">✕</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Descriptive Images -->
+                  <div class="bg-warm-ivory/60 rounded-2xl p-4 border border-rose-blush/15 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-[11px] font-bold text-charcoal/80">🖼️ Description Page Images</p>
+                        <p class="text-[9px] text-charcoal/40 mt-0.5">Full-width images displayed in the product description section on the product page</p>
+                      </div>
+                      <button type="button" @click="productModal.form.descriptiveImages.push('')" class="text-[9px] text-deep-plum font-bold hover:underline">+ Add Image URL</button>
+                    </div>
+                    <div v-if="!productModal.form.descriptiveImages?.length" class="py-4 text-center text-[10px] text-charcoal/30 border border-dashed border-rose-blush/30 rounded-xl">
+                      No descriptive images yet
+                    </div>
+                    <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      <div v-for="(_, dIdx) in productModal.form.descriptiveImages" :key="dIdx" class="flex gap-2 items-center">
+                        <div class="w-10 h-10 shrink-0 rounded-xl bg-white border border-rose-blush/20 overflow-hidden flex items-center justify-center shadow-sm">
+                          <img v-if="productModal.form.descriptiveImages[dIdx]" :src="productModal.form.descriptiveImages[dIdx]" class="w-full h-full object-cover" />
+                          <span v-else class="text-[8px] text-charcoal/25">IMG</span>
+                        </div>
+                        <input v-model="productModal.form.descriptiveImages[dIdx]"
+                          :placeholder="`https://example.com/desc-image-${dIdx + 1}.jpg`"
+                          class="flex-1 px-3 py-2 border border-charcoal/15 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum transition" />
+                        <button type="button" @click="productModal.form.descriptiveImages.splice(dIdx, 1)" class="text-red-400 hover:text-red-600 text-xs shrink-0">✕</button>
                       </div>
                     </div>
                   </div>
@@ -4363,6 +4448,7 @@ const productModal = ref({
     tags: [] as string[],
     images: [] as string[],
     videoUrl: '',
+    commonLastImage: '',
     availableOffer: '',
     features: [] as string[],
     highlights: [] as string[],
@@ -4912,12 +4998,13 @@ const openProductModal = (prod: any | null) => {
       tags: prod.tags || [],
       images: prod.images || [],
       videoUrl: prod.videoUrl || '',
+      commonLastImage: prod.commonLastImage || '',
       availableOffer: prod.availableOffer || '',
       features: prod.features || [],
       highlights: prod.highlights || [],
       care: prod.care || [],
       additionalInfo: prod.additionalInfo || '',
-      descriptiveImages: prod.descriptiveImages || [],
+      descriptiveImages: prod.descriptiveImages?.length ? prod.descriptiveImages : [''],
       faqs: prod.faqs ? JSON.parse(JSON.stringify(prod.faqs)) : [],
       isCodAvailable: prod.isCodAvailable !== undefined ? prod.isCodAvailable : true,
       isReturnable: prod.isReturnable !== undefined ? prod.isReturnable : true,
@@ -4950,7 +5037,6 @@ const openProductModal = (prod: any | null) => {
           stockPerSize: { 'M': 10 },
           skuPerSize: { 'M': 'VE-BRA-001-DEFAULTCOLOR-M' },
           mainImageInput: '',
-          videoUrlInput: '',
           additionalImagesList: [''],
           newSizeInput: '',
           newSizeStock: 0
@@ -4959,6 +5045,7 @@ const openProductModal = (prod: any | null) => {
       tags: [],
       images: [],
       videoUrl: '',
+      commonLastImage: '',
       availableOffer: '',
       features: [''],
       highlights: [''],
@@ -4990,11 +5077,34 @@ const addProductVariant = () => {
     stockPerSize: { 'M': 10 },
     skuPerSize,
     mainImageInput: '',
-    videoUrlInput: '',
     additionalImagesList: [''],
     newSizeInput: '',
     newSizeStock: 0
   })
+}
+
+const moveVariantUp = (idx: number) => {
+  if (idx === 0) return
+  const variants = productModal.value.form.variants
+  const tmp = variants[idx - 1]
+  variants[idx - 1] = variants[idx]
+  variants[idx] = tmp
+}
+
+const moveVariantDown = (idx: number) => {
+  const variants = productModal.value.form.variants
+  if (idx >= variants.length - 1) return
+  const tmp = variants[idx + 1]
+  variants[idx + 1] = variants[idx]
+  variants[idx] = tmp
+}
+
+const moveVariantToPosition = (idx: number, newPos: number) => {
+  const variants = productModal.value.form.variants
+  const clampedPos = Math.max(0, Math.min(variants.length - 1, newPos - 1))
+  if (clampedPos === idx) return
+  const [item] = variants.splice(idx, 1)
+  variants.splice(clampedPos, 0, item)
 }
 
 const addCustomSizeToVariant = (v: any) => {
@@ -5365,15 +5475,19 @@ const saveProductItem = async () => {
     discount = Math.round(((original - price) / original) * 100)
   }
 
+  const sharedVideoUrl = (productModal.value.form.videoUrl || '').trim()
+  const sharedLastImage = (productModal.value.form.commonLastImage || '').trim()
+
   const compiledVariants = productModal.value.form.variants.map((v: any) => {
-    const compiledImages = []
+    const compiledImages: string[] = []
     
     if (v.mainImageInput && v.mainImageInput.trim() !== '') {
       compiledImages.push(v.mainImageInput.trim())
     }
     
-    if (v.videoUrlInput && v.videoUrlInput.trim() !== '') {
-      compiledImages.push(v.videoUrlInput.trim())
+    // Shared YouTube video goes after main image (position 2) for all variants
+    if (sharedVideoUrl) {
+      compiledImages.push(sharedVideoUrl)
     }
     
     if (Array.isArray(v.additionalImagesList)) {
@@ -5383,8 +5497,13 @@ const saveProductItem = async () => {
         }
       })
     }
+
+    // Common last image appended as the final entry for all variants
+    if (sharedLastImage) {
+      compiledImages.push(sharedLastImage)
+    }
     
-    const { mainImageInput, videoUrlInput, additionalImagesList, newSizeInput, newSizeStock, ...rest } = v
+    const { mainImageInput, additionalImagesList, newSizeInput, newSizeStock, videoUrlInput, ...rest } = v
     return {
       ...rest,
       images: compiledImages
@@ -5392,24 +5511,19 @@ const saveProductItem = async () => {
   })
 
   const firstVariantImages = compiledVariants[0]?.images || []
-  const productVideoUrl = firstVariantImages.find(img => 
-    img.includes('youtube.com') || 
-    img.includes('youtu.be') || 
-    img.includes('video') || 
-    img.includes('.mp4')
-  ) || ''
 
   const payload = {
     ...productModal.value.form,
     discount,
     variants: compiledVariants,
     images: firstVariantImages,
-    videoUrl: productVideoUrl,
-    features: productModal.value.form.features.filter(f => f.trim() !== ''),
-    highlights: productModal.value.form.highlights.filter(h => h.trim() !== ''),
-    care: productModal.value.form.care.filter(c => c.trim() !== ''),
-    descriptiveImages: productModal.value.form.descriptiveImages.filter(img => img.trim() !== ''),
-    faqs: productModal.value.form.faqs.filter(faq => faq.question.trim() !== '' && faq.answer.trim() !== '')
+    videoUrl: sharedVideoUrl,
+    commonLastImage: sharedLastImage,
+    features: productModal.value.form.features.filter((f: string) => f.trim() !== ''),
+    highlights: productModal.value.form.highlights.filter((h: string) => h.trim() !== ''),
+    care: productModal.value.form.care.filter((c: string) => c.trim() !== ''),
+    descriptiveImages: productModal.value.form.descriptiveImages.filter((img: string) => img.trim() !== ''),
+    faqs: productModal.value.form.faqs.filter((faq: any) => faq.question.trim() !== '' && faq.answer.trim() !== '')
   }
 
   try {

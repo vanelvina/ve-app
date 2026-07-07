@@ -24,21 +24,53 @@
         <!-- Gallery -->
         <div class="space-y-3">
           <div 
-            class="relative aspect-product bg-light-gray rounded-none overflow-hidden cursor-zoom-in group/gallery"
+            class="relative aspect-product bg-light-gray rounded-none overflow-hidden group/gallery"
+            :class="isCurrentSlideVideo ? 'cursor-pointer' : 'cursor-zoom-in'"
             @touchstart="onTouchStart"
             @touchmove="onTouchMove"
             @touchend="onTouchEnd"
-            @click="openLightbox"
+            @click="isCurrentSlideVideo ? openVideoPlayer() : openLightbox()"
           >
             <Transition :name="slideDirection">
-              <img
-                :key="activeImage"
-                :src="activeImage"
-                :alt="product.name"
-                class="absolute inset-0 w-full h-full object-cover"
-                width="600" height="800"
-                fetchpriority="high"
-              />
+              <!-- YouTube Video Slide -->
+              <div
+                v-if="isCurrentSlideVideo"
+                :key="'video-' + activeImageIdx"
+                class="absolute inset-0"
+              >
+                <!-- Pure CSS video placeholder — no external image fetch, no alt text -->
+                <div class="absolute inset-0 bg-gradient-to-br from-deep-plum/90 via-[#3d1f1a] to-black flex items-center justify-center">
+                  <!-- YouTube logo-style icon -->
+                  <div class="flex flex-col items-center gap-3">
+                    <!-- Play circle -->
+                    <div class="w-20 h-20 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center group-hover/gallery:scale-110 transition-all duration-200 shadow-2xl">
+                      <svg class="w-9 h-9 text-white ml-1.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <p class="text-white/70 text-xs font-medium tracking-wide">Tap to Watch</p>
+                  </div>
+                </div>
+                <!-- Video label badge -->
+                <div class="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                  Watch Video
+                </div>
+              </div>
+              <!-- Regular Image Slide — same root element type (div) to avoid insertBefore mismatch -->
+              <div
+                v-else
+                :key="'img-' + activeImage"
+                class="absolute inset-0"
+              >
+                <img
+                  :src="activeImage"
+                  :alt="product.name"
+                  class="absolute inset-0 w-full h-full object-cover"
+                  width="600" height="800"
+                  fetchpriority="high"
+                />
+              </div>
             </Transition>
             
             <!-- Desktop Arrow Indicators -->
@@ -71,7 +103,7 @@
               <AppBadge v-if="product.discount" :label="`${product.discount}% OFF`" variant="sale" />
             </div>
             
-            <div class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/75 hover:bg-white text-deep-plum flex items-center justify-center shadow-md transition-all pointer-events-none border border-rose-blush/20">
+            <div v-if="!isCurrentSlideVideo" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/75 hover:bg-white text-deep-plum flex items-center justify-center shadow-md transition-all pointer-events-none border border-rose-blush/20">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
               </svg>
@@ -92,16 +124,70 @@
             <button
               v-for="(img, idx) in allImages"
               :key="idx"
-              class="w-16 h-16 shrink-0 rounded-none overflow-hidden border-2 transition-all duration-200"
+              class="w-16 h-16 shrink-0 rounded-none overflow-hidden border-2 transition-all duration-200 relative group/thumb"
               :class="activeImageIdx === idx ? 'border-deep-plum' : 'border-transparent hover:border-border-gray'"
-              :aria-label="`View image ${idx + 1}`"
+              :aria-label="`View ${isYouTubeUrl(img) ? 'video' : 'image'} ${idx + 1}`"
               :aria-pressed="activeImageIdx === idx"
               @click.stop="setActiveImageIdx(idx)"
             >
-              <img :src="img" :alt="`Product view ${idx + 1}`" class="w-full h-full object-cover" width="64" height="64" loading="lazy" />
+              <!-- Pure CSS video thumbnail — no broken img or alt text -->
+              <div v-if="isYouTubeUrl(img)" class="w-full h-full bg-gradient-to-br from-deep-plum via-[#3d1f1a] to-black flex items-center justify-center">
+                <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                </div>
+              </div>
+              <!-- Regular image thumbnail -->
+              <img
+                v-else
+                :src="img"
+                :alt="`Product view ${idx + 1}`"
+                class="w-full h-full object-cover"
+                width="64" height="64" loading="lazy"
+              />
             </button>
           </div>
         </div>
+
+        <!-- YouTube Video Player Modal -->
+        <Teleport to="body">
+          <Transition name="fade">
+            <div
+              v-if="showVideoPlayer && videoEmbedUrl"
+              class="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+              @click.self="closeVideoPlayer"
+              role="dialog" aria-label="Product video"
+            >
+              <!-- Adaptive container: narrow + tall for Shorts, wide for regular -->
+              <div
+                class="relative"
+                :class="isCurrentSlideShort ? 'w-full max-w-xs' : 'w-full max-w-3xl'"
+              >
+                <!-- Close button -->
+                <button
+                  @click="closeVideoPlayer"
+                  class="absolute -top-12 right-0 w-10 h-10 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-all text-xl font-bold z-10"
+                  aria-label="Close video"
+                >
+                  ✕
+                </button>
+                <!-- Adaptive aspect ratio: 9:16 for Shorts, 16:9 for regular -->
+                <div
+                  class="relative w-full rounded-2xl overflow-hidden shadow-2xl"
+                  :style="isCurrentSlideShort ? 'padding-bottom: 177.78%' : 'padding-bottom: 56.25%'"
+                >
+                  <iframe
+                    v-if="videoEmbedUrl"
+                    :src="videoEmbedUrl"
+                    class="absolute inset-0 w-full h-full"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen
+                  />
+                </div>
+              </div>
+            </div>
+          </Transition>
+        </Teleport>
 
         <!-- Product Info -->
         <div class="space-y-4">
@@ -125,8 +211,8 @@
               </button>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
-              <!-- <AppRating :rating="product.rating" :count="product.reviewCount" show-count show-value /> -->
-              <span class="text-[11px] text-mid-gray font-ui">SKU: {{ product.sku }}</span>
+              <!-- <!-- <AppRating :rating="product.rating" :count="product.reviewCount" show-count show-value /> --> -->
+              <span class="text-[11px] text-mid-gray font-ui">SKU: {{ activeSku }}</span>
             </div>
           </div>
 
@@ -166,7 +252,7 @@
                 :style="{ backgroundColor: variant.colorHex }"
                 :aria-label="variant.color"
                 :aria-pressed="selectedVariant === idx"
-                @click="selectedVariant = idx; selectedSize = ''; setActiveImageIdx(0)"
+                @click="selectedVariant = idx; selectedSize = ''; setActiveImageIdx(0); closeVideoPlayer()"
               />
             </div>
           </div>
@@ -802,10 +888,82 @@ onUnmounted(() => {
 const tabs = ['Description', 'Fabric, Care & Origin', /* 'Reviews', */ 'FAQs']
 const faqs = faqsData.slice(0, 5)
 
+const showVideoPlayer = ref(false)
+
+const isYouTubeUrl = (url: string) => {
+  if (!url) return false
+  return url.includes('youtube.com') || url.includes('youtu.be')
+}
+
+const getYouTubeThumbnail = (url: string): string => {
+  if (!url) return ''
+  let videoId = ''
+  if (url.includes('youtube.com/watch?v=')) {
+    videoId = url.split('v=')[1]?.split('&')[0] || ''
+  } else if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split('?')[0] || ''
+  } else if (url.includes('youtube.com/embed/')) {
+    videoId = url.split('embed/')[1]?.split('?')[0] || ''
+  }
+  return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : ''
+}
+
+const getYouTubeEmbedUrl = (url: string): string => {
+  if (!url) return ''
+  // Already an embed URL
+  if (url.includes('youtube.com/embed/')) return url.split('?')[0]
+  let videoId = ''
+  if (url.includes('youtube.com/watch?v=')) {
+    videoId = url.split('v=')[1]?.split('&')[0] || ''
+  } else if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split('?')[0] || ''
+  } else if (url.includes('youtube.com/shorts/')) {
+    videoId = url.split('youtube.com/shorts/')[1]?.split('?')[0] || ''
+  }
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : ''
+}
+
+const isCurrentSlideVideo = computed(() => isYouTubeUrl(activeImage.value))
+const isCurrentSlideShort = computed(() => activeImage.value.includes('youtube.com/shorts/'))
+
+// Safe embed URL — never empty, includes autoplay and no related videos
+const videoEmbedUrl = computed(() => {
+  const base = getYouTubeEmbedUrl(activeImage.value)
+  if (!base) return ''
+  return `${base}?autoplay=1&rel=0&playsinline=1`
+})
+
+const openVideoPlayer = () => {
+  showVideoPlayer.value = true
+  if (typeof window !== 'undefined') {
+    document.body.style.overflow = 'hidden'
+  }
+}
+
+const closeVideoPlayer = () => {
+  showVideoPlayer.value = false
+  if (typeof window !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+}
+
 const allImages = computed(() =>
   product.value?.variants[selectedVariant.value]?.images ?? []
 )
 const activeImage = computed(() => allImages.value[activeImageIdx.value] ?? '')
+
+// Variant + size specific SKU — updates reactively as user picks color and size
+const activeSku = computed(() => {
+  const variant = product.value?.variants?.[selectedVariant.value]
+  if (!variant) return product.value?.sku || ''
+  const skuMap = variant.skuPerSize || {}
+  if (selectedSize.value && skuMap[selectedSize.value]) {
+    return skuMap[selectedSize.value]
+  }
+  // No size selected yet — show first available SKU for this variant
+  const firstSku = Object.values(skuMap)[0] as string | undefined
+  return firstSku || variant.sku || product.value?.sku || ''
+})
 
 const isWishlisted = computed(() =>
   product.value ? wishlist.isWishlisted(product.value.id) : false

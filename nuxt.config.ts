@@ -22,6 +22,22 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: false },
 
+  // Disable the Vite HMR error overlay (stale cache errors show in console only)
+  vite: {
+    server: {
+      hmr: {
+        overlay: false
+      }
+    },
+    resolve: {
+      alias: {
+        // Redirect stale Vite chunk-ID reference for PwaInstallPrompt to the real file location
+        '/components/molecules/PwaInstallPrompt.vue':
+          '/home/saqeb/Projects/ve-app/components/organisms/PwaInstallPrompt.vue'
+      }
+    }
+  },
+
   // Component Auto-imports Configuration (Nested Flat Names)
   components: [
     {

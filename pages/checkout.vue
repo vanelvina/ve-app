@@ -422,7 +422,12 @@ const sendAbandonedNotification = async (reason: string) => {
       price: item.product.price,
       quantity: item.quantity,
       variantColor: item.variantColor || '',
-      size: item.size || 'Standard'
+      color: item.variantColor || '',
+      size: item.size || 'Standard',
+      sku: (() => {
+        const variant = item.product?.variants?.find((v: any) => v.color === item.variantColor)
+        return variant?.skuPerSize?.[item.size] || variant?.sku || item.product?.sku || ''
+      })()
     }))
 
     const shippingAddress = {
@@ -476,8 +481,14 @@ const placeOrder = async () => {
       name: item.product.name,
       price: item.product.price,
       quantity: item.quantity,
-      image: item.product.variants[0]?.images[0] || '',
-      size: item.size || 'Standard'
+      image: item.product.variants?.find((v: any) => v.color === item.variantColor)?.images?.[0] || item.product.variants?.[0]?.images?.[0] || '',
+      size: item.size || 'Standard',
+      color: item.variantColor || '',
+      variantColor: item.variantColor || '',
+      sku: (() => {
+        const variant = item.product?.variants?.find((v: any) => v.color === item.variantColor)
+        return variant?.skuPerSize?.[item.size] || variant?.sku || item.product?.sku || ''
+      })()
     }))
 
     const shippingAddress = {
