@@ -8,7 +8,8 @@ export const useCartStore = defineStore('cart', {
     couponCode: '' as string,
     appliedDiscount: 0 as number,
     isOpen: false as boolean,
-    loading: false as boolean
+    loading: false as boolean,
+    giftWrap: false as boolean
   }),
 
   getters: {
@@ -36,12 +37,13 @@ export const useCartStore = defineStore('cart', {
         item.product?.name?.toLowerCase().includes('test'),
       )
 
-      if (subtotal >= 999 || hasTestProduct) return 0
+      if (subtotal >= 499 || hasTestProduct) return 0
 
       return 40
     },
+    giftWrapCost: (state) => state.giftWrap ? 59 : 0,
     grandTotal(): number {
-      return this.subtotal - this.appliedDiscount + this.shippingCost
+      return this.subtotal - this.appliedDiscount + this.shippingCost + this.giftWrapCost
     },
     isEmpty: (state) => state.items.length === 0,
     findItem: (state) => (productId: string, color: string, size: string) =>
@@ -209,31 +211,35 @@ export const useCartStore = defineStore('cart', {
       const upper = code.toUpperCase()
       
       const loyaltyCoupons: Record<string, { discount: number, requiredDelivered: number }> = {
-        ELVINA10: { discount: 0.1, requiredDelivered: 0 },
+        WELCOME10: { discount: 0.1, requiredDelivered: 0 },
         ELVINAROYAL20: { discount: 0.2, requiredDelivered: 1 },
         ELVINAROYAL30: { discount: 0.3, requiredDelivered: 2 },
         ELVINAROYAL40: { discount: 0.4, requiredDelivered: 3 },
         ELVINAROYAL50: { discount: 0.5, requiredDelivered: 4 },
       }
 
+      if (this.items.length === 0) return { success: false, message: 'Bag is empty' }
+      const maxPrice = Math.max(...this.items.map(item => item.product?.price ?? 0))
+
       if (loyaltyCoupons[upper]) {
         const auth = useAuthStore()
         if (!auth.isLoggedIn) {
           return { success: false, message: 'Please login to use loyalty coupons.' }
         }
-        
         try {
           const orders = await auth.fetchMyOrders()
-          const deliveredCount = (orders || []).filter((o: any) => o.orderStatus === 'delivered' || o.status === 'delivered').length
+          const ordersList = orders || []
+          const nonCancelledOrders = ordersList.filter((o: any) => o.orderStatus !== 'cancelled' && o.status !== 'cancelled')
+          const deliveredCount = ordersList.filter((o: any) => o.orderStatus === 'delivered' || o.status === 'delivered').length
           const required = loyaltyCoupons[upper].requiredDelivered
           
-          if (deliveredCount !== required) {
-            return { success: false, message: `This coupon is not valid for your current order history.` }
+          if (upper === 'WELCOME10' && nonCancelledOrders.length > 0) {
+            return { success: false, message: 'This coupon is only valid for your first order.' }
           }
           
-          if (this.items.length === 0) return { success: false, message: 'Bag is empty' }
-          
-          const maxPrice = Math.max(...this.items.map(item => item.product?.price ?? 0))
+          if (deliveredCount < required) {
+            return { success: false, message: `This coupon is not valid for your current order history.` }
+          }
           
           this.couponCode = upper
           this.appliedDiscount = Math.round(maxPrice * loyaltyCoupons[upper].discount)
@@ -244,16 +250,24 @@ export const useCartStore = defineStore('cart', {
         }
       }
 
-      const otherCoupons: Record<string, number> = {
-        WELCOME20: 0.2,
-        COMFORT15: 0.15,
-        FIRST30: 0.3,
+      // Fetch dynamic coupons from API/widgets
+      const config = useRuntimeConfig()
+      let dynamicDiscountRate = 0
+      try {
+        const widgets = await $fetch<any[]>(`${config.public.apiBase}/widgets`)
+        const cw = (widgets || []).find((w: any) => w.type === 'coupon' && w.enabled && w.title.toUpperCase() === upper)
+        if (cw) {
+          const discountVal = cw.items !== undefined && cw.items !== null ? Number(cw.items) : (cw.subtitle ? parseFloat(cw.subtitle) : 0)
+          dynamicDiscountRate = discountVal > 1 ? discountVal / 100 : discountVal
+        }
+      } catch (err) {
+        console.error('Failed to load dynamic coupons:', err)
       }
-      
-      if (otherCoupons[upper]) {
+
+      if (dynamicDiscountRate > 0) {
         this.couponCode = upper
-        this.appliedDiscount = Math.round(this.subtotal * otherCoupons[upper])
-        return { success: true, message: `Coupon applied! You saved ₹${this.appliedDiscount}` }
+        this.appliedDiscount = Math.round(maxPrice * dynamicDiscountRate)
+        return { success: true, message: `Coupon applied to the highest priced item! You saved ₹${this.appliedDiscount}` }
       }
       
       return { success: false, message: 'Invalid coupon code.' }
@@ -268,7 +282,12 @@ export const useCartStore = defineStore('cart', {
       this.items = []
       this.couponCode = ''
       this.appliedDiscount = 0
+      this.giftWrap = false
       await this.syncCart()
+    },
+
+    setGiftWrap(val: boolean) {
+      this.giftWrap = val
     },
 
     toggleCart() {

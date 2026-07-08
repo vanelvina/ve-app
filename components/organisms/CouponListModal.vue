@@ -77,6 +77,8 @@ const ui = useUIStore()
 
 const loading = ref(false)
 const deliveredCount = ref(0)
+const ordersList = ref<any[]>([])
+const activeCoupons = ref<any[]>([])
 const isLoggedIn = computed(() => auth.isLoggedIn)
 
 const loadEligibility = async () => {
@@ -85,21 +87,48 @@ const loadEligibility = async () => {
   try {
     const orders = await auth.fetchMyOrders()
     if (Array.isArray(orders)) {
+      ordersList.value = orders
       deliveredCount.value = orders.filter((o: any) => o.orderStatus === 'delivered' || o.status === 'delivered').length
     } else {
+      ordersList.value = []
       deliveredCount.value = 0
     }
   } catch (err) {
     console.error('Failed to fetch orders for coupon modal', err)
+    ordersList.value = []
     deliveredCount.value = 0
   } finally {
     loading.value = false
   }
 }
 
+const loadActiveCoupons = async () => {
+  const config = useRuntimeConfig()
+  try {
+    const data = await $fetch<any[]>(`${config.public.apiBase}/widgets`)
+    activeCoupons.value = (data || [])
+      .filter((w: any) => w.type === 'coupon' && w.enabled && w.image !== 'hidden')
+      .map((w: any) => {
+        const discountVal = w.items !== undefined && w.items !== null ? Number(w.items) : (w.subtitle ? parseFloat(w.subtitle) : 0)
+        const percent = discountVal > 1 ? discountVal : Math.round(discountVal * 100)
+        return {
+          code: w.title.toUpperCase(),
+          discountLabel: `${percent}% OFF`,
+          title: `Promo: ${w.title}`,
+          description: `Get ${percent}% off the single most expensive product in your bag.`,
+          eligible: true,
+          reason: ''
+        }
+      })
+  } catch (err) {
+    console.error('Failed to load active coupons:', err)
+  }
+}
+
 watch(() => props.isOpen, (open) => {
   if (open) {
     loadEligibility()
+    loadActiveCoupons()
   }
 })
 
@@ -109,48 +138,52 @@ watch(isLoggedIn, (loggedIn) => {
   }
 })
 
-const coupons = computed(() => [
-  {
-    code: 'ELVINA10',
-    discountLabel: '10% OFF',
-    title: 'First Order Discount',
-    description: 'Get 10% off the most expensive item in your bag on your very first order.',
-    eligible: deliveredCount.value === 0,
-    reason: 'Only valid for your 1st order.'
-  },
-  {
-    code: 'ELVINAROYAL20',
-    discountLabel: '20% OFF',
-    title: '2nd Order Unlock',
-    description: 'Get 20% off your most expensive item. Unlocks when your 1st order is delivered.',
-    eligible: deliveredCount.value === 1,
-    reason: deliveredCount.value < 1 ? 'Your 1st order is not yet marked as delivered.' : 'Already claimed.'
-  },
-  {
-    code: 'ELVINAROYAL30',
-    discountLabel: '30% OFF',
-    title: '3rd Order Unlock',
-    description: 'Get 30% off your most expensive item. Unlocks when your 2nd order is delivered.',
-    eligible: deliveredCount.value === 2,
-    reason: deliveredCount.value < 2 ? 'Your 2nd order is not yet marked as delivered.' : 'Already claimed.'
-  },
-  {
-    code: 'ELVINAROYAL40',
-    discountLabel: '40% OFF',
-    title: '4th Order Unlock',
-    description: 'Get 40% off your most expensive item. Unlocks when your 3rd order is delivered.',
-    eligible: deliveredCount.value === 3,
-    reason: deliveredCount.value < 3 ? 'Your 3rd order is not yet marked as delivered.' : 'Already claimed.'
-  },
-  {
-    code: 'ELVINAROYAL50',
-    discountLabel: '50% OFF',
-    title: '5th Order Unlock',
-    description: 'Get 50% off your most expensive item. Unlocks when your 4th order is delivered.',
-    eligible: deliveredCount.value === 4,
-    reason: deliveredCount.value < 4 ? 'Your 4th order is not yet marked as delivered.' : 'Already claimed.'
-  }
-])
+const coupons = computed(() => {
+  const loyalty = [
+    {
+      code: 'WELCOME10',
+      discountLabel: '10% OFF',
+      title: 'First Order Discount',
+      description: 'Get 10% off the most expensive item on your very first order.',
+      eligible: ordersList.value.filter((o: any) => o.orderStatus !== 'cancelled' && o.status !== 'cancelled').length === 0,
+      reason: 'Only valid for your 1st order.'
+    },
+    {
+      code: 'ELVINAROYAL20',
+      discountLabel: '20% OFF',
+      title: '2nd Order Unlock',
+      description: 'Get 20% off your most expensive item. Unlocks when your 1st order is delivered.',
+      eligible: deliveredCount.value >= 1,
+      reason: 'Your 1st order is not yet marked as delivered.'
+    },
+    {
+      code: 'ELVINAROYAL30',
+      discountLabel: '30% OFF',
+      title: '3rd Order Unlock',
+      description: 'Get 30% off your most expensive item. Unlocks when your 2nd order is delivered.',
+      eligible: deliveredCount.value >= 2,
+      reason: 'Your 2nd order is not yet marked as delivered.'
+    },
+    {
+      code: 'ELVINAROYAL40',
+      discountLabel: '40% OFF',
+      title: '4th Order Unlock',
+      description: 'Get 40% off your most expensive item. Unlocks when your 3rd order is delivered.',
+      eligible: deliveredCount.value >= 3,
+      reason: 'Your 3rd order is not yet marked as delivered.'
+    },
+    {
+      code: 'ELVINAROYAL50',
+      discountLabel: '50% OFF',
+      title: '5th Order Unlock',
+      description: 'Get 50% off your most expensive item. Unlocks when your 4th order is delivered.',
+      eligible: deliveredCount.value >= 4,
+      reason: 'Your 4th order is not yet marked as delivered.'
+    }
+  ]
+  
+  return [...loyalty, ...activeCoupons.value]
+})
 
 const applyCode = (code: string) => {
   emit('apply', code)

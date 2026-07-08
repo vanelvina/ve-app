@@ -11,12 +11,12 @@
   <Transition name="slide-up">
     <div
       v-if="ui.sizeGuideOpen"
-      class="fixed inset-0 z-50 flex items-end md:items-center justify-center px-4 pb-0 md:py-8"
+      class="fixed inset-0 z-50 flex items-center justify-center px-4 py-4"
       role="dialog"
       aria-modal="true"
       aria-label="Size guide"
     >
-      <div class="w-full max-w-2xl bg-white rounded-t-3xl md:rounded-2xl shadow-modal overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="w-full max-w-2xl bg-white rounded-2xl shadow-modal overflow-hidden flex flex-col" style="max-height: min(80vh, calc(100dvh - 8rem));">
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-border-gray shrink-0">
           <h2 class="font-serif text-lg text-deep-plum font-semibold">Size Guide</h2>

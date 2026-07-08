@@ -237,7 +237,7 @@ const activeWidgets = computed(() => {
 
 useSeoMeta({
   title: 'Van Elvina – Women Comfort First | Premium Innerwear',
-  description: "Shop India's most comfortable women's innerwear. Bras, panties, shapewear, sleepwear & activewear. Free shipping above ₹999. Easy 30-day returns.",
+  description: "Shop India's most comfortable women's innerwear. Bras, panties, shapewear, sleepwear & activewear. Free shipping above ₹499. Easy 30-day returns.",
   ogTitle: 'Van Elvina – Women Comfort First',
   ogDescription: "Premium innerwear for the modern Indian woman. Discover bras, panties, shapewear, and more — crafted for all-day comfort and elegance.",
   ogImage: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=1200&h=630&q=80',

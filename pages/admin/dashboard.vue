@@ -224,10 +224,10 @@
     </aside>
 
     <!-- 2. MAIN CONTAINER -->
-    <main class="flex-1 min-w-0 flex flex-col p-4 sm:p-6 lg:p-8 space-y-6">
+    <main class="flex-1 min-w-0 flex flex-col p-4 sm:p-6 lg:p-8 space-y-6 pb-20 lg:pb-8">
       
       <!-- Horizontal Scrollable Quick Sub-tabs bar -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-3 scrollbar-none shrink-0 select-none border-b border-rose-blush/10">
+      <div class="hidden lg:flex items-center gap-2 overflow-x-auto pb-3 scrollbar-none shrink-0 select-none border-b border-rose-blush/10">
         <button
           v-for="tab in flatTabsList"
           :key="tab.id"
@@ -2172,6 +2172,116 @@
         </div>
       </section>
 
+      <!-- TAB 12: COUPONS MANAGEMENT -->
+      <section v-if="activeTab === 'coupons'" class="space-y-6 animate-fade-in">
+        <header class="bg-white p-5 rounded-2xl border border-charcoal/20 shadow-soft">
+          <h3 class="font-serif text-lg font-bold text-deep-plum">Coupons Management</h3>
+          <p class="text-xs text-charcoal/60 mt-1">
+            Create, view, and delete dynamic discount coupons. All active coupons will apply to the single most expensive item in a customer's bag.
+          </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- Add Coupon Form -->
+          <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-charcoal/20 shadow-soft relative overflow-hidden">
+            <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
+            <h4 class="font-serif font-bold text-deep-plum text-sm border-b border-rose-blush/10 pb-3 mb-4">Create New Coupon</h4>
+            
+            <form @submit.prevent="handleCreateCoupon" class="space-y-4 text-xs font-ui relative z-10">
+              <div class="space-y-1">
+                <label class="block font-semibold text-charcoal/70">Coupon Code *</label>
+                <input 
+                  v-model="newCoupon.code" 
+                  type="text" 
+                  required 
+                  placeholder="e.g., WELCOME20" 
+                  class="w-full p-2.5 border border-charcoal/20 rounded-xl focus:outline-none focus:ring-1 focus:ring-deep-plum/20 uppercase font-mono" 
+                />
+              </div>
+
+              <div class="space-y-1">
+                <label class="block font-semibold text-charcoal/70">Percentage Discount * (1 to 99)</label>
+                <input 
+                  v-model="newCoupon.discount" 
+                  type="number" 
+                  required 
+                  min="1"
+                  max="99"
+                  placeholder="e.g., 20" 
+                  class="w-full p-2.5 border border-charcoal/20 rounded-xl focus:outline-none focus:ring-1 focus:ring-deep-plum/20" 
+                />
+              </div>
+
+              <div class="flex items-center gap-2 py-1 select-none">
+                <input 
+                  id="coupon-visible"
+                  v-model="newCoupon.visible" 
+                  type="checkbox" 
+                  class="w-4 h-4 text-deep-plum border-charcoal/20 rounded focus:ring-deep-plum/20" 
+                />
+                <label for="coupon-visible" class="font-semibold text-charcoal/70 cursor-pointer">Show publicly in user bag offers list</label>
+              </div>
+
+              <div class="flex justify-end pt-3 border-t border-rose-blush/10">
+                <button 
+                  type="submit" 
+                  :disabled="creatingCoupon"
+                  class="px-6 py-3 bg-deep-plum hover:bg-deep-plum/95 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-premium flex items-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
+                >
+                  <span>{{ creatingCoupon ? 'Creating...' : 'Create Coupon' }}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Coupons List -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-3xl border border-charcoal/20 shadow-soft relative overflow-hidden">
+            <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
+            <h4 class="font-serif font-bold text-deep-plum text-sm border-b border-rose-blush/10 pb-3 mb-4">Active Dynamic Coupons</h4>
+
+            <div v-if="adminCoupons.length === 0" class="py-12 text-center text-charcoal/40 text-xs font-ui relative z-10">
+              <span class="text-3xl block mb-2">🎫</span>
+              No dynamic coupons found. Create one to get started.
+            </div>
+
+            <div v-else class="overflow-x-auto relative z-10">
+              <table class="w-full text-left border-collapse text-xs font-ui">
+                <thead>
+                  <tr class="border-b border-rose-blush/10 text-charcoal/60 uppercase font-semibold tracking-wider">
+                    <th class="py-2.5">Code</th>
+                    <th class="py-2.5">Discount</th>
+                    <th class="py-2.5">Visibility</th>
+                    <th class="py-2.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-rose-blush/5">
+                  <tr v-for="coupon in adminCoupons" :key="coupon._id" class="hover:bg-rose-blush/5 transition-colors">
+                    <td class="py-3 font-mono font-bold text-deep-plum">{{ coupon.title }}</td>
+                    <td class="py-3 font-semibold">{{ coupon.items }}% OFF</td>
+                    <td class="py-3 font-semibold">
+                      <span 
+                        class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+                        :class="coupon.image !== 'hidden' ? 'bg-green-100 text-green-800' : 'bg-charcoal/10 text-charcoal/60'"
+                      >
+                        {{ coupon.image !== 'hidden' ? 'Public' : 'Hidden/Private' }}
+                      </span>
+                    </td>
+                    <td class="py-3 text-right">
+                      <button 
+                        @click="handleDeleteCoupon(coupon._id)"
+                        class="px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-all font-semibold font-ui cursor-pointer"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
 
     <!-- 3. BANNER MODAL -->
@@ -3611,6 +3721,22 @@
       </div>
     </Transition>
 
+    <!-- Mobile Floating Bottom Navigation Bar -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-rose-blush/15 shadow-[0_-4px_16px_rgba(42,27,24,0.08)] flex items-center gap-2 px-4 py-3 overflow-x-auto scrollbar-none select-none">
+      <button
+        v-for="tab in flatTabsList"
+        :key="tab.id"
+        @click="activeTab = tab.id"
+        class="px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 shrink-0 border flex items-center gap-1.5"
+        :class="activeTab === tab.id
+          ? 'bg-deep-plum text-white border-deep-plum shadow-sm scale-105'
+          : 'bg-[#FAF6F0] text-charcoal/70 border-charcoal/10 hover:border-deep-plum/30'"
+      >
+        <span>{{ tab.icon }}</span>
+        <span>{{ tab.name }}</span>
+      </button>
+    </div>
+
   </div>
 </template>
 
@@ -3661,6 +3787,7 @@ const tabs = [
   { id: 'about', name: 'About Us Page', icon: 'ℹ️' },
   { id: 'inquiries', name: 'Customer Inquiries', icon: '💬' },
   { id: 'emails', name: 'Custom Emails', icon: '✉️' },
+  { id: 'coupons', name: 'Manage Coupons', icon: '🎫' },
 ]
 
 const tabGroups = [
@@ -3698,7 +3825,8 @@ const tabGroups = [
     name: 'Marketing & Comms',
     icon: '✉️',
     tabs: [
-      { id: 'emails', name: 'Send Custom Emails', icon: '📧' }
+      { id: 'emails', name: 'Send Custom Emails', icon: '📧' },
+      { id: 'coupons', name: 'Manage Coupons', icon: '🎫' }
     ]
   }
 ]
@@ -4130,6 +4258,68 @@ const handleSendCustomEmail = async () => {
   }
 }
 
+// Coupons Management
+const newCoupon = ref({ code: '', discount: 20, visible: true })
+const creatingCoupon = ref(false)
+
+const adminCoupons = computed(() => {
+  return (widgets.value || []).filter((w: any) => w.type === 'coupon')
+})
+
+const handleCreateCoupon = async () => {
+  const code = newCoupon.value.code.trim().toUpperCase()
+  const discount = Number(newCoupon.value.discount)
+  
+  if (!code || isNaN(discount) || discount < 1 || discount > 99) {
+    uiStore.addToast('error', 'Please enter a valid coupon code and percentage discount.')
+    return
+  }
+
+  // Check if coupon already exists
+  const exists = adminCoupons.value.some((c: any) => c.title.toUpperCase() === code)
+  if (exists) {
+    uiStore.addToast('error', 'A coupon with this code already exists.')
+    return
+  }
+
+  creatingCoupon.value = true
+  try {
+    const payload = {
+      title: code,
+      type: 'coupon',
+      enabled: true,
+      order: 0,
+      key: 'coupon',
+      name: code,
+      subtitle: discount.toString(),
+      image: newCoupon.value.visible ? 'visible' : 'hidden',
+      items: discount
+    }
+    
+    await adminStore.createWidget(payload)
+    uiStore.addToast('success', `Coupon ${code} created successfully!`)
+    newCoupon.value = { code: '', discount: 20, visible: true }
+    loadAllData()
+  } catch (err: any) {
+    console.error('Failed to create coupon:', err)
+    uiStore.addToast('error', err.message || 'Failed to create coupon')
+  } finally {
+    creatingCoupon.value = false
+  }
+}
+
+const handleDeleteCoupon = async (id: string) => {
+  if (!confirm('Are you sure you want to delete this coupon? This action cannot be undone.')) return
+  try {
+    await adminStore.deleteWidget(id)
+    uiStore.addToast('success', 'Coupon deleted successfully!')
+    loadAllData()
+  } catch (err: any) {
+    console.error('Failed to delete coupon:', err)
+    uiStore.addToast('error', err.message || 'Failed to delete coupon')
+  }
+}
+
 // Search Queries & Filters
 const searchQueries = ref({
   banners: '',
@@ -4150,7 +4340,7 @@ const lowStockProductsCount = computed(() => {
   return products.value.filter(p => p.stockCount <= 5 && p.stockCount > 0).length
 })
 const enabledWidgetsCount = computed(() => {
-  return widgets.value.filter(w => w.enabled).length
+  return widgets.value.filter(w => w.enabled && w.type !== 'coupon').length
 })
 
 // Filtered lists
@@ -4217,7 +4407,7 @@ const filteredInquiries = computed(() => {
 })
 
 const filteredWidgets = computed(() => {
-  let list = widgets.value
+  let list = widgets.value.filter(w => w.type !== 'coupon')
   const q = searchQueries.value.widgets.toLowerCase().trim()
   if (q) {
     list = list.filter(w => 

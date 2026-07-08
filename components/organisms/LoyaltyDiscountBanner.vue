@@ -51,7 +51,7 @@
     <div v-if="!isLoggedIn" class="loyalty-cta-guest">
       <div class="cta-text">
         <strong>Login &amp; get 10% off your 1st order</strong>
-        <span class="cta-code">ELVINA10</span>
+        <span class="cta-code">WELCOME10</span>
       </div>
       <button class="cta-btn" @click="handleLogin" aria-label="Login to unlock loyalty discounts">
         Login
@@ -82,7 +82,7 @@ const isLoggedIn = computed(() => auth.isLoggedIn)
 const orderCount = ref(0)
 
 const tiers = [
-  { order: 1, label: '10% Off', code: 'ELVINA10',      special: false },
+  { order: 1, label: '10% Off', code: 'WELCOME10',      special: false },
   { order: 2, label: '20% Off', code: 'ELVINAROYAL20', special: false },
   { order: 3, label: '30% Off', code: 'ELVINAROYAL30', special: false },
   { order: 4, label: '40% Off', code: 'ELVINAROYAL40', special: false },

@@ -9,7 +9,7 @@
     </Transition>
 
     <!-- Sliding Panel Drawer -->
-    <Transition name="slide-right" appear>
+    <Transition name="profile-drawer-slide" appear>
       <div class="absolute inset-y-0 right-0 w-[380px] max-w-full bg-white shadow-2xl flex flex-col h-full overflow-hidden">
         <!-- Header -->
         <div class="flex items-center justify-between px-5 py-4 border-b border-rose-blush/20 shrink-0">
@@ -419,10 +419,10 @@ const userInitials = computed(() => {
   opacity: 0;
 }
 
-.slide-right-enter-active, .slide-right-leave-active {
+.profile-drawer-slide-enter-active, .profile-drawer-slide-leave-active {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.slide-right-enter-from, .slide-right-leave-to {
+.profile-drawer-slide-enter-from, .profile-drawer-slide-leave-to {
   transform: translateX(100%);
 }
 

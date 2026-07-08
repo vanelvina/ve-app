@@ -183,6 +183,10 @@
                 <span>Shipping</span>
                 <span :class="shippingFee === 0 ? 'text-green-600' : ''">{{ shippingFee === 0 ? 'FREE' : formatPrice(shippingFee) }}</span>
               </div>
+              <div v-if="cart.giftWrap" class="flex justify-between text-mid-gray">
+                <span>Gift Wrapper</span>
+                <span>{{ formatPrice(59) }}</span>
+              </div>
               <div class="flex justify-between font-bold text-charcoal border-t pt-2">
                 <span>Total</span><span>{{ formatPrice(orderTotal) }}</span>
               </div>
@@ -306,7 +310,7 @@ const shippingOptions = computed(() => [
     id: 'standard',
     name: 'Standard Delivery',
     desc: '3–5 business days',
-    price: (checkoutSubtotal.value >= 999 || hasTestProduct.value) ? 0 : 40,
+    price: (checkoutSubtotal.value >= 499 || hasTestProduct.value) ? 0 : 40,
   },
   {
     id: 'express',
@@ -317,10 +321,10 @@ const shippingOptions = computed(() => [
 ])
 
 const shippingFee = computed(() => shippingOptions.value.find(o => o.id === selectedShipping.value)?.price ?? 0)
-const orderTotal = computed(() => checkoutSubtotal.value - checkoutDiscount.value + shippingFee.value)
+const orderTotal = computed(() => checkoutSubtotal.value - checkoutDiscount.value + shippingFee.value + cart.giftWrapCost)
 
 const codEligible = computed(() => {
-  return orderTotal.value > 499 && checkoutItems.value.every((item: any) => item.product?.isCodAvailable !== false)
+  return orderTotal.value >= 299 && checkoutItems.value.every((item: any) => item.product?.isCodAvailable !== false)
 })
 
 watch(codEligible, (eligible) => {
@@ -333,7 +337,7 @@ const paymentOptions = computed(() => [
   {
     id: 'cod',
     name: 'Cash on Delivery (COD)',
-    desc: codEligible.value ? 'Pay in cash at delivery' : 'COD available only for orders above ₹499',
+    desc: codEligible.value ? 'Pay in cash at delivery' : 'COD available only for orders above ₹299',
     disabled: !codEligible.value,
   },
   {
@@ -430,6 +434,19 @@ const sendAbandonedNotification = async (reason: string) => {
       })()
     }))
 
+    if (cart.giftWrap) {
+      orderItems.push({
+        productId: '00000000-0000-0000-0000-000000000000',
+        name: 'Gift Wrapper',
+        price: 59,
+        quantity: 1,
+        variantColor: '',
+        color: '',
+        size: 'Standard',
+        sku: 'GIFT-WRAP'
+      })
+    }
+
     const shippingAddress = {
       name: form.fullName.trim(),
       line1: form.line1.trim(),
@@ -491,6 +508,20 @@ const placeOrder = async () => {
       })()
     }))
 
+    if (cart.giftWrap) {
+      orderItems.push({
+        productId: '00000000-0000-0000-0000-000000000000',
+        name: 'Gift Wrapper',
+        price: 59,
+        quantity: 1,
+        image: '/icons/gift-icon.png',
+        size: 'Standard',
+        color: '',
+        variantColor: '',
+        sku: 'GIFT-WRAP'
+      })
+    }
+
     const shippingAddress = {
       name: form.fullName.trim(),
       line1: form.line1.trim(),
@@ -506,7 +537,7 @@ const placeOrder = async () => {
       shippingAddress,
       paymentMethod: selectedPayment.value,
       shippingMethod: selectedShipping.value,
-      subtotal: checkoutSubtotal.value,
+      subtotal: checkoutSubtotal.value + cart.giftWrapCost,
       shippingFee: shippingFee.value,
       discount: checkoutDiscount.value,
       total: orderTotal.value,

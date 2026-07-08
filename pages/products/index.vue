@@ -326,6 +326,8 @@
         </div>
       </div>
     </Transition>
+    <!-- ── One-time onboarding tooltip ──────────────────────────── -->
+    <PlpOnboarding />
 
   </div>
 </template>
@@ -565,7 +567,7 @@ onUnmounted(() => {
 
 useSeoMeta({
   title: 'All Products – Van Elvina | Premium Women\'s Innerwear',
-  description: 'Browse our complete collection of premium women\'s innerwear — bras, panties, shapewear, sleepwear, activewear, and maternity. Shop now with free shipping above ₹999.',
+  description: 'Browse our complete collection of premium women\'s innerwear — bras, panties, shapewear, sleepwear, activewear, and maternity. Shop now with free shipping above ₹499.',
 })
 </script>
 

@@ -345,6 +345,75 @@
             </div><!-- end flex items-center gap-3 qty row -->
           </div><!-- end space-y-2 pb-4 section -->
 
+          <!-- Available Offers Card -->
+          <div
+            v-if="activeOffer"
+            class="p-4 bg-gradient-to-br from-[#FCFAF8] to-[#F5EAE0]/50 border border-[#EDE4DC] rounded-2xl relative overflow-hidden shadow-soft transition-all duration-300 hover:shadow-md my-4"
+          >
+            <!-- Top tag line -->
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-ui font-extrabold uppercase tracking-widest text-deep-plum/70 bg-[#F2E3D5] px-2 py-0.5 rounded-full">
+                ⚡ Exclusive Offer for You
+              </span>
+              <button 
+                @click="showTcModal = true"
+                class="text-[10.5px] font-ui text-[#A08085] hover:text-deep-plum underline transition-colors cursor-pointer"
+              >
+                T&C Applies
+              </button>
+            </div>
+
+            <!-- Coupon main content -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="space-y-1">
+                <h4 class="font-serif font-bold text-deep-plum text-sm leading-snug">
+                  {{ activeOffer.title }} — <span class="text-rose-600 font-sans font-extrabold">{{ activeOffer.discount }}</span>
+                </h4>
+                <p class="text-xs text-charcoal/70 font-ui leading-relaxed">
+                  {{ activeOffer.description }}
+                </p>
+              </div>
+
+              <!-- Action button / Code Badge -->
+              <div class="shrink-0 text-center flex flex-col items-center gap-1.5">
+                <button
+                  @click="copyCouponCode(activeOffer.code, activeOffer.status)"
+                  class="font-mono font-bold text-xs uppercase tracking-wider px-3.5 py-1.5 rounded-xl border border-dashed transition-all duration-200 select-all cursor-pointer"
+                  :class="activeOffer.status === 'locked' 
+                    ? 'border-charcoal/20 bg-charcoal/5 text-charcoal/40 cursor-not-allowed'
+                    : 'border-rose-400 bg-rose-50 text-rose-700 hover:bg-rose-100/70 hover:scale-[1.02] active:scale-95 shadow-xs'"
+                  :disabled="activeOffer.status === 'locked'"
+                >
+                  {{ activeOffer.code }}
+                </button>
+                <span class="text-[9px] font-ui text-mid-gray/80">
+                  {{ activeOffer.status === 'locked' ? 'Locked 🔒' : 'Click to Copy' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- T&C Modal -->
+          <Transition name="fade">
+            <div v-if="showTcModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs" @click.self="showTcModal = false">
+              <div class="bg-white rounded-3xl p-6 max-w-sm w-full border border-border-gray shadow-2xl relative space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b">
+                  <h3 class="font-serif font-bold text-deep-plum text-base">Coupon Terms & Conditions</h3>
+                  <button @click="showTcModal = false" class="text-charcoal/50 hover:text-charcoal hover:scale-105 transition-all text-lg font-bold">×</button>
+                </div>
+                <div class="space-y-3 text-xs font-ui text-charcoal/80 leading-relaxed">
+                  <p>1. <strong>Single Item Limit:</strong> Applied discounts apply only to the single most expensive product in your shopping bag.</p>
+                  <p>2. <strong>First Order Validation:</strong> WELCOME10 is valid for first-time customers. Re-activated if all previous orders were cancelled.</p>
+                  <p>3. <strong>Loyalty Gating:</strong> Subsequent loyalty coupons (ROYAL20, ROYAL30, etc.) require successful delivery of previous tier orders.</p>
+                  <p>4. Dynamic coupon offers cannot be combined with other custom checkout promo codes.</p>
+                  <p>5. <strong>Fair Use & System Integrity:</strong> Van Elvina reserves the right to void, cancel, or reject any coupon code application in the event of technical bugs, system exploits, unauthorized alterations, or suspected fraudulent activity.</p>
+                </div>
+                <button @click="showTcModal = false" class="w-full py-2 bg-deep-plum hover:bg-plum-800 text-white rounded-xl text-xs font-semibold font-ui shadow-premium transition-all">
+                  Got it, thanks!
+                </button>
+              </div>
+            </div>
+          </Transition>
 
           <!-- Delivery check -->
           <div class="bg-light-gray rounded-lg p-3">
@@ -385,8 +454,8 @@
                 <circle cx="18.5" cy="18.5" r="2.5"/>
               </svg>
               <span class="text-[12.5px] font-ui text-charcoal">
-                <span v-if="product.price >= 999">Free delivery on this order</span>
-                <span v-else>Free delivery on ₹999+ orders</span>
+                <span v-if="product.price >= 499">Free delivery on this order</span>
+                <span v-else>Free delivery on ₹499+ orders</span>
               </span>
             </div>
             <!-- COD -->
@@ -399,7 +468,7 @@
               </svg>
               <span class="text-[12.5px] font-ui text-charcoal">
                 <span v-if="product.isCodAvailable === false">COD is not available for this product</span>
-                <span v-else>COD available on orders above ₹499</span>
+                <span v-else>COD available on orders above ₹299</span>
               </span>
             </div>
           </div>
@@ -1262,6 +1331,112 @@ useHead({
     ]
   }),
 })
+
+// ── Available Offers Logic ───────────────────────────────────────────────────
+const deliveredOrdersCount = ref(0)
+const nonCancelledOrdersCount = ref(0)
+const loadingOrdersCount = ref(false)
+const showTcModal = ref(false)
+
+const loadOrderHistoryForOffers = async () => {
+  if (!auth.isLoggedIn) {
+    deliveredOrdersCount.value = 0
+    nonCancelledOrdersCount.value = 0
+    return
+  }
+  loadingOrdersCount.value = true
+  try {
+    const orders = await auth.fetchMyOrders()
+    const ordersList = orders || []
+    deliveredOrdersCount.value = ordersList.filter((o: any) => o.orderStatus === 'delivered' || o.status === 'delivered').length
+    nonCancelledOrdersCount.value = ordersList.filter((o: any) => o.orderStatus !== 'cancelled' && o.status !== 'cancelled').length
+  } catch (err) {
+    console.error('Failed to load orders for PDP offers:', err)
+  } finally {
+    loadingOrdersCount.value = false
+  }
+}
+
+watch(() => auth.isLoggedIn, () => {
+  loadOrderHistoryForOffers()
+}, { immediate: true })
+
+const activeOffer = computed(() => {
+  if (!auth.isLoggedIn) {
+    return {
+      code: 'WELCOME10',
+      discount: '10% OFF',
+      title: 'New Customer Offer',
+      description: 'Get 10% off your 1st order. Simply log in or sign up to activate.',
+      status: 'login_required'
+    }
+  }
+
+  const delivered = deliveredOrdersCount.value
+  const nonCancelled = nonCancelledOrdersCount.value
+
+  if (nonCancelled === 0) {
+    return {
+      code: 'WELCOME10',
+      discount: '10% OFF',
+      title: 'First Order Welcome Offer',
+      description: '10% off your first purchase. Coupon applies automatically in Bag.',
+      status: 'eligible'
+    }
+  }
+
+  if (delivered === 0) {
+    return {
+      code: 'ELVINAROYAL20',
+      discount: '20% OFF',
+      title: 'Loyalty Club Tier 2',
+      description: 'Unlock 20% off your second order once your first order is delivered.',
+      status: 'locked'
+    }
+  } else if (delivered === 1) {
+    return {
+      code: 'ELVINAROYAL20',
+      discount: '20% OFF',
+      title: 'Loyalty Club Tier 2',
+      description: '20% off your second order. Promo code is active for you!',
+      status: 'eligible'
+    }
+  } else if (delivered === 2) {
+    return {
+      code: 'ELVINAROYAL30',
+      discount: '30% OFF',
+      title: 'Loyalty Club Tier 3',
+      description: '30% off your third purchase. Promo code is active for you!',
+      status: 'eligible'
+    }
+  } else if (delivered === 3) {
+    return {
+      code: 'ELVINAROYAL40',
+      discount: '40% OFF',
+      title: 'Loyalty Club Tier 4',
+      description: '40% off your fourth purchase. Promo code is active for you!',
+      status: 'eligible'
+    }
+  } else {
+    return {
+      code: 'ELVINAROYAL50',
+      discount: '50% OFF',
+      title: 'Loyalty Club Elite Tier',
+      description: 'Get 50% off your purchase. Premium customer privilege code!',
+      status: 'eligible'
+    }
+  }
+})
+
+const copyCouponCode = (code: string, status: string) => {
+  if (status === 'locked') return
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code)
+    ui.addToast('success', `Code "${code}" copied to clipboard! Paste it in the Bag page.`)
+  } else {
+    ui.addToast('error', 'Failed to copy to clipboard')
+  }
+}
 
 </script>
 

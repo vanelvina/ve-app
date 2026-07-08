@@ -1,18 +1,17 @@
 <template>
-  <!-- Mobile Bottom Tab Bar – only on small screens -->
+  <!-- Mobile Bottom Tab Bar – only on small screens, hidden on PLP/PDP/Admin -->
   <nav
-    v-if="!['products', 'products-slug'].includes($route.name as string)"
+    v-if="showBar"
     class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.08)]"
     aria-label="Mobile bottom navigation"
   >
     <div class="flex items-stretch h-16">
+
       <!-- Home -->
       <NuxtLink
         to="/"
         class="flex-1 flex flex-col items-center justify-center gap-0.5 group"
-        active-class=""
         aria-label="Home"
-        @click="activeTab = 'home'"
       >
         <div
           class="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200"
@@ -37,7 +36,6 @@
         to="/categories"
         class="flex-1 flex flex-col items-center justify-center gap-0.5 group"
         aria-label="Browse categories"
-        @click="() => activeTab = 'category'"
       >
         <div
           class="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200"
@@ -61,7 +59,7 @@
       <button
         class="flex-1 flex flex-col items-center justify-center gap-0.5 group"
         aria-label="Explore and search"
-        @click="activeTab = 'explore'; ui.openSearch()"
+        @click="ui.openSearch()"
       >
         <div
           class="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200"
@@ -85,7 +83,7 @@
       <button
         class="flex-1 flex flex-col items-center justify-center gap-0.5 group"
         aria-label="My account"
-        @click="activeTab = 'profile'; ui.openProfileDrawer()"
+        @click="ui.openProfileDrawer()"
       >
         <div
           class="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200"
@@ -104,6 +102,7 @@
           :class="activeTab === 'profile' ? 'text-deep-plum' : 'text-gray-400'"
         >Profile</span>
       </button>
+
     </div>
   </nav>
 </template>
@@ -112,12 +111,18 @@
 const ui = useUIStore()
 const route = useRoute()
 
-// Sync active tab with current route
+// Safe: path is always a string, never null — unlike route.name which is null during transitions
+const showBar = computed(() => {
+  const p = route.path ?? ''
+  return !p.startsWith('/products') && !p.startsWith('/admin')
+})
+
+// Read-only computed — never assigned to. Tab highlighting driven purely by URL.
 const activeTab = computed(() => {
-  const path = route.path
-  if (path === '/') return 'home'
-  if (path === '/categories') return 'category'
-  if (path.startsWith('/products')) return 'explore'
+  const p = route.path ?? ''
+  if (p === '/') return 'home'
+  if (p.startsWith('/categories')) return 'category'
+  if (p.startsWith('/products')) return 'explore'
   return 'home'
 })
 </script>

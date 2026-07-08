@@ -26,7 +26,7 @@
       <div class="flex-1 min-w-0 pr-4">
         <p class="text-[10px] uppercase font-bold tracking-wider text-dusty-rose">Special Offer</p>
         <p class="text-xs text-charcoal leading-snug mt-0.5">
-          Use <strong class="text-deep-plum select-all bg-rose-blush/30 px-1 py-0.5 rounded font-mono">ELVINA10</strong> to claim <span class="font-bold text-deep-plum">10% OFF</span>
+          Use <strong class="text-deep-plum select-all bg-rose-blush/30 px-1 py-0.5 rounded font-mono">WELCOME10</strong> to claim <span class="font-bold text-deep-plum">10% OFF</span>
         </p>
       </div>
 
@@ -60,7 +60,7 @@ const copied = ref(false)
 
 const copyCoupon = async () => {
   try {
-    await navigator.clipboard.writeText('ELVINA10')
+    await navigator.clipboard.writeText('WELCOME10')
     copied.value = true
     setTimeout(() => {
       copied.value = false

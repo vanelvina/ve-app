@@ -85,8 +85,63 @@
             </div>
           </article>
 
+          <!-- Gift Wrap Offer Card -->
+          <div
+            v-if="!cart.giftWrap && !ignoredGiftWrap"
+            class="mt-6 p-5 bg-gradient-to-br from-[#FCFAF8] to-[#FAF2EA] border border-rose-blush/40 rounded-3xl relative overflow-hidden shadow-soft animate-fade-in"
+          >
+            <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush/35 pointer-events-none" />
+            <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-start gap-4">
+                <span class="text-3xl animate-pulse-slow">🎁</span>
+                <div class="space-y-1">
+                  <h4 class="font-serif font-bold text-deep-plum text-sm leading-snug">A gift for someone special?</h4>
+                  <p class="text-xs text-charcoal/60 font-ui leading-relaxed">
+                    Make it unforgettable. Add our signature premium gift wrap with a customized card for just ₹59.
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                <button
+                  @click="ignoredGiftWrap = true"
+                  class="px-4 py-2 rounded-xl text-xs font-semibold text-charcoal/45 hover:text-charcoal/70 transition-all font-ui"
+                >
+                  Ignore
+                </button>
+                <button
+                  @click="cart.setGiftWrap(true)"
+                  class="px-5 py-2 bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-semibold shadow-premium transition-all"
+                >
+                  Add Gift Wrap – ₹59
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gift Wrap Added Confirmation -->
+          <div
+            v-if="cart.giftWrap"
+            class="mt-6 p-4 bg-green-50 border border-green-200 rounded-3xl relative overflow-hidden shadow-soft animate-fade-in"
+          >
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">💝</span>
+                <div>
+                  <h4 class="font-serif font-bold text-green-800 text-sm">Gift wrapping added successfully!</h4>
+                  <p class="text-[11px] text-green-700 font-ui">Your order will be elegantly hand-wrapped (₹59).</p>
+                </div>
+              </div>
+              <button
+                @click="cart.setGiftWrap(false)"
+                class="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-all text-xs font-semibold font-ui cursor-pointer"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+
           <!-- Continue shopping -->
-          <div class="pt-2">
+          <div class="pt-6">
             <NuxtLink to="/products" class="btn-ghost text-sm">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -108,7 +163,7 @@
                 <input
                   v-model="couponInput"
                   type="text"
-                  placeholder="e.g. ELVINA10"
+                  placeholder="e.g. WELCOME10"
                   class="input-base flex-1"
                   aria-label="Coupon code"
                 />
@@ -141,8 +196,12 @@
                   {{ cart.shippingCost === 0 ? 'FREE' : formatPrice(cart.shippingCost) }}
                 </span>
               </div>
+              <div v-if="cart.giftWrap" class="flex justify-between text-sm font-ui text-charcoal">
+                <span>Gift Wrapper</span>
+                <span>{{ formatPrice(59) }}</span>
+              </div>
               <p v-if="cart.shippingCost > 0" class="text-xs text-mid-gray font-ui">
-                Add {{ formatPrice(999 - cart.subtotal) }} more for free shipping
+                Add {{ formatPrice(499 - cart.subtotal) }} more for free shipping
               </p>
             </div>
 
@@ -189,6 +248,7 @@ const ui = useUIStore()
 const auth = useAuthStore()
 const couponInput = ref('')
 const showCouponList = ref(false)
+const ignoredGiftWrap = ref(false)
 
 const applyingCoupon = ref(false)
 
@@ -217,6 +277,6 @@ const proceedToCheckout = () => {
 
 useSeoMeta({
   title: 'Shopping Bag – Van Elvina',
-  description: 'Review your shopping bag and proceed to checkout. Free shipping on orders above ₹999.',
+  description: 'Review your shopping bag and proceed to checkout. Free shipping on orders above ₹499.',
 })
 </script>
