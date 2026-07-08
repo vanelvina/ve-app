@@ -13,10 +13,19 @@
         style="background-color: #FAF6F0;"
       >
         <div class="flex items-center gap-1.5">
-          <button v-if="!isHomepage" @click="router.back()" class="p-1 -ml-1 text-charcoal/70 hover:text-deep-plum transition-colors" aria-label="Go back">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
+          <button
+            v-if="!isHomepage"
+            @click="router.back()"
+            class="flex items-center justify-center w-8 h-8 rounded-lg bg-charcoal/8 hover:bg-charcoal/14 active:scale-95 transition-all duration-150 -ml-1 shrink-0"
+            aria-label="Go back"
+          >
+            <img
+              src="https://static.vecteezy.com/system/resources/previews/000/589/654/original/vector-back-icon.jpg"
+              alt=""
+              class="object-contain"
+              style="width: 28px; height: 28px;"
+              aria-hidden="true"
+            />
           </button>
           <NuxtLink to="/" aria-label="Van Elvina – Home" class="shrink-0" :class="isHomepage ? 'ml-1' : ''">
             <img src="/favicon.png" alt="Van Elvina" class="w-8 h-8 object-contain" />

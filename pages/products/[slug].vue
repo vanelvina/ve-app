@@ -211,8 +211,7 @@
               </button>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
-              <!-- <!-- <AppRating :rating="product.rating" :count="product.reviewCount" show-count show-value /> --> -->
-              <span class="text-[11px] text-mid-gray font-ui">SKU: {{ activeSku }}</span>
+              <span v-if="product.subcategory" class="text-[11px] text-mid-gray font-ui">Type: {{ product.subcategory }}</span>
             </div>
           </div>
 
@@ -317,7 +316,7 @@
                 <button class="w-9 h-9 flex items-center justify-center text-charcoal hover:bg-light-gray transition-colors text-lg font-light" aria-label="Increase quantity"
                   @click="qty = Math.min(selectedSizeStock !== null ? Math.min(selectedSizeStock, 10) : 10, qty + 1)">+</button>
               </div>
-              <span v-if="selectedSizeStock === null" class="text-xs text-mid-gray font-ui">{{ product.stockCount }} in stock</span>
+              <!-- Stock count is intentionally NOT shown to customers — urgency only shows when ≤2 left -->
               <div class="flex-1 flex items-center gap-2">
               <AppButton size="md" :full="true" :loading="adding" @click="handleAddToCart" class="hidden md:inline-flex flex-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -728,7 +727,7 @@
     
     <button 
       @click="handleAddToCart" 
-      :disabled="!product.inStock || adding"
+      :disabled="(selectedSize && selectedSizeStock === 0) || adding"
       class="w-[80%] bg-deep-plum text-white font-ui font-bold tracking-wider text-sm hover:bg-[#473021] transition-colors rounded-none flex items-center justify-center gap-2 disabled:opacity-50"
     >
       <span v-if="adding" class="flex items-center gap-2">

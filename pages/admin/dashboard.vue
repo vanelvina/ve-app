@@ -156,12 +156,6 @@
                 {{ products.length }}
               </span>
               <span 
-                v-else-if="tab.id === 'plp-banners' && categories.length"
-                class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
-              >
-                {{ categories.length }}
-              </span>
-              <span 
                 v-else-if="tab.id === 'widgets' && widgets.length"
                 class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold"
               >
@@ -839,137 +833,6 @@
                 </tr>
               </tbody>
             </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB: PLP BANNERS -->
-      <section v-if="activeTab === 'plp-banners'" class="space-y-6 animate-fade-in">
-        <header class="bg-white p-5 rounded-2xl border border-charcoal/20 shadow-soft">
-          <h3 class="font-serif text-lg font-bold text-deep-plum">Product Listing Page (PLP) Banners</h3>
-          <p class="text-xs text-charcoal/60 mt-1">
-            Upload and configure custom banners for the top of each category's listing page. Configure separate images for Desktop (wide layout) and Mobile (portrait aspect ratio) to ensure optimized page loading and design.
-          </p>
-        </header>
-
-        <div class="grid grid-cols-1 gap-6">
-          <!-- All Products Banner Card -->
-          <div 
-            v-if="allProductsCategory"
-            class="bg-[#FAF5E4]/50 p-6 rounded-2xl border-2 border-dashed border-[#C5A58E] shadow-soft space-y-4"
-          >
-            <div class="flex items-center justify-between border-b border-[#C5A58E]/20 pb-3">
-              <h4 class="font-serif text-base font-bold text-deep-plum flex items-center gap-2">
-                <span>🌟</span> General / All Products Banner
-                <span class="text-xs font-mono font-normal text-dusty-rose bg-rose-blush/20 px-2 py-0.5 rounded">/products (No Category Selected)</span>
-              </h4>
-              <span class="text-xs font-semibold text-[#C5A58E]">Default Fallback</span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Desktop Banner -->
-              <div class="space-y-2">
-                <label class="block text-xs font-bold text-charcoal/80">Desktop PLP Banner Image URL</label>
-                <div class="flex gap-3">
-                  <div class="w-24 h-12 shrink-0 rounded-xl overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
-                    <img v-if="allProductsCategory.plpBanner" :src="allProductsCategory.plpBanner" class="w-full h-full object-cover" />
-                    <span v-else class="text-[10px] text-charcoal/40">No Banner</span>
-                  </div>
-                  <input 
-                    v-model="allProductsCategory.plpBanner" 
-                    type="text" 
-                    placeholder="https://example.com/all-products-desktop.jpg" 
-                    class="flex-1 p-3 border border-charcoal/20 bg-white rounded-xl text-xs" 
-                  />
-                </div>
-              </div>
-
-              <!-- Mobile Banner -->
-              <div class="space-y-2">
-                <label class="block text-xs font-bold text-charcoal/80">Mobile PLP Banner Image URL</label>
-                <div class="flex gap-3">
-                  <div class="w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
-                    <img v-if="allProductsCategory.plpBannerMobile" :src="allProductsCategory.plpBannerMobile" class="w-full h-full object-cover" />
-                    <span v-else class="text-[10px] text-charcoal/40">No Banner</span>
-                  </div>
-                  <input 
-                    v-model="allProductsCategory.plpBannerMobile" 
-                    type="text" 
-                    placeholder="https://example.com/all-products-mobile.jpg" 
-                    class="flex-1 p-3 border border-charcoal/20 bg-white rounded-xl text-xs" 
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="flex justify-end pt-2 border-t border-rose-blush/10">
-              <button 
-                @click="savePLPBanners(allProductsCategory)" 
-                class="px-4 py-2 bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-semibold shadow-premium transition-all"
-              >
-                Save General Banner
-              </button>
-            </div>
-          </div>
-
-          <!-- Dynamic Category Banners -->
-          <div 
-            v-for="cat in categories.filter(c => c.slug !== 'all')" 
-            :key="cat._id" 
-            class="bg-white p-6 rounded-2xl border border-charcoal/20 shadow-soft space-y-4"
-          >
-            <div class="flex items-center justify-between border-b border-rose-blush/20 pb-3">
-              <h4 class="font-serif text-base font-bold text-deep-plum flex items-center gap-2">
-                <span>📁</span> {{ cat.name }}
-                <span class="text-xs font-mono font-normal text-dusty-rose bg-rose-blush/20 px-2 py-0.5 rounded">/products?category={{ cat.slug }}</span>
-              </h4>
-              <span class="text-xs font-semibold text-charcoal/50">{{ cat.productCount || 0 }} Products</span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Desktop Banner -->
-              <div class="space-y-2">
-                <label class="block text-xs font-bold text-charcoal/80">Desktop PLP Banner Image URL</label>
-                <div class="flex gap-3">
-                  <div class="w-24 h-12 shrink-0 rounded-xl overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
-                    <img v-if="cat.plpBanner" :src="cat.plpBanner" class="w-full h-full object-cover" />
-                    <span v-else class="text-[10px] text-charcoal/40">No Banner</span>
-                  </div>
-                  <input 
-                    v-model="cat.plpBanner" 
-                    type="text" 
-                    placeholder="https://example.com/desktop-banner.jpg" 
-                    class="flex-1 p-3 border border-charcoal/20 bg-white rounded-xl text-xs" 
-                  />
-                </div>
-              </div>
-
-              <!-- Mobile Banner -->
-              <div class="space-y-2">
-                <label class="block text-xs font-bold text-charcoal/80">Mobile PLP Banner Image URL</label>
-                <div class="flex gap-3">
-                  <div class="w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-warm-ivory border border-rose-blush flex items-center justify-center shadow-soft">
-                    <img v-if="cat.plpBannerMobile" :src="cat.plpBannerMobile" class="w-full h-full object-cover" />
-                    <span v-else class="text-[10px] text-charcoal/40">No Banner</span>
-                  </div>
-                  <input 
-                    v-model="cat.plpBannerMobile" 
-                    type="text" 
-                    placeholder="https://example.com/mobile-banner.jpg" 
-                    class="flex-1 p-3 border border-charcoal/20 bg-white rounded-xl text-xs" 
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="flex justify-end pt-2 border-t border-rose-blush/10">
-              <button 
-                @click="savePLPBanners(cat)" 
-                class="px-4 py-2 bg-deep-plum text-white hover:bg-plum-800 rounded-xl text-xs font-semibold shadow-premium transition-all"
-              >
-                Save Banners for {{ cat.name }}
-              </button>
-            </div>
           </div>
         </div>
       </section>
@@ -2743,18 +2606,7 @@
                         <input v-model.number="productModal.form.deliveryDays" type="number" placeholder="3"
                           class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
                       </div>
-                      <div class="flex items-center justify-between bg-white rounded-xl border border-charcoal/15 px-3.5 py-2.5">
-                        <div>
-                          <p class="text-[11px] font-bold text-charcoal/70">Visible (In Stock)</p>
-                          <p class="text-[9px] text-charcoal/35">Product shows on storefront</p>
-                        </div>
-                        <button type="button" @click="productModal.form.inStock = !productModal.form.inStock"
-                          class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                          :class="productModal.form.inStock ? 'bg-emerald-500' : 'bg-gray-200'">
-                          <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                            :class="productModal.form.inStock ? 'translate-x-5' : 'translate-x-0'" />
-                        </button>
-                      </div>
+                      <!-- inStock is now derived from stockPerSize per variant — no manual toggle needed -->
                     </div>
                   </div>
 
@@ -3183,18 +3035,51 @@
 
               <!-- ── Sticky Footer ──────────────────────────────────── -->
               <div class="shrink-0 px-6 py-4 border-t border-rose-blush/10 bg-white flex items-center justify-between gap-3">
-                <!-- Tab progress dots (desktop) -->
-                <div class="hidden md:flex items-center gap-2">
-                  <div v-for="tab in ['general', 'pricing', 'variants', 'media', 'details']" :key="tab"
-                    class="h-1.5 rounded-full transition-all"
-                    :class="productFormTab === tab ? 'w-6 bg-deep-plum' : 'w-2 bg-charcoal/15'" />
+                <!-- Left: progress dots -->
+                <div class="hidden md:flex items-center gap-1.5">
+                  <div v-for="(tab, idx) in ['general', 'pricing', 'variants', 'media', 'details']" :key="tab"
+                    class="h-1.5 rounded-full transition-all cursor-pointer"
+                    :class="productFormTab === tab ? 'w-6 bg-deep-plum' : 'w-2 bg-charcoal/15'"
+                    @click="productFormTab = tab" />
                 </div>
+
+                <!-- Right: action buttons -->
                 <div class="flex items-center gap-2 ml-auto">
+                  <!-- Cancel (always visible) -->
                   <button type="button" @click="productModal.show = false"
-                    class="px-5 py-2.5 border border-charcoal/20 rounded-xl text-xs font-semibold text-charcoal hover:bg-warm-ivory transition-colors">
+                    class="px-4 py-2.5 border border-charcoal/20 rounded-xl text-xs font-semibold text-charcoal hover:bg-warm-ivory transition-colors">
                     Cancel
                   </button>
-                  <button type="submit"
+
+                  <!-- Back button (not on first tab) -->
+                  <button v-if="productFormTab !== 'general'" type="button" @click="prevProductTab"
+                    class="px-4 py-2.5 border border-deep-plum/30 text-deep-plum rounded-xl text-xs font-semibold hover:bg-rose-blush/10 transition-colors flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Back
+                  </button>
+
+                  <!-- NEXT button (all tabs except last) -->
+                  <button v-if="productFormTab !== 'details'" type="button" @click="nextProductTab"
+                    class="px-5 py-2.5 bg-deep-plum/10 text-deep-plum border border-deep-plum/20 rounded-xl text-xs font-bold hover:bg-deep-plum/15 transition-all flex items-center gap-1.5">
+                    Next
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+
+                  <!-- SAVE AS DRAFT (only on last tab, only when adding new product) -->
+                  <button v-if="productFormTab === 'details' && !productModal.isEdit" type="button" @click="saveProductAsDraft"
+                    class="px-5 py-2.5 border border-amber-400 text-amber-700 bg-amber-50 rounded-xl text-xs font-bold hover:bg-amber-100 transition-all flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Save as Draft
+                  </button>
+
+                  <!-- SUBMIT (only on last tab) -->
+                  <button v-if="productFormTab === 'details'" type="submit"
                     class="px-6 py-2.5 bg-deep-plum text-white rounded-xl text-xs font-bold shadow-lg shadow-deep-plum/25 hover:bg-[#473021] transition-all flex items-center gap-2">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
@@ -3744,6 +3629,22 @@ const uiStore = useUIStore()
 
 const activeTab = ref('overview')
 const productFormTab = ref('general')
+
+const PRODUCT_TABS = ['general', 'pricing', 'variants', 'media', 'details'] as const
+
+const nextProductTab = () => {
+  const idx = PRODUCT_TABS.indexOf(productFormTab.value as any)
+  if (idx < PRODUCT_TABS.length - 1) {
+    productFormTab.value = PRODUCT_TABS[idx + 1]
+  }
+}
+
+const prevProductTab = () => {
+  const idx = PRODUCT_TABS.indexOf(productFormTab.value as any)
+  if (idx > 0) {
+    productFormTab.value = PRODUCT_TABS[idx - 1]
+  }
+}
 const widgetDeviceTab = ref('desktop')
 const mobileDrawerOpen = ref(false)
 
@@ -3752,7 +3653,6 @@ const tabs = [
   { id: 'banners', name: 'Banners Carousel', icon: '🖼️' },
   { id: 'categories', name: 'Categories Selector', icon: '🗂️' },
   { id: 'category-page-banners', name: 'Category Banners', icon: '📱' },
-  { id: 'plp-banners', name: 'PLP Banners', icon: '🎏' },
   { id: 'products', name: 'Products Catalog', icon: '🛍️' },
   { id: 'widgets', name: 'Widgets & Layout', icon: '⚙️' },
   { id: 'blogs', name: 'Blogs Management', icon: '📝' },
@@ -3790,7 +3690,6 @@ const tabGroups = [
     tabs: [
       { id: 'banners', name: 'Homepage Banners', icon: '🖼️' },
       { id: 'category-page-banners', name: 'Category Banners', icon: '📱' },
-      { id: 'plp-banners', name: 'PLP Header Banners', icon: '🎏' },
       { id: 'widgets', name: 'Widgets & Layout', icon: '⚙️' },
       { id: 'about', name: 'About Us Content', icon: 'ℹ️' }
     ]
@@ -4903,19 +4802,6 @@ const deleteCategoryItem = async (id: string) => {
   }
 }
 
-const savePLPBanners = async (cat: any) => {
-  try {
-    await adminStore.updateCategory(cat._id, {
-      plpBanner: cat.plpBanner,
-      plpBannerMobile: cat.plpBannerMobile
-    })
-    uiStore.addToast('success', `${cat.name} banners saved successfully`)
-    loadAllData()
-  } catch (error: any) {
-    uiStore.addToast('error', error.message || 'Failed to save PLP banners')
-  }
-}
-
 // PRODUCTS CRUD
 const openProductModal = (prod: any | null) => {
   productFormTab.value = 'general'
@@ -5462,7 +5348,7 @@ const getVideoEmbedUrl = (url: string) => {
   return url
 }
 
-const saveProductItem = async () => {
+const saveProductItem = async (isDraft = false) => {
   if (!productModal.value.form.category || productModal.value.form.category.trim() === '') {
     uiStore.addToast('error', 'Please select at least one Category for the product.')
     return
@@ -5514,6 +5400,7 @@ const saveProductItem = async () => {
 
   const payload = {
     ...productModal.value.form,
+    status: isDraft ? 'draft' : 'active',
     discount,
     variants: compiledVariants,
     images: firstVariantImages,
@@ -5530,9 +5417,12 @@ const saveProductItem = async () => {
     if (productModal.value.isEdit) {
       await adminStore.updateProduct(productModal.value.itemId, payload)
       uiStore.addToast('success', 'Product updated successfully')
+    } else if (isDraft) {
+      await adminStore.createProduct(payload)
+      uiStore.addToast('success', '📝 Product saved as draft — it won\'t be visible to customers until published.')
     } else {
       await adminStore.createProduct(payload)
-      uiStore.addToast('success', 'Product created successfully')
+      uiStore.addToast('success', 'Product created and published successfully!')
     }
     productModal.value.show = false
     loadAllData()
@@ -5540,6 +5430,9 @@ const saveProductItem = async () => {
     uiStore.addToast('error', error.message || 'Failed to save product')
   }
 }
+
+// Save as draft — same as create but with status:'draft' so it stays hidden from customers
+const saveProductAsDraft = () => saveProductItem(true)
 
 const deleteProductItem = async (id: string) => {
   if (!confirm('Are you sure you want to delete this product?')) return
