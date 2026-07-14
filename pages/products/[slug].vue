@@ -1262,7 +1262,8 @@ const similarProducts = computed(() => {
 const { recentlyViewed } = storeToRefs(useProducts())
 const recentlyViewedProducts = computed(() => {
   const currentId = product.value?.id || (product.value as any)?._id
-  return recentlyViewed.value
+  const list = Array.isArray(recentlyViewed.value) ? recentlyViewed.value : []
+  return list
     .filter((p: any) => (p.id || p._id) !== currentId)
     .slice(0, 6)
 })

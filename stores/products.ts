@@ -63,12 +63,15 @@ export const useProductsStore = defineStore('products', {
         result = result.filter((p) => p.inStock)
       }
 
-      // Tags (quick filter chips)
+      // Tags / Quick Filters — match product.tags[] OR product.subcategory
       if (state.filters.tags && state.filters.tags.length > 0) {
         result = result.filter((p) =>
-          state.filters.tags!.some(tag =>
-            (p.tags || []).some(t => t.toLowerCase().includes(tag.toLowerCase()))
-          )
+          state.filters.tags!.some(tag => {
+            const t = tag.toLowerCase()
+            const tagMatch = (p.tags || []).some(pt => pt.toLowerCase().includes(t))
+            const subMatch = p.subcategory ? p.subcategory.toLowerCase().includes(t) : false
+            return tagMatch || subMatch
+          })
         )
       }
 
@@ -218,9 +221,10 @@ export const useProductsStore = defineStore('products', {
       this.page = page
     },
     addRecentlyViewed(product: Product) {
+      const current = Array.isArray(this.recentlyViewed) ? this.recentlyViewed : []
       this.recentlyViewed = [
         product,
-        ...this.recentlyViewed.filter((p) => p.id !== product.id),
+        ...current.filter((p) => p.id !== product.id),
       ].slice(0, 8)
     },
   },

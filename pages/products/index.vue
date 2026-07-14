@@ -231,20 +231,14 @@
           </div>
         </section>
 
-        <!-- End message when viewing all products (no filter) and fully loaded -->
-        <div
-          v-if="!activeCategory && !hasMorePrimary && primaryProducts.length > 0 && otherCategoryGroups.length === 0"
-          class="mt-16 py-10 text-center border-t border-rose-blush/20"
-        >
-          <p class="text-[11px] font-ui text-mid-gray uppercase tracking-widest mb-2">You've reached the end of our catalogue</p>
-          <p class="font-serif text-deep-plum text-lg">New collections drop every season ✨</p>
-        </div>
-
       </main>
     </div>
 
     <!-- ── Mobile Quick Filter Chips ─────────────────────────────── -->
-    <div class="lg:hidden fixed bottom-14 left-0 right-0 z-40 bg-white border-t border-border-gray/40 py-2 px-3 shadow-sm">
+    <div
+      class="lg:hidden fixed bottom-14 left-0 right-0 z-40 bg-white border-t border-border-gray/40 py-2 px-3 shadow-sm transition-transform duration-300"
+      :class="filtersScrollHidden ? 'translate-y-full' : 'translate-y-0'"
+    >
       <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-0.5">
         <button
           v-for="chip in quickFilterChips"
@@ -584,16 +578,33 @@ watch(sentinel, () => { if (sentinel.value) setupObserver() })
 watch(sortValue, val => store.setSort(val))
 watch(() => route.query, parseRouteQueries, { deep: true })
 
+// ── Mobile scroll-hide for quick filter bar ──────────────────────────────
+const filtersScrollHidden = ref(false)
+let scrollStopTimer: ReturnType<typeof setTimeout> | null = null
+
+const onPlpScroll = () => {
+  // Only apply on mobile (lg breakpoint = 1024px)
+  if (window.innerWidth >= 1024) return
+  filtersScrollHidden.value = true
+  if (scrollStopTimer) clearTimeout(scrollStopTimer)
+  scrollStopTimer = setTimeout(() => {
+    filtersScrollHidden.value = false
+  }, 150)
+}
+
 onMounted(() => {
   parseRouteQueries()
   loadCategories()
   restoreScroll()
   nextTick(setupObserver)
+  window.addEventListener('scroll', onPlpScroll, { passive: true })
 })
 
 onUnmounted(() => {
   observer?.disconnect()
   saveScroll()
+  window.removeEventListener('scroll', onPlpScroll)
+  if (scrollStopTimer) clearTimeout(scrollStopTimer)
 })
 
 useSeoMeta({

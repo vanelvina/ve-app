@@ -3094,22 +3094,50 @@
                       class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition resize-none" />
                   </div>
 
-                  <!-- Tags -->
+                  <!-- Search Tags & Quick Filters -->
                   <div class="bg-warm-ivory/60 rounded-2xl p-4 border border-rose-blush/15 space-y-3">
-                    <p class="text-[11px] font-bold text-charcoal/70">🏷️ Search Tags</p>
-                    <div class="flex flex-wrap gap-1.5">
-                      <button v-for="pTag in ['new arrival', 'bestseller', 'trending', 'comfort', 'premium', 'daily-wear', 'bridal', 'sports', 'seamless']"
-                        :key="pTag" type="button" @click="togglePresetTag(pTag)"
-                        class="px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-colors"
-                        :class="productModal.form.tags.includes(pTag) ? 'bg-deep-plum text-white border-deep-plum' : 'bg-white text-charcoal/55 border-charcoal/20 hover:border-deep-plum'">
-                        {{ pTag }}
-                      </button>
+                    <div class="flex items-center justify-between">
+                      <p class="text-[11px] font-bold text-charcoal/70">🏷️ Search Tags &amp; Quick Filters</p>
+                      <p class="text-[9px] text-charcoal/40">Used by quick-filter chips on the shop page</p>
                     </div>
-                    <input
-                      :value="productModal.form.tags.join(', ')"
-                      @input="productModal.form.tags = ($event.target as HTMLInputElement).value.split(',').map(s => s.trim()).filter(Boolean)"
-                      placeholder="Or type custom tags, comma separated..."
-                      class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white font-mono focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
+
+                    <!-- Active tag pills -->
+                    <div class="flex flex-wrap gap-1.5 min-h-[28px]">
+                      <span
+                        v-for="tag in productModal.form.tags" :key="tag"
+                        class="inline-flex items-center gap-1 px-2.5 py-1 bg-deep-plum text-white rounded-xl text-[10px] font-bold border border-deep-plum"
+                      >
+                        {{ tag }}
+                        <button type="button" class="ml-0.5 hover:opacity-70" @click="togglePresetTag(tag)">&times;</button>
+                      </span>
+                      <span v-if="!productModal.form.tags.length" class="text-[10px] text-charcoal/35 italic py-1">No tags yet — add from suggestions or type below</span>
+                    </div>
+
+                    <!-- Preset suggestion chips -->
+                    <div>
+                      <p class="text-[9px] text-charcoal/45 mb-1.5 uppercase tracking-wide font-semibold">Quick suggestions</p>
+                      <div class="flex flex-wrap gap-1.5">
+                        <button v-for="pTag in ['padded', 'non-padded', 't-shirt bra', 'full coverage', 'cotton', 'bridal', 'sports', 'underwired', 'seamless', 'new arrival', 'bestseller', 'trending', 'comfort', 'premium', 'daily-wear']"
+                          :key="pTag" type="button" @click="togglePresetTag(pTag)"
+                          class="px-2.5 py-1 rounded-xl text-[10px] font-bold border transition-colors"
+                          :class="productModal.form.tags.includes(pTag) ? 'bg-deep-plum text-white border-deep-plum' : 'bg-white text-charcoal/55 border-charcoal/20 hover:border-deep-plum'">
+                          {{ pTag }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Custom tag input -->
+                    <div class="flex gap-2">
+                      <input
+                        v-model="tagInputValue"
+                        type="text"
+                        placeholder="Type a tag and press Enter or comma…"
+                        class="flex-1 px-3.5 py-2 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition"
+                        @keydown.enter.prevent="addCustomTag"
+                        @keydown="if($event.key === ',') { $event.preventDefault(); addCustomTag() }"
+                      />
+                      <button type="button" @click="addCustomTag" class="px-3 py-2 bg-deep-plum text-white rounded-xl text-xs font-bold hover:bg-deep-plum/90 transition shrink-0">Add</button>
+                    </div>
                   </div>
 
                   <!-- FAQs -->
@@ -5522,6 +5550,17 @@ const toggleSizePreset = (variant: any, size: string) => {
     if (variant.stockPerSize) delete variant.stockPerSize[size]
     if (variant.skuPerSize) delete variant.skuPerSize[size]
   }
+}
+
+const tagInputValue = ref('')
+
+const addCustomTag = () => {
+  const tag = tagInputValue.value.trim().replace(/,+$/, '')
+  if (!tag) return
+  if (!productModal.value.form.tags.includes(tag)) {
+    productModal.value.form.tags.push(tag)
+  }
+  tagInputValue.value = ''
 }
 
 const togglePresetTag = (tag: string) => {

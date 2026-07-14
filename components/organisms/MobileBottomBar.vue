@@ -2,7 +2,8 @@
   <!-- Mobile Bottom Tab Bar – only on small screens, hidden on PLP/PDP/Admin -->
   <nav
     v-if="showBar"
-    class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.08)]"
+    class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_12px_rgba(0,0,0,0.08)] transition-transform duration-300"
+    :class="isScrolling ? 'translate-y-full' : 'translate-y-0'"
     aria-label="Mobile bottom navigation"
   >
     <div class="flex items-stretch h-16">
@@ -108,8 +109,28 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
 const ui = useUIStore()
 const route = useRoute()
+
+// ── Scroll-hide behaviour ──────────────────────────────────────────────
+const isScrolling = ref(false)
+let stopTimer: ReturnType<typeof setTimeout> | null = null
+
+const handleScroll = () => {
+  isScrolling.value = true
+  if (stopTimer) clearTimeout(stopTimer)
+  stopTimer = setTimeout(() => {
+    isScrolling.value = false
+  }, 150)
+}
+
+onMounted(() => window.addEventListener('scroll', handleScroll, { passive: true }))
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+  if (stopTimer) clearTimeout(stopTimer)
+})
 
 // Safe: path is always a string, never null — unlike route.name which is null during transitions
 const showBar = computed(() => {
