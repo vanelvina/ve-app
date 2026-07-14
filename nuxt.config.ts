@@ -1,19 +1,19 @@
 // Helper to resolve the correct API base URL
 const getApiBase = () => {
   const envBase = process.env.NUXT_PUBLIC_API_BASE;
-  
+
   // If the env variable points to the old Render backend, ignore it and use Supabase
   if (envBase && envBase.includes('onrender.com')) {
     return 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api';
   }
-  
+
   // In production, relative '/api' calls won't work without a server proxy, so force Supabase URL
   if (process.env.NODE_ENV === 'production') {
     if (!envBase || envBase === '/api') {
       return 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api';
     }
   }
-  
+
   return envBase || '/api';
 };
 
@@ -82,8 +82,8 @@ export default defineNuxtConfig({
         { name: 'twitter:image', content: 'https://vanelvina.com/icons/icon-512x512.png' },
       ],
       link: [
-        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon.png' },
-        { rel: 'shortcut icon', href: '/favicon.png' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon2.png' },
+        { rel: 'shortcut icon', href: '/favicon2.png' },
         { rel: 'apple-touch-icon', sizes: '192x192', href: '/icons/icon-192x192.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },

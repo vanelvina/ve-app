@@ -237,6 +237,64 @@
             </p>
           </div>
 
+          <!-- ── EXCLUSIVE OFFER CARD (between price & colour) ───────── -->
+          <div
+            v-if="activeOffer"
+            class="relative overflow-hidden rounded-xl border border-[#EDE4DC] bg-gradient-to-br from-[#FCFAF8] to-[#F5EAE0]/50 shadow-soft hover:shadow-md transition-all duration-300"
+          >
+            <!-- Green "Extra ₹X off" badge — top right -->
+            <div
+              v-if="offerExtraRupees > 0"
+              class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold font-ui px-2 py-0.5 rounded-bl-xl flex items-center gap-0.5 leading-tight"
+            >
+              <svg class="w-2.5 h-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 7h.01M7 3h5l8.657 8.657a1 1 0 010 1.414L15.97 18.76a1 1 0 01-1.414 0L6 10.086V3zM7 7a0 0 010 0z"/></svg>
+              Extra ₹{{ offerExtraRupees }} off
+            </div>
+
+            <div class="px-3 py-2.5">
+              <!-- Header row -->
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[12px] font-ui font-extrabold uppercase tracking-widest text-deep-plum/70 bg-[#F2E3D5] px-1.5 py-0.5 rounded-full whitespace-nowrap">⚡ Exclusive Offer for You</span>
+                <button
+                  @click="showTcModal = true"
+                  class="text-[12px] font-ui text-[#A08085] hover:text-deep-plum underline transition-colors cursor-pointer ml-2 shrink-0 mt-3"
+                >T&C</button>
+              </div>
+
+              <!-- Main content row -->
+              <div class="flex items-center justify-between gap-2">
+                <!-- Left: title + description + get-at price -->
+                <div class="min-w-0 flex-1">
+                  <p class="text-[12px] font-serif font-bold text-deep-plum leading-tight truncate">
+                    {{ activeOffer.title }} — <span class="text-rose-600 font-sans font-extrabold">{{ activeOffer.discount }}</span>
+                  </p>
+                  <p class="text-[10.5px] text-charcoal/60 font-ui leading-snug mt-0.5 line-clamp-2">{{ activeOffer.description }}</p>
+                  <!-- Get at price -->
+                  <p v-if="offerExtraRupees > 0" class="text-[10.5px] font-ui font-semibold text-emerald-600 mt-1 whitespace-nowrap">
+                    Get at <span class="font-bold">{{ formatPrice(product.price - offerExtraRupees) }}</span>
+                    <span class="text-charcoal/40 line-through ml-1">{{ formatPrice(product.price) }}</span>
+                  </p>
+                </div>
+
+                <!-- Right: coupon code -->
+                <div class="shrink-0 flex flex-col items-center gap-0.5">
+                  <button
+                    @click="copyCouponCode(activeOffer.code, activeOffer.status)"
+                    class="font-mono font-bold text-[10.5px] uppercase tracking-wide px-2.5 py-1 rounded-lg border border-dashed transition-all duration-200 select-all cursor-pointer whitespace-nowrap"
+                    :class="activeOffer.status === 'locked'
+                      ? 'border-charcoal/20 bg-charcoal/5 text-charcoal/40 cursor-not-allowed'
+                      : 'border-rose-400 bg-rose-50 text-rose-700 hover:bg-rose-100/70 hover:scale-[1.02] active:scale-95'"
+                    :disabled="activeOffer.status === 'locked'"
+                  >{{ activeOffer.code }}</button>
+                  <span class="text-[8.8px] font-ui text-mid-gray/80">
+                    {{ activeOffer.status === 'locked' ? 'Locked 🔒' : 'Tap to Copy' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- ─────────────────────────────────────────────────────────── -->
+
           <!-- Variant / Color -->
           <div>
             <p class="text-xs font-ui font-semibold text-charcoal mb-2">
@@ -246,13 +304,24 @@
               <button
                 v-for="(variant, idx) in product.variants"
                 :key="variant.color"
-                class="w-7 h-7 rounded-full border-2 transition-all duration-200 cursor-pointer"
+                class="relative w-7 h-7 rounded-full border-2 transition-all duration-200 cursor-pointer"
                 :class="selectedVariant === idx ? 'border-deep-plum scale-110 shadow-md' : 'border-white shadow-sm hover:scale-105'"
                 :style="{ backgroundColor: variant.colorHex }"
                 :aria-label="variant.color"
                 :aria-pressed="selectedVariant === idx"
                 @click="selectedVariant = idx; selectedSize = ''; setActiveImageIdx(0); closeVideoPlayer()"
-              />
+              >
+                <!-- OOS diagonal slash for fully out-of-stock colors -->
+                <span
+                  v-if="isVariantOos(variant)"
+                  class="absolute inset-0 flex items-center justify-center rounded-full overflow-hidden pointer-events-none"
+                  aria-hidden="true"
+                >
+                  <svg viewBox="0 0 28 28" class="w-full h-full" fill="none">
+                    <line x1="4" y1="4" x2="24" y2="24" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+                  </svg>
+                </span>
+              </button>
             </div>
           </div>
 
@@ -327,7 +396,7 @@
               <!-- Desktop Wishlist Button -->
               <button
                 v-if="product"
-                @click="wishlist.toggle(product)"
+                @click="handleWishlistToggle"
                 class="hidden md:flex items-center justify-center w-11 h-11 rounded-xl border transition-all duration-200 shrink-0"
                 :class="wishlist.isWishlisted(product.id || product._id)
                   ? 'bg-rose-50 border-dusty-rose text-deep-plum'
@@ -344,54 +413,6 @@
               </div><!-- end flex-1 buttons -->
             </div><!-- end flex items-center gap-3 qty row -->
           </div><!-- end space-y-2 pb-4 section -->
-
-          <!-- Available Offers Card -->
-          <div
-            v-if="activeOffer"
-            class="p-4 bg-gradient-to-br from-[#FCFAF8] to-[#F5EAE0]/50 border border-[#EDE4DC] rounded-2xl relative overflow-hidden shadow-soft transition-all duration-300 hover:shadow-md my-4"
-          >
-            <!-- Top tag line -->
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-[10px] font-ui font-extrabold uppercase tracking-widest text-deep-plum/70 bg-[#F2E3D5] px-2 py-0.5 rounded-full">
-                ⚡ Exclusive Offer for You
-              </span>
-              <button 
-                @click="showTcModal = true"
-                class="text-[10.5px] font-ui text-[#A08085] hover:text-deep-plum underline transition-colors cursor-pointer"
-              >
-                T&C Applies
-              </button>
-            </div>
-
-            <!-- Coupon main content -->
-            <div class="flex items-start justify-between gap-3">
-              <div class="space-y-1">
-                <h4 class="font-serif font-bold text-deep-plum text-sm leading-snug">
-                  {{ activeOffer.title }} — <span class="text-rose-600 font-sans font-extrabold">{{ activeOffer.discount }}</span>
-                </h4>
-                <p class="text-xs text-charcoal/70 font-ui leading-relaxed">
-                  {{ activeOffer.description }}
-                </p>
-              </div>
-
-              <!-- Action button / Code Badge -->
-              <div class="shrink-0 text-center flex flex-col items-center gap-1.5">
-                <button
-                  @click="copyCouponCode(activeOffer.code, activeOffer.status)"
-                  class="font-mono font-bold text-xs uppercase tracking-wider px-3.5 py-1.5 rounded-xl border border-dashed transition-all duration-200 select-all cursor-pointer"
-                  :class="activeOffer.status === 'locked' 
-                    ? 'border-charcoal/20 bg-charcoal/5 text-charcoal/40 cursor-not-allowed'
-                    : 'border-rose-400 bg-rose-50 text-rose-700 hover:bg-rose-100/70 hover:scale-[1.02] active:scale-95 shadow-xs'"
-                  :disabled="activeOffer.status === 'locked'"
-                >
-                  {{ activeOffer.code }}
-                </button>
-                <span class="text-[9px] font-ui text-mid-gray/80">
-                  {{ activeOffer.status === 'locked' ? 'Locked 🔒' : 'Click to Copy' }}
-                </span>
-              </div>
-            </div>
-          </div>
 
           <!-- T&C Modal -->
           <Transition name="fade">
@@ -436,13 +457,26 @@
           <!-- Policy Indicators -->
           <div class="divide-y divide-border-gray border border-border-gray rounded-xl overflow-hidden bg-white">
             <!-- Returns -->
-            <div class="flex items-center gap-3 px-3 py-2.5">
-              <!-- Return/Exchange Icon -->
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-charcoal" aria-hidden="true">
-                <path d="M1 4v6h6"/>
-                <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
-              </svg>
-              <span class="text-[12.5px] font-ui text-charcoal">7-day return and exchange</span>
+            <div class="flex items-start gap-3 px-3 py-2.5">
+              <template v-if="product.isReturnable === false">
+                <!-- No-return icon -->
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-red-500 mt-0.5" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                </svg>
+                <span class="text-[12.5px] font-ui text-red-600 leading-snug">
+                  <strong class="block">No Return &amp; No Exchange</strong>
+                  This product is non-returnable and non-exchangeable.
+                  All sales are final as per our hygiene policy.
+                </span>
+              </template>
+              <template v-else>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-charcoal" aria-hidden="true">
+                  <path d="M1 4v6h6"/>
+                  <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+                </svg>
+                <span class="text-[12.5px] font-ui text-charcoal">7-day return and exchange</span>
+              </template>
             </div>
             <!-- Free Delivery -->
             <div class="flex items-center gap-3 px-3 py-2.5">
@@ -491,11 +525,11 @@
       <!-- Product details tabs -->
       <div class="mt-12 bg-white rounded-2xl shadow-soft border border-border-gray overflow-hidden">
         <!-- Tab headers -->
-        <div class="flex border-b border-border-gray overflow-x-auto scrollbar-hide">
+        <div class="flex border-b border-border-gray">
           <button
             v-for="tab in tabs"
             :key="tab"
-            class="px-6 py-4 text-sm font-ui font-medium whitespace-nowrap transition-colors border-b-2 shrink-0"
+            class="flex-1 px-2 py-3 text-xs font-ui font-medium whitespace-nowrap transition-colors border-b-2 text-center"
             :class="activeTab === tab
               ? 'border-deep-plum text-deep-plum'
               : 'border-transparent text-mid-gray hover:text-charcoal'"
@@ -509,6 +543,9 @@
         <!-- Tab content -->
         <div class="p-6">
           <div v-if="activeTab === 'Description'" class="space-y-6">
+            <!-- Save Big Banner -->
+            <LoyaltyDiscountBanner />
+
             <p class="text-sm font-ui text-mid-gray leading-relaxed">{{ product.description }}</p>
 
             <!-- Key Features -->
@@ -526,20 +563,6 @@
             <div v-if="product.additionalInfo" class="space-y-2 mt-4 border-t border-border-gray pt-4">
               <h3 class="font-ui font-semibold text-charcoal text-sm">Additional Product Information</h3>
               <p class="text-sm font-ui text-mid-gray leading-relaxed whitespace-pre-line">{{ product.additionalInfo }}</p>
-            </div>
-
-            <!-- YouTube Video Embed -->
-            <div v-if="product.videoUrl" class="mt-6 border-t border-border-gray pt-6">
-              <h3 class="font-ui font-semibold text-charcoal text-sm mb-3.5">Product Showcase Video</h3>
-              <div class="relative aspect-video rounded-2xl overflow-hidden shadow-soft max-w-2xl bg-black">
-                <iframe 
-                  :src="product.videoUrl" 
-                  class="absolute inset-0 w-full h-full" 
-                  frameborder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowfullscreen
-                ></iframe>
-              </div>
             </div>
 
             <!-- Descriptive/Lifestyle Images Grid -->
@@ -675,16 +698,25 @@
         </div>
       </div>
 
-      <!-- Loyalty Discount Banner -->
-      <div class="mt-10">
-        <LoyaltyDiscountBanner />
-      </div>
+
+      <!-- Sticky release sentinel: when this enters viewport, release the mobile sticky bar -->
+      <div ref="stickyReleaseSentinel" aria-hidden="true"></div>
 
       <!-- Similar Products -->
       <div class="mt-10">
         <h2 class="font-serif text-2xl text-deep-plum font-semibold mb-6">Similar Products</h2>
         <div class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
           <div v-for="p in similarProducts" :key="p.id" class="w-48 md:w-56 shrink-0">
+            <ProductCard :product="p" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Recently Viewed -->
+      <div v-if="recentlyViewedProducts.length > 0" class="mt-10">
+        <h2 class="font-serif text-2xl text-deep-plum font-semibold mb-6">Recently Viewed</h2>
+        <div class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+          <div v-for="p in recentlyViewedProducts" :key="p.id || p._id" class="w-48 md:w-56 shrink-0">
             <ProductCard :product="p" />
           </div>
         </div>
@@ -749,7 +781,36 @@
         @touchend="onTouchEnd"
       >
         <Transition name="slide-fade" mode="out-in">
+          <!-- YouTube slide: show thumbnail with play button overlay -->
+          <div
+            v-if="isYouTubeUrl(allImages[activeImageIdx])"
+            :key="'yt-' + activeImageIdx"
+            class="relative flex items-center justify-center w-full max-h-full"
+            style="aspect-ratio: 16/9; max-width: 800px;"
+          >
+            <img
+              :src="getYouTubeThumbnail(allImages[activeImageIdx])"
+              alt="Video preview"
+              class="w-full h-full object-cover rounded-lg shadow-2xl"
+            />
+            <a
+              :href="allImages[activeImageIdx]"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="absolute inset-0 flex items-center justify-center group"
+              aria-label="Play video on YouTube"
+              @click.stop
+            >
+              <div class="w-20 h-20 rounded-full bg-red-600 group-hover:bg-red-500 flex items-center justify-center shadow-2xl transition-all duration-200 group-hover:scale-110">
+                <svg class="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            </a>
+          </div>
+          <!-- Regular image -->
           <img 
+            v-else
             :key="activeImageIdx" 
             :src="allImages[activeImageIdx]" 
             :alt="`Product detailed image ${activeImageIdx + 1}`"
@@ -779,9 +840,9 @@
   </Transition>
 
   <!-- Mobile Sticky Bottom Bar -->
-  <div v-if="product" class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white flex shadow-[0_-4px_16px_rgba(0,0,0,0.1)] h-[60px]">
+  <div v-if="product && stickyBarActive" class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white flex shadow-[0_-4px_16px_rgba(0,0,0,0.1)] h-[60px]">
     <button 
-      @click="wishlist.toggle(product)" 
+      @click="handleWishlistToggle" 
       class="w-[20%] flex items-center justify-center border-r border-border-gray/50 transition-colors bg-white"
       :class="wishlist.isWishlisted(product.id || product._id) ? 'text-deep-plum' : 'text-mid-gray'"
       aria-label="Wishlist"
@@ -887,6 +948,29 @@ const selectedSizeStock = computed(() => {
 // Lightbox and Swipe functionality states
 const showLightbox = ref(false)
 const lightboxRef = ref<HTMLElement | null>(null)
+
+// ── Sticky bar release via IntersectionObserver ───────────────────────────────
+const stickyBarActive = ref(true)
+const stickyReleaseSentinel = ref<HTMLElement | null>(null)
+
+onMounted(() => {
+  if (typeof IntersectionObserver !== 'undefined' && stickyReleaseSentinel.value) {
+    const obs = new IntersectionObserver(
+      ([entry]) => { stickyBarActive.value = !entry.isIntersecting },
+      { threshold: 0 }
+    )
+    obs.observe(stickyReleaseSentinel.value)
+    onUnmounted(() => obs.disconnect())
+  }
+})
+
+// ── OOS helper: is every size for this variant out of stock? ─────────────────
+const isVariantOos = (variant: any) => {
+  if (!variant?.stockPerSize) return false
+  const values = Object.values(variant.stockPerSize) as number[]
+  if (values.length === 0) return false
+  return values.every(v => v === 0)
+}
 
 const touchStartX = ref(0)
 const touchEndX = ref(0)
@@ -1174,6 +1258,15 @@ const similarProducts = computed(() => {
     .slice(0, 6)
 })
 
+// ── Recently Viewed ───────────────────────────────────────────────────────────
+const { recentlyViewed } = storeToRefs(useProducts())
+const recentlyViewedProducts = computed(() => {
+  const currentId = product.value?.id || (product.value as any)?._id
+  return recentlyViewed.value
+    .filter((p: any) => (p.id || p._id) !== currentId)
+    .slice(0, 6)
+})
+
 const isAlreadyInBag = computed(() => {
   if (!product.value) return false
   const pId = product.value.id || (product.value as any)._id
@@ -1201,7 +1294,17 @@ const handleAddToCart = async () => {
   const color = product.value.variants[selectedVariant.value].color
   trackAddToCart(pId, product.value.name, product.value.price, color, selectedSize.value, qty.value)
   addToCart(product.value, color, selectedSize.value, qty.value)
+  // Fire navbar tooltip
+  ui.showCartTooltip('Added to bag', `₹${product.value.price.toLocaleString('en-IN')}`)
 }
+
+const handleWishlistToggle = () => {
+  if (!product.value) return
+  const wasWishlisted = wishlist.isWishlisted(product.value.id || (product.value as any)._id)
+  wishlist.toggle(product.value)
+  ui.showWishlistTooltip(wasWishlisted ? 'Removed from wishlist' : 'Saved to wishlist')
+}
+
 
 const sizeModalOpen = ref(false)
 
@@ -1426,6 +1529,16 @@ const activeOffer = computed(() => {
       status: 'eligible'
     }
   }
+})
+
+// Parses the offer discount string (e.g. "10% OFF", "30% OFF") and computes
+// the actual rupees saved on the current product price.
+const offerExtraRupees = computed(() => {
+  if (!activeOffer.value || !product.value) return 0
+  const match = activeOffer.value.discount.match(/(\d+)%/)
+  if (!match) return 0
+  const pct = parseInt(match[1], 10)
+  return Math.round((product.value.price * pct) / 100)
 })
 
 const copyCouponCode = (code: string, status: string) => {

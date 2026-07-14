@@ -4,7 +4,7 @@ import fs from 'fs';
 
 const Jimp = JimpModule.default || JimpModule.Jimp || JimpModule;
 
-const sourceFile = path.resolve('public/favicon.png');
+const sourceFile = path.resolve('public/favicon2.png');
 const outputDir = path.resolve('public/icons');
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
 
@@ -19,7 +19,7 @@ async function generate() {
   for (const size of sizes) {
     const filename = `icon-${size}x${size}.png`;
     const outputPath = path.join(outputDir, filename);
-    
+
     let cloned = image.clone();
     try {
       // Try Jimp v1.x options object signature
@@ -28,7 +28,7 @@ async function generate() {
       // Fall back to Jimp v0.x positional parameters
       cloned = cloned.resize(size, size);
     }
-    
+
     if (typeof cloned.writeAsync === 'function') {
       await cloned.writeAsync(outputPath);
     } else if (typeof cloned.write === 'function') {
@@ -40,7 +40,7 @@ async function generate() {
     }
     console.log(`Generated: ${filename}`);
   }
-  
+
   console.log('All icons generated successfully!');
 }
 

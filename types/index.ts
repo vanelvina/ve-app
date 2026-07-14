@@ -34,6 +34,8 @@ export interface Product {
   isWishlisted?: boolean
   isCodAvailable?: boolean
   isFreeShipping?: boolean
+  isReturnable?: boolean
+  isExchangeable?: boolean
 }
 
 export interface Category {
@@ -108,6 +110,7 @@ export interface FilterState {
   priceRange: [number, number]
   rating: number | null
   inStock: boolean
+  tags?: string[]
 }
 
 export type SortOption = 'popularity' | 'price-asc' | 'price-desc' | 'rating' | 'newest' | 'discount'

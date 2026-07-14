@@ -232,7 +232,15 @@ export const useCartStore = defineStore('cart', {
           const nonCancelledOrders = ordersList.filter((o: any) => o.orderStatus !== 'cancelled' && o.status !== 'cancelled')
           const deliveredCount = ordersList.filter((o: any) => o.orderStatus === 'delivered' || o.status === 'delivered').length
           const required = loyaltyCoupons[upper].requiredDelivered
-          
+
+          // ── Single-use check: coupon already used in a prior order? ──────────
+          const alreadyUsed = nonCancelledOrders.some((o: any) =>
+            (o.couponCode || o.coupon_code || '').toUpperCase() === upper
+          )
+          if (alreadyUsed) {
+            return { success: false, message: `Coupon ${upper} has already been used on a previous order.` }
+          }
+
           if (upper === 'WELCOME10' && nonCancelledOrders.length > 0) {
             return { success: false, message: 'This coupon is only valid for your first order.' }
           }

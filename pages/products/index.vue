@@ -64,9 +64,7 @@
 
         <!-- Description + count pill -->
         <div class="flex items-center gap-2.5 mt-2 flex-wrap">
-          <p v-if="activeCategoryBanner?.description" class="text-[11px] font-ui text-white/70 max-w-sm leading-snug">
-            {{ activeCategoryBanner.description }}
-          </p>
+
           <span
             class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold font-ui backdrop-blur-sm"
             :style="`background: rgba(255,255,255,0.10); color: ${categoryHero.accent}; border: 1px solid rgba(255,255,255,0.12);`"
@@ -138,7 +136,7 @@
         <!-- ── END-OF-CATEGORY BANNER ──────────────────────────────── -->
         <div
           v-if="primaryProducts.length > 0 && !hasMorePrimary"
-          class="my-16 mx-auto max-w-2xl text-center"
+          class="my-8 mx-auto max-w-2xl text-center"
         >
           <div class="flex items-center gap-4 mb-8">
             <div class="flex-1 h-px bg-gradient-to-r from-transparent via-rose-blush to-deep-plum/20" />
@@ -153,12 +151,6 @@
           <h2 class="font-serif text-2xl md:text-3xl text-deep-plum font-bold mb-3">
             {{ activeCategory ? `That's our full ${activeCategory} collection` : "You've reached the end" }}
           </h2>
-          <p class="text-sm text-mid-gray font-ui leading-relaxed max-w-md mx-auto">
-            {{ activeCategory
-              ? `Every ${activeCategory.toLowerCase()} style we craft is right here — made with care for comfort and confidence. New drops arrive every season, so check back soon.`
-              : "That's everything in our catalogue right now. We're constantly adding new styles — follow us for a first look at new arrivals."
-            }}
-          </p>
           <div class="flex items-center justify-center gap-3 mt-6 flex-wrap">
             <NuxtLink
               to="/products?sort=newest"
@@ -251,6 +243,23 @@
       </main>
     </div>
 
+    <!-- ── Mobile Quick Filter Chips ─────────────────────────────── -->
+    <div class="lg:hidden fixed bottom-14 left-0 right-0 z-40 bg-white border-t border-border-gray/40 py-2 px-3 shadow-sm">
+      <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-0.5">
+        <button
+          v-for="chip in quickFilterChips"
+          :key="chip.value"
+          class="shrink-0 px-3 py-1 rounded-full text-[11px] font-bold font-ui tracking-wide border transition-all duration-200 whitespace-nowrap"
+          :class="activeQuickFilter === chip.value
+            ? 'bg-deep-plum text-white border-deep-plum shadow-sm'
+            : 'bg-white text-charcoal border-border-gray hover:border-deep-plum hover:text-deep-plum'"
+          @click="toggleQuickFilter(chip.value)"
+        >
+          {{ chip.label }}
+        </button>
+      </div>
+    </div>
+
     <!-- ── Mobile Sticky Bottom Bar ───────────────────────────────── -->
     <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-border-gray flex h-14 shadow-[0_-4px_16px_rgba(0,0,0,0.1)]">
       <button class="flex-1 flex items-center justify-center gap-2 border-r border-border-gray font-ui text-sm font-semibold text-charcoal hover:bg-gray-50 transition-colors" @click="sortDrawerOpen = true">
@@ -326,8 +335,6 @@
         </div>
       </div>
     </Transition>
-    <!-- ── One-time onboarding tooltip ──────────────────────────── -->
-    <PlpOnboarding />
 
   </div>
 </template>
@@ -511,6 +518,30 @@ const toggleCategory = (cat: string) => {
   const idx = current.indexOf(cat)
   if (idx === -1) current.push(cat); else current.splice(idx, 1)
   selectedCategories.value = current
+}
+
+// ── Mobile Quick Filter Chips ─────────────────────────────────────────────
+const quickFilterChips = [
+  { label: 'Padded',        value: 'padded' },
+  { label: 'Non-Padded',    value: 'non-padded' },
+  { label: 'T-Shirt Bra',   value: 't-shirt' },
+  { label: 'Full Coverage', value: 'full-coverage' },
+  { label: 'Cotton',        value: 'cotton' },
+  { label: 'Bridal',        value: 'bridal' },
+  { label: 'Sports',        value: 'sports' },
+  { label: 'Underwired',    value: 'underwired' },
+]
+
+const activeQuickFilter = ref<string>('')
+
+const toggleQuickFilter = (value: string) => {
+  if (activeQuickFilter.value === value) {
+    activeQuickFilter.value = ''
+    store.setFilters({ tags: [] })
+  } else {
+    activeQuickFilter.value = value
+    store.setFilters({ tags: [value] })
+  }
 }
 
 // ── Category banner ───────────────────────────────────────────────────

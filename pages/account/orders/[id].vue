@@ -104,10 +104,9 @@
                   class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
                   :class="getStepClass(step.id)"
                 >
-                  <svg v-if="isStepCompleted(step.id)" :class="step.id === normalizeStatus(order.orderStatus) ? (step.id === 'cancelled' ? 'text-red-600' : 'text-deep-plum') : 'text-white'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="isStepCompleted(step.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span v-else>{{ idx + 1 }}</span>
                 </div>
                 <span class="text-[10px] font-bold font-ui mt-2 text-charcoal/70 uppercase tracking-wider text-center max-w-[70px]">
                   {{ step.label }}
@@ -138,10 +137,9 @@
                   class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 font-ui text-xs font-bold border-2"
                   :class="getStepClass(step.id)"
                 >
-                  <svg v-if="isStepCompleted(step.id)" :class="step.id === normalizeStatus(order.orderStatus) ? (step.id === 'cancelled' ? 'text-red-600' : 'text-deep-plum') : 'text-white'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="isStepCompleted(step.id)" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span v-else>{{ idx + 1 }}</span>
                 </div>
                 <div class="pt-1.5">
                   <span class="text-[11px] font-bold font-ui text-charcoal/80 uppercase tracking-wider block">
@@ -165,6 +163,35 @@
               <p class="text-xs text-red-700/80 mt-0.5 font-ui">This order has been cancelled and will not be processed further.</p>
             </div>
           </div>
+        </div>
+
+        <!-- Cancel Order (pre-ship only) -->
+        <div
+          v-if="isCancellable"
+          class="bg-red-50 rounded-3xl p-5 border border-red-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        >
+          <div>
+            <h3 class="font-bold text-red-800 text-sm uppercase tracking-wide">Cancel This Order</h3>
+            <p class="text-xs text-red-700/80 mt-1 font-ui leading-relaxed">
+              Your order hasn't shipped yet. You can cancel it now and we'll process your refund (if applicable) within 5–7 business days.
+            </p>
+          </div>
+          <button
+            id="cancel-order-btn"
+            @click="cancelOrder"
+            :disabled="cancelling"
+            class="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-200 shadow-sm"
+            aria-label="Cancel this order"
+          >
+            <svg v-if="cancelling" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            {{ cancelling ? 'Cancelling…' : 'Cancel Order' }}
+          </button>
         </div>
 
         <!-- Return / Exchange Actions -->
@@ -295,12 +322,14 @@ import { ref, onMounted, computed } from 'vue'
 
 definePageMeta({
   middleware: [
-    function (to, from) {
+    function (to) {
+      if (import.meta.server) return  // auth state lives in localStorage – client only
       const auth = useAuthStore()
+      auth.init()  // read token from localStorage before checking isLoggedIn
       const ui = useUIStore()
       if (!auth.isLoggedIn) {
         ui.openAuthModal(to.fullPath)
-        ui.addToast('warning', 'Please sign in to view your order details.')
+        ui.addToast('info', 'Please sign in to view your order details.')
         return navigateTo(`/?auth_trigger=true&redirect=${encodeURIComponent(to.fullPath)}`)
       }
     }
@@ -445,21 +474,21 @@ const isStepCompleted = (stepId: string) => {
 }
 
 const getStepClass = (stepId: string) => {
-  if (!order.value) return 'border-charcoal/20 bg-white text-charcoal/40'
+  if (!order.value) return 'border-charcoal/15 bg-white'
   const currentStatus = normalizeStatus(order.value.orderStatus)
   const levels = statusLevels.value
   const stepLevel = levels[stepId] || 1
   const currentLevel = levels[currentStatus] || 1
 
-  if (stepLevel < currentLevel) {
-    return 'border-deep-plum bg-deep-plum text-white scale-100 shadow-sm'
-  } else if (stepLevel === currentLevel) {
-    if (currentStatus === 'cancelled') {
-      return 'border-red-600 bg-white text-red-600 scale-110 ring-4 ring-red-600/10 font-bold'
+  if (stepLevel <= currentLevel) {
+    // Completed or current — same dark fill
+    if (currentStatus === 'cancelled' && stepId === 'cancelled') {
+      return 'border-red-600 bg-red-600 text-white shadow-sm'
     }
-    return 'border-deep-plum bg-white text-deep-plum scale-110 ring-4 ring-deep-plum/10 font-bold'
+    return 'border-deep-plum bg-deep-plum text-white shadow-sm'
   } else {
-    return 'border-charcoal/15 bg-white text-charcoal/40'
+    // Pending — plain white ring
+    return 'border-charcoal/20 bg-white'
   }
 }
 
@@ -473,14 +502,62 @@ const getStepTimestamp = (stepId: string) => {
 
 const isEligibleForReturnOrExchange = computed(() => {
   if (!order.value || order.value.orderStatus !== 'delivered') return false
+  // If every item in the order is flagged non-returnable, hide buttons
+  const allNonReturnable = order.value.items?.length > 0 &&
+    order.value.items.every((item: any) => item.isReturnable === false)
+  if (allNonReturnable) return false
   const deliveredEntry = order.value.statusHistory?.slice().reverse().find((h: any) => h.status === 'delivered')
   const deliveredDate = deliveredEntry ? new Date(deliveredEntry.timestamp).getTime() : new Date(order.value.updatedAt).getTime()
   const sevenDays = 7 * 24 * 60 * 60 * 1000
   return (Date.now() - deliveredDate) <= sevenDays
 })
 
+// Cancellable only before shipped stage
+const NON_CANCELLABLE_STATUSES = ['shipped', 'out_for_delivery', 'delivered', 'cancelled',
+  'return_requested', 'exchange_requested', 'returned', 'exchanged']
+
+const isCancellable = computed(() => {
+  if (!order.value) return false
+  return !NON_CANCELLABLE_STATUSES.includes(order.value.orderStatus)
+})
+
+const cancelling = ref(false)
+const { $alert, $confirm, $prompt } = useDialog()
+
+const cancelOrder = async () => {
+  if (!order.value) return
+  const confirmed = await $confirm(
+    `Are you sure you want to cancel Order #${order.value.orderId}? This action cannot be undone.`,
+    { title: 'Cancel Order' }
+  )
+  if (!confirmed) return
+
+  const reason = await $prompt('Reason for cancellation (optional):', {
+    title: 'Cancellation Reason',
+    placeholder: 'e.g. Changed my mind…'
+  }) ?? ''
+
+  cancelling.value = true
+  try {
+    await $fetch(`${config.public.apiBase}/orders/${order.value._id}/cancel`, {
+      method: 'POST',
+      headers: auth.getHeaders(),
+      body: { reason: reason || 'Cancelled by customer' }
+    })
+    location.reload()
+  } catch (err: any) {
+    await $alert(err.data?.message || 'Failed to cancel order. Please try again.')
+  } finally {
+    cancelling.value = false
+  }
+}
+
+
 const requestReturn = async () => {
-  const reason = prompt('Please provide a reason for the return:')
+  const reason = await $prompt('Please provide a reason for the return:', {
+    title: 'Request Return',
+    placeholder: 'e.g. Wrong size, damaged item…'
+  })
   if (!reason) return
   
   try {
@@ -489,15 +566,18 @@ const requestReturn = async () => {
       headers: auth.getHeaders(),
       body: { reason }
     })
-    alert('Return requested successfully.')
+    await $alert('Return requested successfully. Our team will reach out shortly.')
     location.reload()
   } catch (err: any) {
-    alert(err.data?.message || 'Failed to request return')
+    await $alert(err.data?.message || 'Failed to request return')
   }
 }
 
 const requestExchange = async () => {
-  const reason = prompt('Please provide a reason for the exchange:')
+  const reason = await $prompt('Please provide a reason for the exchange:', {
+    title: 'Request Exchange',
+    placeholder: 'e.g. Need a different size…'
+  })
   if (!reason) return
   
   try {
@@ -506,10 +586,11 @@ const requestExchange = async () => {
       headers: auth.getHeaders(),
       body: { reason }
     })
-    alert('Exchange requested successfully.')
+    await $alert('Exchange requested successfully. Our team will reach out shortly.')
     location.reload()
   } catch (err: any) {
-    alert(err.data?.message || 'Failed to request exchange')
+    await $alert(err.data?.message || 'Failed to request exchange')
   }
 }
 </script>
+

@@ -187,6 +187,10 @@
                 <span>Gift Wrapper</span>
                 <span>{{ formatPrice(59) }}</span>
               </div>
+              <div v-if="codHandlingFee > 0" class="flex justify-between text-amber-700">
+                <span>COD Handling Fee</span>
+                <span>{{ formatPrice(codHandlingFee) }}</span>
+              </div>
               <div class="flex justify-between font-bold text-charcoal border-t pt-2">
                 <span>Total</span><span>{{ formatPrice(orderTotal) }}</span>
               </div>
@@ -321,7 +325,8 @@ const shippingOptions = computed(() => [
 ])
 
 const shippingFee = computed(() => shippingOptions.value.find(o => o.id === selectedShipping.value)?.price ?? 0)
-const orderTotal = computed(() => checkoutSubtotal.value - checkoutDiscount.value + shippingFee.value + cart.giftWrapCost)
+const codHandlingFee = computed(() => selectedPayment.value === 'cod' ? 10 : 0)
+const orderTotal = computed(() => checkoutSubtotal.value - checkoutDiscount.value + shippingFee.value + cart.giftWrapCost + codHandlingFee.value)
 
 const codEligible = computed(() => {
   return orderTotal.value >= 299 && checkoutItems.value.every((item: any) => item.product?.isCodAvailable !== false)
@@ -337,7 +342,7 @@ const paymentOptions = computed(() => [
   {
     id: 'cod',
     name: 'Cash on Delivery (COD)',
-    desc: codEligible.value ? 'Pay in cash at delivery' : 'COD available only for orders above ₹299',
+    desc: codEligible.value ? 'Pay in cash at delivery (+₹10 handling fee)' : 'COD available only for orders above ₹299',
     disabled: !codEligible.value,
   },
   {
@@ -440,6 +445,7 @@ const sendAbandonedNotification = async (reason: string) => {
         name: 'Gift Wrapper',
         price: 59,
         quantity: 1,
+        image: '/gift-wrap.png',
         variantColor: '',
         color: '',
         size: 'Standard',
@@ -502,6 +508,7 @@ const placeOrder = async () => {
       size: item.size || 'Standard',
       color: item.variantColor || '',
       variantColor: item.variantColor || '',
+      isReturnable: item.product?.isReturnable !== false,
       sku: (() => {
         const variant = item.product?.variants?.find((v: any) => v.color === item.variantColor)
         return variant?.skuPerSize?.[item.size] || variant?.sku || item.product?.sku || ''
@@ -514,7 +521,7 @@ const placeOrder = async () => {
         name: 'Gift Wrapper',
         price: 59,
         quantity: 1,
-        image: '/icons/gift-icon.png',
+        image: '/gift-wrap.png',
         size: 'Standard',
         color: '',
         variantColor: '',
@@ -541,6 +548,7 @@ const placeOrder = async () => {
       shippingFee: shippingFee.value,
       discount: checkoutDiscount.value,
       total: orderTotal.value,
+      couponCode: !isBuyNow.value ? (cart.couponCode || null) : null,
       guestInfo: !auth.isLoggedIn ? {
         name: form.fullName.trim(),
         email: form.email.trim(),
@@ -552,7 +560,7 @@ const placeOrder = async () => {
       const res = await auth.placeOrder(payload)
       if (res.success) {
         if (!isBuyNow.value) {
-          cart.clearCart()
+          await cart.clearCart()  // await so backend is empty before thank-you fetchCart runs
         } else {
           sessionStorage.removeItem('ve_buy_now_item')
         }
@@ -589,7 +597,7 @@ const placeOrder = async () => {
             const res = await auth.verifyPayment(verifyPayload)
             if (res.success) {
               if (!isBuyNow.value) {
-                cart.clearCart()
+                await cart.clearCart()  // await so backend is empty before thank-you fetchCart runs
               } else {
                 sessionStorage.removeItem('ve_buy_now_item')
               }

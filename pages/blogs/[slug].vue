@@ -124,10 +124,11 @@ const shareUrl = computed(() => {
   return `https://vanelvina.com/blogs/${route.params.slug}`
 })
 
+const ui = useUIStore()
 const copyShareLink = () => {
   if (import.meta.client) {
     navigator.clipboard.writeText(window.location.href)
-    alert('Link copied to clipboard!')
+    ui.addToast('success', 'Link copied to clipboard!')
   }
 }
 

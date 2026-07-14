@@ -28,6 +28,8 @@
     <!-- Toast Notifications -->
     <ToastNotifications />
 
+    <!-- App Dialog (themed alert / confirm / prompt) -->
+    <AppDialog />
 
 
     <!-- Profile Sidebar Drawer -->

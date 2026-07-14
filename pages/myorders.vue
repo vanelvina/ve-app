@@ -152,12 +152,14 @@ import { formatPrice } from '~/utils/formatters'
 
 definePageMeta({
   middleware: [
-    function (to, from) {
+    function (to) {
+      if (import.meta.server) return
       const auth = useAuthStore()
+      auth.init()
       const ui = useUIStore()
       if (!auth.isLoggedIn) {
         ui.openAuthModal(to.fullPath)
-        ui.addToast('warning', 'Please sign in to view your orders.')
+        ui.addToast('info', 'Please sign in to view your orders.')
         return navigateTo(`/?auth_trigger=true&redirect=${encodeURIComponent(to.fullPath)}`)
       }
     }

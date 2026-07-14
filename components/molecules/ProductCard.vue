@@ -17,35 +17,57 @@
         <!-- Main Image Container — transitions via slide direction per active variant or image change -->
         <Transition :name="slideDirection">
           <div :key="activeVariantIdx + '-' + activeImageIndex" class="absolute inset-0 w-full h-full overflow-hidden">
+            <!-- Skeleton shown while image is loading -->
+            <div
+              v-if="!isImageLoaded(activeVariantImages[activeImageIndex])"
+              class="absolute inset-0 w-full h-full bg-[#F0EDED] flex items-center justify-center overflow-hidden"
+              aria-hidden="true"
+            >
+              <!-- Shimmer sweep -->
+              <div class="absolute inset-0 skeleton-shimmer" />
+              <!-- Faded brand watermark -->
+              <img
+                src="/favicon2.png"
+                alt=""
+                class="w-12 h-12 opacity-[0.13] object-contain select-none pointer-events-none"
+                aria-hidden="true"
+              />
+            </div>
             <img
-              :src="activeVariantImages[activeImageIndex] || 'https://via.placeholder.com/300x400?text=Van+Elvina'"
+              :src="activeVariantImages[activeImageIndex] || '/favicon2.png'"
               :alt="product.name"
-              class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 md:group-hover:scale-105"
+              class="absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 md:group-hover:scale-105"
+              :class="isImageLoaded(activeVariantImages[activeImageIndex]) ? 'opacity-100' : 'opacity-0'"
               loading="lazy"
               width="300"
               height="400"
+              @load="markImageLoaded(activeVariantImages[activeImageIndex])"
             />
           </div>
         </Transition>
       </NuxtLink>
 
-      <!-- Dots Indicator -->
-      <div 
-        v-if="activeVariantImages.length > 1"
-        class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none"
+      <!-- Out of Stock overlay (Flipkart-style: still clickable, clearly marked) -->
+      <div
+        v-if="product.inStock === false || product.stockCount === 0"
+        class="absolute inset-0 bg-white/60 flex items-center justify-center z-10 pointer-events-none"
+        aria-hidden="true"
       >
-        <span 
-          v-for="(_, index) in activeVariantImages" 
-          :key="index"
-          class="w-1.2 h-1.2 rounded-full transition-all duration-200"
-          :class="index === activeImageIndex ? 'bg-deep-plum w-2.5' : 'bg-charcoal/20'"
-        />
+        <span class="bg-charcoal/80 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
+          Out of Stock
+        </span>
       </div>
 
       <!-- Status Badges Stack (Top-Left) -->
       <div class="absolute top-2 left-2 md:top-2.5 md:left-2.5 z-10 flex flex-col gap-1 items-start">
         <span
-          v-if="product.badge"
+          v-if="product.inStock === false || product.stockCount === 0"
+          class="px-1.5 py-0.5 md:px-2.5 md:py-0.5 rounded text-[8px] md:text-[9px] font-bold uppercase tracking-wider text-white bg-gray-500 shadow-soft"
+        >
+          Out of Stock
+        </span>
+        <span
+          v-else-if="product.badge"
           class="px-1.5 py-0.5 md:px-2.5 md:py-0.5 rounded text-[8px] md:text-[9px] font-bold uppercase tracking-wider text-white shadow-soft"
           :class="product.badge === 'bestseller' ? 'bg-amber-500' : product.badge === 'new' ? 'bg-deep-plum' : 'bg-dusty-rose'"
         >
@@ -53,7 +75,7 @@
         </span>
         
         <span 
-          v-if="product.discount > 0" 
+          v-if="product.discount > 0 && product.inStock !== false && product.stockCount !== 0" 
           class="px-1.5 py-0.5 md:px-2 md:py-0.5 rounded text-[8px] md:text-[9px] font-ui font-bold uppercase tracking-wider text-white bg-red-500 shadow-soft"
         >
           {{ product.discount }}% OFF
@@ -130,6 +152,19 @@ const props = defineProps<{ product: Product }>()
 
 const ui = useUIStore()
 const { toggle, isWishlisted: isWishlistedFn } = useWishlist()
+
+// ─── Image loading state ──────────────────────────────────────────────────────
+const loadedImages = ref<Set<string>>(new Set())
+
+const isImageLoaded = (src: string | undefined) => {
+  if (!src) return false
+  return loadedImages.value.has(src)
+}
+
+const markImageLoaded = (src: string | undefined) => {
+  if (!src) return
+  loadedImages.value = new Set([...loadedImages.value, src])
+}
 
 const isWishlisted = computed(() => {
   const pId = props.product.id || (props.product as any)._id
@@ -269,6 +304,25 @@ const handleQuickAdd = () => {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Skeleton loading shimmer */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 40%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.45) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 </style>
 

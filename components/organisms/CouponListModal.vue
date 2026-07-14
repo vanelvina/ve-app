@@ -139,46 +139,51 @@ watch(isLoggedIn, (loggedIn) => {
 })
 
 const coupons = computed(() => {
+  const nonCancelled = ordersList.value.filter((o: any) => o.orderStatus !== 'cancelled' && o.status !== 'cancelled')
+  const usedCodes = new Set(
+    nonCancelled.map((o: any) => (o.couponCode || o.coupon_code || '').toUpperCase()).filter(Boolean)
+  )
+
   const loyalty = [
     {
       code: 'WELCOME10',
       discountLabel: '10% OFF',
       title: 'First Order Discount',
       description: 'Get 10% off the most expensive item on your very first order.',
-      eligible: ordersList.value.filter((o: any) => o.orderStatus !== 'cancelled' && o.status !== 'cancelled').length === 0,
-      reason: 'Only valid for your 1st order.'
+      eligible: nonCancelled.length === 0 && !usedCodes.has('WELCOME10'),
+      reason: usedCodes.has('WELCOME10') ? 'Already used on a previous order.' : 'Only valid for your 1st order.'
     },
     {
       code: 'ELVINAROYAL20',
       discountLabel: '20% OFF',
       title: '2nd Order Unlock',
       description: 'Get 20% off your most expensive item. Unlocks when your 1st order is delivered.',
-      eligible: deliveredCount.value >= 1,
-      reason: 'Your 1st order is not yet marked as delivered.'
+      eligible: deliveredCount.value >= 1 && !usedCodes.has('ELVINAROYAL20'),
+      reason: usedCodes.has('ELVINAROYAL20') ? 'Already used on a previous order.' : 'Your 1st order is not yet marked as delivered.'
     },
     {
       code: 'ELVINAROYAL30',
       discountLabel: '30% OFF',
       title: '3rd Order Unlock',
       description: 'Get 30% off your most expensive item. Unlocks when your 2nd order is delivered.',
-      eligible: deliveredCount.value >= 2,
-      reason: 'Your 2nd order is not yet marked as delivered.'
+      eligible: deliveredCount.value >= 2 && !usedCodes.has('ELVINAROYAL30'),
+      reason: usedCodes.has('ELVINAROYAL30') ? 'Already used on a previous order.' : 'Your 2nd order is not yet marked as delivered.'
     },
     {
       code: 'ELVINAROYAL40',
       discountLabel: '40% OFF',
       title: '4th Order Unlock',
       description: 'Get 40% off your most expensive item. Unlocks when your 3rd order is delivered.',
-      eligible: deliveredCount.value >= 3,
-      reason: 'Your 3rd order is not yet marked as delivered.'
+      eligible: deliveredCount.value >= 3 && !usedCodes.has('ELVINAROYAL40'),
+      reason: usedCodes.has('ELVINAROYAL40') ? 'Already used on a previous order.' : 'Your 3rd order is not yet marked as delivered.'
     },
     {
       code: 'ELVINAROYAL50',
       discountLabel: '50% OFF',
       title: '5th Order Unlock',
       description: 'Get 50% off your most expensive item. Unlocks when your 4th order is delivered.',
-      eligible: deliveredCount.value >= 4,
-      reason: 'Your 4th order is not yet marked as delivered.'
+      eligible: deliveredCount.value >= 4 && !usedCodes.has('ELVINAROYAL50'),
+      reason: usedCodes.has('ELVINAROYAL50') ? 'Already used on a previous order.' : 'Your 4th order is not yet marked as delivered.'
     }
   ]
   

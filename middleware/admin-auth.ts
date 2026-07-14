@@ -18,8 +18,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     try {
       const valid = await adminStore.checkAuth()
       if (!valid) {
-        const uiStore = useUIStore()
-        uiStore.addToast('error', 'Session expired. Please login again.')
+        // checkAuth already calls handleUnauthorized() on 401/403
+        // which clears credentials and navigates to /admin/login
         return navigateTo('/admin/login')
       }
     } catch (e) {

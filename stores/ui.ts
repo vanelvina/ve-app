@@ -12,6 +12,9 @@ export const useUIStore = defineStore('ui', {
     authRedirect: null as string | null,
     toasts: [] as Array<{ id: string; type: 'success' | 'error' | 'info'; message: string }>,
     activeRequests: 0,
+    // Navbar icon tooltips
+    cartTooltip: null as null | { message: string; sub?: string },
+    wishlistTooltip: null as null | { message: string },
   }),
 
   getters: {
@@ -70,6 +73,15 @@ export const useUIStore = defineStore('ui', {
     },
     removeToast(id: string) {
       this.toasts = this.toasts.filter((t) => t.id !== id)
+    },
+
+    showCartTooltip(message: string, sub?: string) {
+      this.cartTooltip = { message, sub }
+      setTimeout(() => { this.cartTooltip = null }, 2500)
+    },
+    showWishlistTooltip(message: string) {
+      this.wishlistTooltip = { message }
+      setTimeout(() => { this.wishlistTooltip = null }, 2500)
     },
   },
 })

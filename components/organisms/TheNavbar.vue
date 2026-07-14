@@ -31,7 +31,7 @@
             </svg>
           </button>
           <NuxtLink to="/" aria-label="Van Elvina – Home" class="shrink-0" :class="isHomepage ? 'ml-1' : ''">
-            <img src="/favicon.png" alt="Van Elvina" class="w-8 h-8 object-contain" />
+            <img src="/favicon2.png" alt="Van Elvina" class="w-8 h-8 object-contain" />
           </NuxtLink>
           <p class="text-[15px] font-bold font-serif text-deep-plum tracking-tight truncate max-w-[120px] sm:max-w-[180px]">Hey {{ auth.isLoggedIn && auth.user?.name ? auth.user.name.split(' ')[0] : 'Delicate' }}!</p>
         </div>
@@ -45,25 +45,48 @@
             </svg>
           </button>
 
-          <!-- Bag -->
-          <NuxtLink to="/bag" class="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Bag">
-            <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-            </svg>
-            <span v-if="cart.itemCount > 0" :key="cart.itemCount" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-deep-plum text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-              {{ cart.itemCount }}
-            </span>
-          </NuxtLink>
+          <!-- Bag (mobile top-right) -->
+          <div class="relative">
+            <NuxtLink to="/bag" class="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Bag">
+              <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span v-if="cart.itemCount > 0" :key="cart.itemCount" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-deep-plum text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                {{ cart.itemCount }}
+              </span>
+            </NuxtLink>
+            <!-- Cart Tooltip -->
+            <Transition name="tooltip-pop">
+              <div v-if="ui.cartTooltip" class="absolute top-full right-0 mt-2 z-[9999] pointer-events-none">
+                <div class="relative bg-[#1C1C1E] text-white rounded-xl px-3 py-2 shadow-xl min-w-[140px] text-left">
+                  <div class="absolute -top-1.5 right-3.5 w-3 h-3 bg-[#1C1C1E] rotate-45 rounded-sm"></div>
+                  <p class="text-[11px] font-medium font-ui leading-snug whitespace-nowrap">{{ ui.cartTooltip.message }}</p>
+                  <p v-if="ui.cartTooltip.sub" class="text-[11px] font-bold text-white/90 mt-0.5">{{ ui.cartTooltip.sub }}</p>
+                </div>
+              </div>
+            </Transition>
+          </div>
 
 
 
-          <!-- Wishlist -->
-          <NuxtLink to="/wishlist" class="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Wishlist">
-            <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            <span v-if="wishlist.count > 0" :key="wishlist.count" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dusty-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ wishlist.count }}</span>
-          </NuxtLink>
+          <!-- Wishlist (mobile top-right) -->
+          <div class="relative">
+            <NuxtLink to="/wishlist" class="relative w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors" aria-label="Wishlist">
+              <svg class="w-5 h-5 text-charcoal/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span v-if="wishlist.count > 0" :key="wishlist.count" class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dusty-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ wishlist.count }}</span>
+            </NuxtLink>
+            <!-- Wishlist Tooltip -->
+            <Transition name="tooltip-pop">
+              <div v-if="ui.wishlistTooltip" class="absolute top-full right-0 mt-2 z-[9999] pointer-events-none">
+                <div class="relative bg-[#1C1C1E] text-white rounded-xl px-3 py-2 shadow-xl min-w-[140px] text-left">
+                  <div class="absolute -top-1.5 right-3.5 w-3 h-3 bg-[#1C1C1E] rotate-45 rounded-sm"></div>
+                  <p class="text-[11px] font-medium font-ui leading-snug whitespace-nowrap">{{ ui.wishlistTooltip.message }}</p>
+                </div>
+              </div>
+            </Transition>
+          </div>
 
           <!-- Profile -->
           <button @click="ui.openProfileDrawer" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#EDE4DC]/60 transition-colors text-charcoal/60 hover:text-deep-plum" aria-label="My account">
@@ -140,12 +163,24 @@
             <button @click="ui.openSizeGuide" class="inline-flex items-center px-4 py-1.5 bg-[#C59B27] hover:bg-[#A37B1D] text-white text-xs font-semibold rounded-full pulse-fit transition-all duration-300 select-none cursor-pointer">
               Find Your Fit
             </button>
-            <NuxtLink to="/wishlist" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Wishlist">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              <span v-if="wishlist.count > 0" :key="wishlist.count" class="absolute -top-1 -right-1 w-4 h-4 bg-dusty-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ wishlist.count }}</span>
-            </NuxtLink>
+            <!-- Wishlist (desktop) -->
+            <div class="relative">
+              <NuxtLink to="/wishlist" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Wishlist">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span v-if="wishlist.count > 0" :key="wishlist.count" class="absolute -top-1 -right-1 w-4 h-4 bg-dusty-rose text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ wishlist.count }}</span>
+              </NuxtLink>
+              <!-- Wishlist Tooltip (desktop) -->
+              <Transition name="tooltip-pop">
+                <div v-if="ui.wishlistTooltip" class="absolute top-full right-0 mt-2 z-[9999] pointer-events-none">
+                  <div class="relative bg-[#1C1C1E] text-white rounded-xl px-3 py-2 shadow-xl min-w-[140px] text-left">
+                    <div class="absolute -top-1.5 right-3.5 w-3 h-3 bg-[#1C1C1E] rotate-45 rounded-sm"></div>
+                    <p class="text-[11px] font-medium font-ui leading-snug whitespace-nowrap">{{ ui.wishlistTooltip.message }}</p>
+                  </div>
+                </div>
+              </Transition>
+            </div>
 
             <!-- Profile -->
             <button @click="ui.openProfileDrawer" class="btn-icon flex text-charcoal hover:text-deep-plum" aria-label="My account">
@@ -154,12 +189,25 @@
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </button>
-            <NuxtLink to="/bag" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Shopping bag">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              <span v-if="cart.itemCount > 0" :key="cart.itemCount" class="absolute -top-1 -right-1 w-4 h-4 bg-deep-plum text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ cart.itemCount }}</span>
-            </NuxtLink>
+            <!-- Bag (desktop) -->
+            <div class="relative">
+              <NuxtLink to="/bag" class="btn-icon relative text-charcoal hover:text-deep-plum" aria-label="Shopping bag">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span v-if="cart.itemCount > 0" :key="cart.itemCount" class="absolute -top-1 -right-1 w-4 h-4 bg-deep-plum text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ cart.itemCount }}</span>
+              </NuxtLink>
+              <!-- Cart Tooltip (desktop) -->
+              <Transition name="tooltip-pop">
+                <div v-if="ui.cartTooltip" class="absolute top-full right-0 mt-2 z-[9999] pointer-events-none">
+                  <div class="relative bg-[#1C1C1E] text-white rounded-xl px-3 py-2 shadow-xl min-w-[140px] text-left">
+                    <div class="absolute -top-1.5 right-3.5 w-3 h-3 bg-[#1C1C1E] rotate-45 rounded-sm"></div>
+                    <p class="text-[11px] font-medium font-ui leading-snug whitespace-nowrap">{{ ui.cartTooltip.message }}</p>
+                    <p v-if="ui.cartTooltip.sub" class="text-[11px] font-bold text-white/90 mt-0.5">{{ ui.cartTooltip.sub }}</p>
+                  </div>
+                </div>
+              </Transition>
+            </div>
           </div>
         </nav>
       </div>
@@ -251,27 +299,28 @@ const cycleWords = () => {
 }
 
 // ── Scroll hide logic ──────────────────────────────────────────
-// Mobile (<768px): direction-based — any scroll down hides, y===0 shows
-// Desktop (≥768px): position-based — hide past 50% of first widget height
+// Direction-based on all screen sizes: hide on scroll-down, show on scroll-up.
+// No change when idle (y === lastScrollY), ensuring the bar freezes on stop.
 const navbarHidden = ref(false)
 let lastScrollY = 0
 let rafId = 0
-
-const isMobile = () => window.innerWidth < 768
 
 const onScroll = () => {
   cancelAnimationFrame(rafId)
   rafId = requestAnimationFrame(() => {
     const y = window.scrollY
 
-    // Hide on scroll down, show on scroll up (both mobile & desktop)
-    if (y <= 50) {
+    if (y <= 4) {
+      // Always show at the very top (tiny threshold for bounce)
       navbarHidden.value = false
-    } else if (y > lastScrollY) {
+    } else if (y > lastScrollY + 4) {
+      // Scrolling down: hide
       navbarHidden.value = true
-    } else if (y < lastScrollY) {
+    } else if (y < lastScrollY - 4) {
+      // Scrolling up: show
       navbarHidden.value = false
     }
+    // If y === lastScrollY (idle): do nothing → freeze current state
 
     lastScrollY = y
   })
@@ -279,7 +328,7 @@ const onScroll = () => {
 
 onMounted(() => {
   lastScrollY = window.scrollY
-  navbarHidden.value = isMobile() ? window.scrollY > 0 : false
+  navbarHidden.value = false // Always start visible
 
   window.addEventListener('scroll', onScroll, { passive: true })
   cycleWords()
@@ -321,5 +370,21 @@ onUnmounted(() => {
 .search-bar-hidden {
   opacity: 0;
   pointer-events: none;   /* can't accidentally tap while invisible */
+}
+
+/* Tooltip pop animation */
+.tooltip-pop-enter-active {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tooltip-pop-leave-active {
+  transition: all 0.12s ease-in;
+}
+.tooltip-pop-enter-from {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.95);
+}
+.tooltip-pop-leave-to {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.96);
 }
 </style>

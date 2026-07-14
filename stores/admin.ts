@@ -57,6 +57,10 @@ export const useAdminStore = defineStore('admin', {
     },
 
     logout() {
+      this.handleUnauthorized()
+    },
+
+    handleUnauthorized() {
       this.token = null
       this.isAuthenticated = false
       this.adminUser = null
@@ -66,7 +70,7 @@ export const useAdminStore = defineStore('admin', {
         localStorage.removeItem('ve_admin_email')
         localStorage.removeItem('ve_admin_name')
       }
-      navigateTo('/')
+      navigateTo('/admin/login')
     },
 
     async checkAuth() {
@@ -92,16 +96,9 @@ export const useAdminStore = defineStore('admin', {
         return true
       } catch (error: any) {
         console.error('Session verification failed:', error)
-        const statusCode = error.response?.status || error.status
+        const statusCode = error.response?.status || error.status || error.data?.statusCode
         if (statusCode === 401 || statusCode === 403) {
-          this.token = null
-          this.isAuthenticated = false
-          this.adminUser = null
-          if (import.meta.client) {
-            localStorage.removeItem('ve_admin_token')
-            localStorage.removeItem('ve_admin_email')
-            localStorage.removeItem('ve_admin_name')
-          }
+          this.handleUnauthorized()
         }
         return false
       }

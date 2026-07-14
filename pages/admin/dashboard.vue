@@ -987,7 +987,7 @@
               <thead>
                 <tr class="bg-warm-ivory text-deep-plum border-b border-rose-blush/30 font-semibold">
                   <th class="p-4">Thumbnail</th>
-                  <th class="p-4">Item Name / Category</th>
+                  <th class="p-4">Item Name / Category / Style</th>
                   <th class="p-4">Price (INR)</th>
                   <th class="p-4">Warehouse Stock</th>
                   <th class="p-4 text-right">Actions</th>
@@ -1011,6 +1011,9 @@
                     </div>
                     <p class="text-[10px] text-charcoal/50 mt-0.5 font-semibold">
                       {{ product.category }} <span v-if="product.subcategory">› {{ product.subcategory }}</span>
+                    </p>
+                    <p v-if="product.styleId" class="text-[9px] text-deep-plum/60 mt-0.5 font-mono tracking-wide">
+                      {{ product.styleId }}
                     </p>
                   </td>
                   <td class="p-4">
@@ -4737,9 +4740,15 @@ const loadAllData = async () => {
     inquiries.value = inquiriesData
     // Fetch real analytics summary (events + orders aggregated)
     fetchAnalyticsSummary()
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to load dashboard data:', error)
-    uiStore.addToast('error', 'Error loading database resources')
+    const status = error?.response?.status || error?.status || error?.data?.statusCode
+    if (status === 401 || status === 403) {
+      // Session expired — clear credentials and go to login
+      adminStore.handleUnauthorized()
+    } else {
+      uiStore.addToast('error', 'Error loading dashboard data. Please refresh.')
+    }
   } finally {
     loadingData.value = false
   }

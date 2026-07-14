@@ -460,12 +460,14 @@ import { capitalizeWords } from '~/utils/formatters'
 
 definePageMeta({
   middleware: [
-    function (to, from) {
+    function (to) {
+      if (import.meta.server) return
       const auth = useAuthStore()
+      auth.init()
       const ui = useUIStore()
       if (!auth.isLoggedIn) {
         ui.openAuthModal(to.fullPath)
-        ui.addToast('warning', 'Please sign in to view your profile.')
+        ui.addToast('info', 'Please sign in to view your profile.')
         return navigateTo(`/?auth_trigger=true&redirect=${encodeURIComponent(to.fullPath)}`)
       }
     }
@@ -474,6 +476,7 @@ definePageMeta({
 
 const auth = useAuthStore()
 const ui = useUIStore()
+const { $confirm } = useDialog()
 const router = useRouter()
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -563,7 +566,7 @@ const saveAddress = async () => {
 }
 
 const deleteAddress = async (id: string) => {
-  if (!confirm('Are you sure you want to delete this address?')) return
+  if (!await $confirm('Are you sure you want to delete this address?', { title: 'Delete Address' })) return
   try {
     await auth.removeAddress(id)
     ui.addToast('success', 'Address deleted successfully.')

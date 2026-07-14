@@ -14,6 +14,7 @@ export const useProductsStore = defineStore('products', {
       priceRange: [0, 2000] as [number, number],
       rating: null,
       inStock: false,
+      tags: [],
     } as FilterState,
     sort: 'popularity' as SortOption,
     page: 1,
@@ -60,6 +61,15 @@ export const useProductsStore = defineStore('products', {
       // In stock
       if (state.filters.inStock) {
         result = result.filter((p) => p.inStock)
+      }
+
+      // Tags (quick filter chips)
+      if (state.filters.tags && state.filters.tags.length > 0) {
+        result = result.filter((p) =>
+          state.filters.tags!.some(tag =>
+            (p.tags || []).some(t => t.toLowerCase().includes(tag.toLowerCase()))
+          )
+        )
       }
 
       // Sort
