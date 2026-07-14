@@ -148,9 +148,9 @@
             <div class="flex-1 h-px bg-gradient-to-l from-transparent via-rose-blush to-deep-plum/20" />
           </div>
           <p class="text-[11px] font-ui font-bold uppercase tracking-widest text-dusty-rose mb-3">You've seen it all</p>
-          <h2 class="font-serif text-2xl md:text-3xl text-deep-plum font-bold mb-3">
+          <!-- <h2 class="font-serif text-2xl md:text-3xl text-deep-plum font-bold mb-3">
             {{ activeCategory ? `That's our full ${activeCategory} collection` : "You've reached the end" }}
-          </h2>
+          </h2> -->
           <div class="flex items-center justify-center gap-3 mt-6 flex-wrap">
             <NuxtLink
               to="/products?sort=newest"
