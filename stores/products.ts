@@ -188,17 +188,6 @@ export const useProductsStore = defineStore('products', {
       this.loading = true
       const config = useRuntimeConfig()
 
-      // Restore recently viewed from localStorage before products arrive
-      if (import.meta.client && this.recentlyViewed.length === 0) {
-        try {
-          const stored = localStorage.getItem('ve_recently_viewed')
-          if (stored) {
-            const parsed = JSON.parse(stored)
-            if (Array.isArray(parsed)) this.recentlyViewed = parsed
-          }
-        } catch { /* ignore */ }
-      }
-
       try {
         const data = await $fetch<Product[]>(`${config.public.apiBase}/products`, {
           silent: this.all.length > 0
@@ -209,6 +198,19 @@ export const useProductsStore = defineStore('products', {
       } finally {
         this.loading = false
       }
+    },
+    restoreRecentlyViewed() {
+      // Only run on client. Reads from localStorage and populates store.
+      // Must be called from onMounted so it always runs regardless of SSR hydration.
+      if (!import.meta.client) return
+      try {
+        const stored = localStorage.getItem('ve_recently_viewed')
+        if (!stored) return
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.recentlyViewed = parsed
+        }
+      } catch { /* ignore */ }
     },
     setFilters(filters: Partial<FilterState>) {
       this.filters = { ...this.filters, ...filters }

@@ -43,5 +43,6 @@ export const useProducts = () => {
     setPage: (page: number) => store.setPage(page),
     searchProducts,
     addRecentlyViewed: (product: Product) => store.addRecentlyViewed(product),
+    restoreRecentlyViewed: () => store.restoreRecentlyViewed(),
   }
 }

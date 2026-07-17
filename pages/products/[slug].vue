@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div class="page-container py-6 lg:py-10">
+    <div class="page-container py-6 lg:py-10 pb-28">
       <div class="grid lg:grid-cols-2 gap-8 lg:gap-12">
 
         <!-- Gallery -->
@@ -418,7 +418,7 @@
                   @click="qty = Math.min(selectedSizeStock !== null ? Math.min(selectedSizeStock, 10) : 10, qty + 1)">+</button>
               </div>
               <!-- Stock count is intentionally NOT shown to customers — urgency only shows when ≤2 left -->
-              <div class="flex-1 flex items-center gap-2">
+              <div ref="inlineAtbRow" class="flex-1 flex items-center gap-2">
               <AppButton size="md" :full="true" :loading="adding" :disabled="(!!selectedSize && selectedSizeStock === 0)" @click="handleAddToCart" class="hidden md:inline-flex flex-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -730,51 +730,79 @@
         </div>
       </div>
 
-      <!-- ── Locked Action Bar — docked below the description card ──────── -->
-      <!-- Shares rounded-2xl bottom-radius with the card above, flat top -->
-      <div
-        v-if="product"
-        class="md:hidden bg-white border border-t-0 border-border-gray rounded-b-2xl shadow-soft overflow-hidden flex h-[58px]"
-      >
-        <!-- Wishlist -->
-        <button
-          @click="handleWishlistToggle"
-          class="w-[20%] flex items-center justify-center border-r border-border-gray/50 transition-colors"
-          :class="wishlist.isWishlisted(product.id || product._id) ? 'text-deep-plum bg-rose-50' : 'text-mid-gray bg-white hover:bg-rose-50 hover:text-deep-plum'"
-          aria-label="Wishlist"
-        >
-          <svg v-if="wishlist.isWishlisted(product.id || product._id)" class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-          </svg>
-          <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-          </svg>
-        </button>
 
-        <!-- Add to Bag -->
-        <button
-          @click="handleAddToCart"
-          :disabled="(selectedSize && selectedSizeStock === 0) || adding"
-          class="flex-1 bg-deep-plum text-white font-ui font-bold tracking-wider text-sm hover:bg-[#473021] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+      <!-- ─────────────────────────────────────────────────────────────── -->
+      <!-- FLOATING STICKY BOTTOM ACTION BAR                               -->
+      <!-- Shows once the inline Add to Bag button scrolls out of view     -->
+      <!-- ─────────────────────────────────────────────────────────────── -->
+      <Teleport to="body">
+        <Transition
+          enter-active-class="transition-all duration-300 ease-out"
+          enter-from-class="translate-y-full opacity-0"
+          enter-to-class="translate-y-0 opacity-100"
+          leave-active-class="transition-all duration-200 ease-in"
+          leave-from-class="translate-y-0 opacity-100"
+          leave-to-class="translate-y-full opacity-0"
         >
-          <span v-if="adding" class="flex items-center gap-2">
-            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-            </svg>
-            ADDING…
-          </span>
-          <span v-else class="flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-            </svg>
-            {{ isAlreadyInBag ? 'GO TO BAG' : 'ADD TO BAG' }}
-          </span>
-        </button>
-      </div>
+          <div
+            v-if="product && stickyBarActive"
+            class="fixed bottom-0 inset-x-0 z-[60] pb-safe"
+            aria-label="Quick actions"
+          >
+            <!-- Frosted backdrop gradient -->
+            <div class="absolute inset-0 bg-gradient-to-t from-white/95 via-white/90 to-transparent backdrop-blur-sm" />
 
-      <!-- Sticky release sentinel: when this enters viewport, release the mobile sticky bar -->
-      <div ref="stickyReleaseSentinel" aria-hidden="true"></div>
+            <div class="relative max-w-screen-sm mx-auto px-4 py-3 flex items-center gap-3">
+              <!-- Product thumbnail + name -->
+              <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                <img
+                  v-if="product.variants?.[selectedVariant]?.images?.[0]"
+                  :src="product.variants[selectedVariant].images[0]"
+                  class="w-10 h-10 rounded-xl object-cover border border-border-gray/50 shrink-0"
+                  alt=""
+                />
+                <div class="min-w-0">
+                  <p class="text-[11px] font-ui font-semibold text-charcoal truncate leading-tight">{{ product.name }}</p>
+                  <p class="text-[11px] font-ui text-deep-plum font-bold">₹{{ product.price?.toLocaleString('en-IN') }}</p>
+                </div>
+              </div>
+
+              <!-- Wishlist icon button -->
+              <button
+                @click="handleWishlistToggle"
+                class="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl border transition-all duration-200"
+                :class="wishlist.isWishlisted(product.id || product._id)
+                  ? 'bg-rose-50 border-dusty-rose text-deep-plum'
+                  : 'border-border-gray text-mid-gray hover:border-dusty-rose hover:text-deep-plum hover:bg-rose-50'"
+                aria-label="Wishlist"
+              >
+                <svg v-if="wishlist.isWishlisted(product.id || product._id)" class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+              </button>
+
+              <!-- Add to Bag button -->
+              <button
+                @click="handleAddToCart"
+                :disabled="(!!selectedSize && selectedSizeStock === 0) || adding"
+                class="h-11 px-6 rounded-xl bg-deep-plum text-white font-ui font-bold text-sm tracking-wide flex items-center gap-2 transition-all duration-200 hover:bg-[#473021] active:scale-[0.97] disabled:opacity-50 shadow-premium shrink-0"
+              >
+                <svg v-if="adding" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+                <span>{{ isAlreadyInBag ? 'GO TO BAG' : 'ADD TO BAG' }}</span>
+              </button>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
 
       <!-- Similar Products -->
       <div class="mt-10">
@@ -968,7 +996,7 @@ definePageMeta({ pageTransition: false })
 
 const route = useRoute()
 const ui = useUIStore()
-const { getBySlug, all, addRecentlyViewed } = useProducts()
+const { getBySlug, all, addRecentlyViewed, restoreRecentlyViewed } = useProducts()
 const { addToCart } = useCart()
 const wishlist = useWishlistStore()
 const cart = useCartStore()
@@ -1008,18 +1036,21 @@ const selectedSizeStock = computed(() => {
 const showLightbox = ref(false)
 const lightboxRef = ref<HTMLElement | null>(null)
 
-// ── Sticky bar release via IntersectionObserver ───────────────────────────────
-const stickyBarActive = ref(true)
-const stickyReleaseSentinel = ref<HTMLElement | null>(null)
+// ── Sticky bottom action bar — appears when inline ATB button scrolls out of view ───
+const stickyBarActive = ref(false)
+const inlineAtbRow = ref<HTMLElement | null>(null)
 
 onMounted(() => {
-  if (typeof IntersectionObserver !== 'undefined' && stickyReleaseSentinel.value) {
+  if (typeof IntersectionObserver !== 'undefined' && inlineAtbRow.value) {
     const obs = new IntersectionObserver(
       ([entry]) => { stickyBarActive.value = !entry.isIntersecting },
-      { threshold: 0 }
+      { threshold: 0, rootMargin: '0px 0px 0px 0px' }
     )
-    obs.observe(stickyReleaseSentinel.value)
+    obs.observe(inlineAtbRow.value)
     onUnmounted(() => obs.disconnect())
+  } else {
+    // Fallback: always show the bar if IntersectionObserver not supported
+    stickyBarActive.value = true
   }
 })
 
@@ -1423,8 +1454,9 @@ watch(selectedSize, () => { if (selectedSize.value) sizeError.value = false })
 // Scroll restoration for seamless back-navigation from PDP → PLP
 const { saveScroll, restoreScroll } = useScrollRestore()
 
-// Watch product — fires once it resolves from async fetch (handles both
-// the already-cached case and the async-loaded case after mount)
+// Watch product — fires once product resolves (handles async fetch)
+// Uses { immediate: false } so it only fires on client after hydration.
+// restoreRecentlyViewed() in onMounted ensures localStorage is loaded first.
 const _recentlyViewedTracked = ref(false)
 watch(
   product,
@@ -1435,11 +1467,32 @@ watch(
     trackProductView(p.id || (p as any)._id, p.name, p.category, p.price)
     trackProductImpression(p.id || (p as any)._id, p.name, p.category, p.price)
   },
-  { immediate: true }
+  { immediate: false }
 )
 
 onMounted(() => {
   restoreScroll()
+  // Restore recently viewed from localStorage — must happen on mount
+  // (not during setup) to ensure it works both with and without SSR hydration.
+  restoreRecentlyViewed()
+  // After restoring, fire the tracking watch manually for the current product
+  // (because it won't fire naturally if product is already resolved at mount time)
+  if (product.value && !_recentlyViewedTracked.value) {
+    _recentlyViewedTracked.value = true
+    addRecentlyViewed(product.value)
+    trackProductView(
+      product.value.id || (product.value as any)._id,
+      product.value.name,
+      product.value.category,
+      product.value.price
+    )
+    trackProductImpression(
+      product.value.id || (product.value as any)._id,
+      product.value.name,
+      product.value.category,
+      product.value.price
+    )
+  }
 })
 
 onBeforeUnmount(() => {
