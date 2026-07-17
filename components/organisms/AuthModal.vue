@@ -97,29 +97,72 @@
               </div>
 
               <!-- ── SIGNUP Form ─────────────────────────────────────────── -->
-              <div v-if="activeTab === 'signup'" class="space-y-4">
+              <!-- ── SIGNUP Form: Step 1 (Details) ─────────────────────────── -->
+              <div v-if="activeTab === 'signup' && signupStep === 'form'" class="space-y-4">
                 <div>
                   <label class="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-1.5 font-ui">Full Name</label>
-                  <input v-model="signupName" type="text" placeholder="Priya Sharma" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleSignup" />
+                  <input v-model="signupName" type="text" placeholder="Priya Sharma" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="sendSignupOtp" />
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-1.5 font-ui">Email</label>
-                  <input v-model="signupEmail" type="email" placeholder="you@example.com" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleSignup" @input="errorMsg = ''" />
+                  <input v-model="signupEmail" type="email" placeholder="you@example.com" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="sendSignupOtp" @input="errorMsg = ''" />
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-1.5 font-ui">Password</label>
-                  <input v-model="signupPassword" type="password" placeholder="At least 6 characters" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleSignup" />
+                  <input v-model="signupPassword" type="password" placeholder="At least 6 characters" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="sendSignupOtp" />
                 </div>
 
                 <p v-if="errorMsg" class="text-red-500 text-xs font-ui">{{ errorMsg }}</p>
 
-                <button @click="handleSignup" :disabled="loading" class="w-full py-3 bg-deep-plum text-white rounded-xl font-ui font-semibold text-sm hover:bg-[#7a3e4a] disabled:opacity-50 transition-all flex justify-center items-center gap-2">
+                <button @click="sendSignupOtp" :disabled="loading" class="w-full py-3 bg-deep-plum text-white rounded-xl font-ui font-semibold text-sm hover:bg-[#7a3e4a] disabled:opacity-50 transition-all flex justify-center items-center gap-2">
                   <svg v-if="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
-                  {{ loading ? 'Signing up...' : 'Create Account' }}
+                  {{ loading ? 'Sending OTP…' : 'Create Account' }}
                 </button>
+              </div>
+
+              <!-- ── SIGNUP Form: Step 2 (OTP Verification) ───────────────── -->
+              <div v-if="activeTab === 'signup' && signupStep === 'otp'" class="space-y-4">
+                <div class="text-center mb-2">
+                  <p class="text-sm font-ui text-charcoal/70">OTP sent to <span class="font-semibold text-deep-plum">{{ signupEmail }}</span></p>
+                  <button @click="signupStep = 'form'; signupOtp = ''; errorMsg = ''" class="text-xs text-charcoal/40 hover:text-deep-plum underline mt-1 font-ui">Change details</button>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-1.5 font-ui">Enter OTP</label>
+                  <input
+                    v-model="signupOtp"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="6-digit code"
+                    class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all tracking-widest text-center text-lg font-bold"
+                    @keydown.enter="verifySignupOtp"
+                    @input="errorMsg = ''"
+                    autocomplete="one-time-code"
+                  />
+                </div>
+
+                <p v-if="errorMsg" class="text-red-500 text-xs font-ui">{{ errorMsg }}</p>
+
+                <button @click="verifySignupOtp" :disabled="loading || signupOtp.length < 6" class="w-full py-3 bg-deep-plum text-white rounded-xl font-ui font-semibold text-sm hover:bg-[#7a3e4a] disabled:opacity-50 transition-all flex justify-center items-center gap-2">
+                  <svg v-if="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  {{ loading ? 'Verifying…' : 'Verify & Create Account' }}
+                </button>
+
+                <div class="text-center">
+                  <button
+                    @click="sendSignupOtp"
+                    :disabled="resendCooldown > 0 || loading"
+                    class="text-xs text-charcoal/40 hover:text-deep-plum font-ui disabled:cursor-not-allowed transition-colors"
+                  >
+                    {{ resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : 'Resend OTP' }}
+                  </button>
+                </div>
               </div>
 
               <!-- Divider -->
@@ -181,6 +224,8 @@ let cooldownTimer: ReturnType<typeof setInterval> | null = null
 const signupName = ref('')
 const signupEmail = ref('')
 const signupPassword = ref('')
+const signupStep = ref<'form' | 'otp'>('form')
+const signupOtp = ref('')
 
 // ── Shared ───────────────────────────────────────────────────────────────
 const loading = ref(false)
@@ -199,6 +244,8 @@ watch(() => ui.authModalOpen, (open) => {
     signupName.value = ''
     signupEmail.value = ''
     signupPassword.value = ''
+    signupStep.value = 'form'
+    signupOtp.value = ''
     errorMsg.value = ''
     resendCooldown.value = 0
     if (cooldownTimer) clearInterval(cooldownTimer)
@@ -215,6 +262,8 @@ const switchTab = (tab: 'login' | 'signup') => {
   signupName.value = ''
   signupEmail.value = ''
   signupPassword.value = ''
+  signupStep.value = 'form'
+  signupOtp.value = ''
   errorMsg.value = ''
 }
 
@@ -276,7 +325,7 @@ const verifyLoginOtp = async () => {
   }
 }
 
-const handleSignup = async () => {
+const sendSignupOtp = async () => {
   errorMsg.value = ''
   const trimmedEmail = signupEmail.value.trim()
   if (!signupName.value.trim() || !trimmedEmail || !signupPassword.value) {
@@ -293,7 +342,29 @@ const handleSignup = async () => {
   }
   loading.value = true
   try {
-    await auth.signupWithPassword(signupName.value.trim(), trimmedEmail, signupPassword.value)
+    const res = await auth.sendOtp(trimmedEmail)
+    if (res && res.purpose === 'login') {
+      errorMsg.value = 'An account with this email already exists. Please login instead.'
+      return
+    }
+    signupStep.value = 'otp'
+    startResendCooldown()
+  } catch (err: any) {
+    errorMsg.value = err.message || 'Failed to send verification code'
+  } finally {
+    loading.value = false
+  }
+}
+
+const verifySignupOtp = async () => {
+  errorMsg.value = ''
+  if (signupOtp.value.length < 6) {
+    errorMsg.value = 'Enter the 6-digit OTP'
+    return
+  }
+  loading.value = true
+  try {
+    await auth.verifyOtp(signupEmail.value.trim(), signupOtp.value, signupName.value.trim(), signupPassword.value)
     await Promise.all([
       wishlist.syncWishlistAfterLogin(),
       cart.syncCartAfterLogin()
@@ -311,7 +382,7 @@ const handleSignup = async () => {
       navigateTo(redirectPath)
     }
   } catch (err: any) {
-    errorMsg.value = err.message || 'Signup failed'
+    errorMsg.value = err.message || 'Verification failed. Please check the code.'
   } finally {
     loading.value = false
   }

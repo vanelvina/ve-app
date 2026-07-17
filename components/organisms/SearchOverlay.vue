@@ -102,21 +102,16 @@ watch(query, (val) => {
   }, 100)
 })
 
-// Search matching on name, description, category, and subcategory
+// Search matching only on tags exactly (non-case-sensitive)
 const results = computed(() => {
   const q = debouncedQuery.value.trim().toLowerCase()
   if (q.length < 2) return []
   return store.all.filter(p => {
-    return (
-      p.name?.toLowerCase().includes(q) ||
-      p.description?.toLowerCase().includes(q) ||
-      p.category?.toLowerCase().includes(q) ||
-      p.subcategory?.toLowerCase().includes(q)
-    )
+    return (p.tags || []).some(t => t.toLowerCase().trim() === q)
   }).slice(0, 12)
 })
 
-const popularSearches = ['Cotton Bra', 'Push-Up', 'Seamless', 'Sports Bra', 'Lace Brief', 'Nursing Bra', 'Shapewear', 'Bamboo']
+const popularSearches = ['Cotton', 'Seamless', 'Sports', 'Padded', 'Bridal', 'Comfort', 'Premium', 'Trending']
 
 watch(() => ui.searchOverlayOpen, (open) => {
   if (open) {

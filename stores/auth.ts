@@ -77,13 +77,13 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // ── Verify OTP ─────────────────────────────────────────────────
-    async verifyOtp(email: string, otp: string, name?: string) {
+    async verifyOtp(email: string, otp: string, name?: string, password?: string) {
       this.loading = true
       const config = useRuntimeConfig()
       try {
         const data = await $fetch<any>(`${config.public.apiBase}/user-auth/verify-otp`, {
           method: 'POST',
-          body: { identifier: email, otp, name },
+          body: { identifier: email, otp, name, password },
         })
         this.setAuth(data.token, data.user)
         await this.fetchProfile()

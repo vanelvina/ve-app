@@ -6,12 +6,9 @@ export const useProducts = () => {
 
   const searchProducts = (query: string): Product[] => {
     if (!query.trim()) return []
-    const q = query.toLowerCase()
+    const q = query.toLowerCase().trim()
     return store.all.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.tags.some((t) => t.includes(q)),
+      (p) => (p.tags || []).some((t) => t.toLowerCase().trim() === q),
     ).slice(0, 10)
   }
 

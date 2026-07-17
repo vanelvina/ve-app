@@ -102,6 +102,29 @@
           </div>
         </div>
 
+        <!-- Desktop Quick Filter Chips (lg:flex, hidden on mobile) -->
+        <div v-if="quickFilterChips.length > 0" class="hidden lg:flex gap-2 items-center mb-6 flex-wrap">
+          <span class="text-xs text-mid-gray font-ui shrink-0">Filter by:</span>
+          <button
+            v-for="chip in quickFilterChips"
+            :key="chip.value"
+            class="px-3.5 py-1.5 rounded-full text-[11px] font-bold font-ui tracking-wide border transition-all duration-200"
+            :class="activeQuickFilter === chip.value
+              ? 'bg-deep-plum text-white border-deep-plum shadow-sm'
+              : 'bg-white text-charcoal border-border-gray hover:border-deep-plum hover:text-deep-plum'"
+            @click="toggleQuickFilter(chip.value)"
+          >
+            {{ chip.label }}
+          </button>
+          <button
+            v-if="activeQuickFilter"
+            @click="toggleQuickFilter(activeQuickFilter)"
+            class="text-xs text-deep-plum hover:text-dusty-rose underline ml-3 font-ui font-semibold"
+          >
+            Clear Quick Filter
+          </button>
+        </div>
+
         <!-- ── Empty state ─────────────────────────────────────────── -->
         <div v-if="primaryProducts.length === 0 && !store.loading" class="py-20 text-center">
           <div class="text-6xl mb-4" aria-hidden="true">🔍</div>
@@ -515,16 +538,42 @@ const toggleCategory = (cat: string) => {
 }
 
 // ── Mobile Quick Filter Chips ─────────────────────────────────────────────
-const quickFilterChips = [
+const MASTER_QUICK_FILTERS = [
   { label: 'Padded',        value: 'padded' },
   { label: 'Non-Padded',    value: 'non-padded' },
-  { label: 'T-Shirt Bra',   value: 't-shirt' },
-  { label: 'Full Coverage', value: 'full-coverage' },
+  { label: 'T-Shirt Bra',   value: 't-shirt bra' },
+  { label: 'Full Coverage', value: 'full coverage' },
   { label: 'Cotton',        value: 'cotton' },
   { label: 'Bridal',        value: 'bridal' },
   { label: 'Sports',        value: 'sports' },
   { label: 'Underwired',    value: 'underwired' },
+  { label: 'Seamless',      value: 'seamless' },
+  { label: 'New Arrival',   value: 'new arrival' },
+  { label: 'Bestseller',    value: 'bestseller' },
+  { label: 'Trending',      value: 'trending' },
+  { label: 'Comfort',       value: 'comfort' },
+  { label: 'Premium',       value: 'premium' },
+  { label: 'Daily Wear',    value: 'daily-wear' },
 ]
+
+const quickFilterChips = computed(() => {
+  let products = store.all
+  if (selectedCategories.value.length > 0) {
+    products = store.all.filter((p) => {
+      const productCats = (p.category || '').split(',').map(s => s.trim().toLowerCase())
+      return selectedCategories.value.some(c => productCats.includes(c.toLowerCase()))
+    })
+  }
+
+  const availableTags = new Set<string>()
+  products.forEach(p => {
+    if (p.tags) {
+      p.tags.forEach(t => availableTags.add(t.toLowerCase().trim()))
+    }
+  })
+
+  return MASTER_QUICK_FILTERS.filter(chip => availableTags.has(chip.value))
+})
 
 const activeQuickFilter = ref<string>('')
 
@@ -576,6 +625,14 @@ watch(() => store.filters, () => {
 
 watch(sentinel, () => { if (sentinel.value) setupObserver() })
 watch(sortValue, val => store.setSort(val))
+watch(() => store.filters.tags, (newTags) => {
+  if (!newTags || newTags.length === 0) {
+    activeQuickFilter.value = ''
+  } else {
+    activeQuickFilter.value = newTags[0]
+  }
+}, { deep: true })
+
 watch(() => route.query, parseRouteQueries, { deep: true })
 
 // ── Mobile scroll-hide for quick filter bar ──────────────────────────────

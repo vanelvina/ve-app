@@ -63,14 +63,12 @@ export const useProductsStore = defineStore('products', {
         result = result.filter((p) => p.inStock)
       }
 
-      // Tags / Quick Filters — match product.tags[] OR product.subcategory
+      // Tags / Quick Filters — match product.tags[] exactly (non-case-sensitive)
       if (state.filters.tags && state.filters.tags.length > 0) {
         result = result.filter((p) =>
           state.filters.tags!.some(tag => {
-            const t = tag.toLowerCase()
-            const tagMatch = (p.tags || []).some(pt => pt.toLowerCase().includes(t))
-            const subMatch = p.subcategory ? p.subcategory.toLowerCase().includes(t) : false
-            return tagMatch || subMatch
+            const t = tag.toLowerCase().trim()
+            return (p.tags || []).some(pt => pt.toLowerCase().trim() === t)
           })
         )
       }
