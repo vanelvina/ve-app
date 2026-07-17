@@ -2142,7 +2142,18 @@
             <div class="bg-rose-blush/10 rounded-3xl p-6 border border-rose-blush/30 text-xs leading-relaxed space-y-3 text-charcoal/80">
               <h4 class="font-serif font-bold text-deep-plum text-sm">💡 Email Composer Guidance</h4>
               <p>When sending administrative announcements, promo gifts, or manual support notifications:</p>
-             <section v-if="activeTab === 'coupons'" class="space-y-6 animate-fade-in">
+              <ul class="list-disc pl-4 space-y-1">
+                <li>Double check recipient email syntax prior to delivery.</li>
+                <li>Your customized body copy will be rendered inside our premium, responsive brand template.</li>
+                <li>Formatting line breaks (new lines) will be automatically preserved.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 12: COUPONS MANAGEMENT -->
+      <section v-if="activeTab === 'coupons'" class="space-y-6 animate-fade-in">
         <header class="bg-white p-5 rounded-2xl border border-charcoal/20 shadow-soft">
           <h3 class="font-serif text-lg font-bold text-deep-plum">Coupons Management</h3>
           <p class="text-xs text-charcoal/60 mt-1">
