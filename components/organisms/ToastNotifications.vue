@@ -9,7 +9,7 @@
         <div
           v-for="toast in ui.toasts"
           :key="toast.id"
-          class="pointer-events-auto inline-flex items-center gap-2.5 bg-[#1C1C1E] text-white pl-3 pr-2 py-2.5 rounded-2xl shadow-xl w-full md:w-auto md:min-w-[220px] md:max-w-xs"
+          class="pointer-events-auto inline-flex items-center gap-2.5 bg-[#1C1C1E]/80 text-white/90 pl-3 pr-2 py-2 rounded-2xl shadow-xl w-full md:w-auto md:min-w-[220px] md:max-w-xs backdrop-blur-sm"
           role="alert"
           :aria-label="toast.message"
         >

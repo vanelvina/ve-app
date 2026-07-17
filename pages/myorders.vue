@@ -201,11 +201,17 @@ const getStatusClass = (status: string) => {
   const s = status ? status.toLowerCase() : ''
   switch (s) {
     case 'placed':
-      return 'bg-amber-50 text-amber-800 border border-amber-200'
+    case 'accepted':
     case 'confirmed':
-      return 'bg-blue-50 text-blue-800 border border-blue-200'
+    case 'label_created':
+    case 'ready_to_ship':
+    case 'packed':
+      return 'bg-amber-50 text-amber-800 border border-amber-200'
     case 'shipped':
       return 'bg-indigo-50 text-indigo-800 border border-indigo-200'
+    case 'out_for_delivery':
+    case 'in_transit':
+      return 'bg-blue-50 text-blue-800 border border-blue-200'
     case 'delivered':
       return 'bg-emerald-50 text-emerald-800 border border-emerald-200'
     case 'cancelled':

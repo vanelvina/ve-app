@@ -22,45 +22,93 @@
 
               <!-- Tabs -->
               <div class="flex border-b border-charcoal/10 mb-6">
-                <button @click="activeTab = 'login'" class="flex-1 pb-3 text-sm font-ui font-semibold transition-colors" :class="activeTab === 'login' ? 'text-deep-plum border-b-2 border-deep-plum' : 'text-charcoal/40 hover:text-charcoal/70'">Login</button>
-                <button @click="activeTab = 'signup'" class="flex-1 pb-3 text-sm font-ui font-semibold transition-colors" :class="activeTab === 'signup' ? 'text-deep-plum border-b-2 border-deep-plum' : 'text-charcoal/40 hover:text-charcoal/70'">Sign Up</button>
+                <button @click="switchTab('login')" class="flex-1 pb-3 text-sm font-ui font-semibold transition-colors" :class="activeTab === 'login' ? 'text-deep-plum border-b-2 border-deep-plum' : 'text-charcoal/40 hover:text-charcoal/70'">Login</button>
+                <button @click="switchTab('signup')" class="flex-1 pb-3 text-sm font-ui font-semibold transition-colors" :class="activeTab === 'signup' ? 'text-deep-plum border-b-2 border-deep-plum' : 'text-charcoal/40 hover:text-charcoal/70'">Sign Up</button>
               </div>
 
-              <!-- Login Form -->
-              <div v-if="activeTab === 'login'" class="space-y-4">
+              <!-- ── LOGIN: Step 1 — Email ──────────────────────────────── -->
+              <div v-if="activeTab === 'login' && loginStep === 'email'" class="space-y-4">
                 <div>
                   <label class="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-1.5 font-ui">Email</label>
-                  <input v-model="email" type="email" placeholder="you@example.com" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleLogin" />
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-1.5 font-ui">Password</label>
-                  <input v-model="password" type="password" placeholder="••••••••" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleLogin" />
+                  <input
+                    v-model="loginEmail"
+                    type="email"
+                    placeholder="you@example.com"
+                    class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all"
+                    :class="loginEmailError ? 'border-red-400' : ''"
+                    @keydown.enter="sendLoginOtp"
+                    @input="loginEmailError = ''"
+                    autocomplete="email"
+                  />
+                  <p v-if="loginEmailError" class="mt-1 text-xs text-red-500 font-ui">{{ loginEmailError }}</p>
                 </div>
 
                 <p v-if="errorMsg" class="text-red-500 text-xs font-ui">{{ errorMsg }}</p>
 
-                <button @click="handleLogin" :disabled="loading" class="w-full py-3 bg-deep-plum text-white rounded-xl font-ui font-semibold text-sm hover:bg-[#7a3e4a] disabled:opacity-50 transition-all flex justify-center items-center gap-2">
+                <button @click="sendLoginOtp" :disabled="loading" class="w-full py-3 bg-deep-plum text-white rounded-xl font-ui font-semibold text-sm hover:bg-[#7a3e4a] disabled:opacity-50 transition-all flex justify-center items-center gap-2">
                   <svg v-if="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
-                  {{ loading ? 'Logging in...' : 'Login' }}
+                  {{ loading ? 'Sending OTP…' : 'Send OTP' }}
                 </button>
               </div>
 
-              <!-- Signup Form -->
-              <div v-else class="space-y-4">
+              <!-- ── LOGIN: Step 2 — OTP ────────────────────────────────── -->
+              <div v-if="activeTab === 'login' && loginStep === 'otp'" class="space-y-4">
+                <div class="text-center mb-2">
+                  <p class="text-sm font-ui text-charcoal/70">OTP sent to <span class="font-semibold text-deep-plum">{{ loginEmail }}</span></p>
+                  <button @click="loginStep = 'email'; otp = ''; errorMsg = ''" class="text-xs text-charcoal/40 hover:text-deep-plum underline mt-1 font-ui">Change email</button>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-1.5 font-ui">Enter OTP</label>
+                  <input
+                    v-model="otp"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="6-digit code"
+                    class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all tracking-widest text-center text-lg"
+                    @keydown.enter="verifyLoginOtp"
+                    @input="errorMsg = ''"
+                    autocomplete="one-time-code"
+                  />
+                </div>
+
+                <p v-if="errorMsg" class="text-red-500 text-xs font-ui">{{ errorMsg }}</p>
+
+                <button @click="verifyLoginOtp" :disabled="loading || otp.length < 6" class="w-full py-3 bg-deep-plum text-white rounded-xl font-ui font-semibold text-sm hover:bg-[#7a3e4a] disabled:opacity-50 transition-all flex justify-center items-center gap-2">
+                  <svg v-if="loading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  {{ loading ? 'Verifying…' : 'Verify & Login' }}
+                </button>
+
+                <div class="text-center">
+                  <button
+                    @click="sendLoginOtp"
+                    :disabled="resendCooldown > 0 || loading"
+                    class="text-xs text-charcoal/40 hover:text-deep-plum font-ui disabled:cursor-not-allowed transition-colors"
+                  >
+                    {{ resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : 'Resend OTP' }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- ── SIGNUP Form ─────────────────────────────────────────── -->
+              <div v-if="activeTab === 'signup'" class="space-y-4">
                 <div>
                   <label class="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-1.5 font-ui">Full Name</label>
-                  <input v-model="name" type="text" placeholder="Priya Sharma" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleSignup" />
+                  <input v-model="signupName" type="text" placeholder="Priya Sharma" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleSignup" />
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-1.5 font-ui">Email</label>
-                  <input v-model="email" type="email" placeholder="you@example.com" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleSignup" />
+                  <input v-model="signupEmail" type="email" placeholder="you@example.com" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleSignup" @input="errorMsg = ''" />
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-charcoal/60 uppercase tracking-wider mb-1.5 font-ui">Password</label>
-                  <input v-model="password" type="password" placeholder="At least 6 characters" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleSignup" />
+                  <input v-model="signupPassword" type="password" placeholder="At least 6 characters" class="w-full px-4 py-3 border border-charcoal/20 rounded-xl text-sm font-ui focus:outline-none focus:border-deep-plum transition-all" @keydown.enter="handleSignup" />
                 </div>
 
                 <p v-if="errorMsg" class="text-red-500 text-xs font-ui">{{ errorMsg }}</p>
@@ -118,32 +166,93 @@ const auth = useAuthStore()
 const wishlist = useWishlistStore()
 const cart = useCartStore()
 
+// ── Tab state ────────────────────────────────────────────────────────────
 const activeTab = ref<'login' | 'signup'>('login')
-const email = ref('')
-const name = ref('')
-const password = ref('')
+
+// ── Login flow (OTP-based) ───────────────────────────────────────────────
+const loginStep = ref<'email' | 'otp'>('email')
+const loginEmail = ref('')
+const loginEmailError = ref('')
+const otp = ref('')
+const resendCooldown = ref(0)
+let cooldownTimer: ReturnType<typeof setInterval> | null = null
+
+// ── Signup state ─────────────────────────────────────────────────────────
+const signupName = ref('')
+const signupEmail = ref('')
+const signupPassword = ref('')
+
+// ── Shared ───────────────────────────────────────────────────────────────
 const loading = ref(false)
 const errorMsg = ref('')
 
+const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+
+// Reset all state when modal closes
 watch(() => ui.authModalOpen, (open) => {
   if (!open) {
     activeTab.value = 'login'
-    email.value = ''
-    name.value = ''
-    password.value = ''
+    loginStep.value = 'email'
+    loginEmail.value = ''
+    loginEmailError.value = ''
+    otp.value = ''
+    signupName.value = ''
+    signupEmail.value = ''
+    signupPassword.value = ''
     errorMsg.value = ''
+    resendCooldown.value = 0
+    if (cooldownTimer) clearInterval(cooldownTimer)
   }
 })
 
-const handleLogin = async () => {
+// Clear all state when switching tabs
+const switchTab = (tab: 'login' | 'signup') => {
+  activeTab.value = tab
+  loginStep.value = 'email'
+  loginEmail.value = ''
+  loginEmailError.value = ''
+  otp.value = ''
+  signupName.value = ''
+  signupEmail.value = ''
+  signupPassword.value = ''
   errorMsg.value = ''
-  if (!email.value || !password.value) {
-    errorMsg.value = 'Email and password are required'
-    return
-  }
+}
+
+// Start a 30s countdown before allowing resend
+const startResendCooldown = () => {
+  resendCooldown.value = 30
+  if (cooldownTimer) clearInterval(cooldownTimer)
+  cooldownTimer = setInterval(() => {
+    resendCooldown.value--
+    if (resendCooldown.value <= 0 && cooldownTimer) clearInterval(cooldownTimer)
+  }, 1000)
+}
+
+const sendLoginOtp = async () => {
+  loginEmailError.value = ''
+  errorMsg.value = ''
+  const trimmed = loginEmail.value.trim()
+  if (!trimmed) { loginEmailError.value = 'Email is required'; return }
+  if (!isValidEmail(trimmed)) { loginEmailError.value = 'Enter a valid email address'; return }
+  loginEmail.value = trimmed
   loading.value = true
   try {
-    await auth.loginWithPassword(email.value.trim(), password.value)
+    await auth.sendOtp(trimmed)
+    loginStep.value = 'otp'
+    startResendCooldown()
+  } catch (err: any) {
+    errorMsg.value = err.message || 'Failed to send OTP. Please try again.'
+  } finally {
+    loading.value = false
+  }
+}
+
+const verifyLoginOtp = async () => {
+  errorMsg.value = ''
+  if (otp.value.length < 6) { errorMsg.value = 'Enter the 6-digit OTP'; return }
+  loading.value = true
+  try {
+    await auth.verifyOtp(loginEmail.value, otp.value)
     await Promise.all([
       wishlist.syncWishlistAfterLogin(),
       cart.syncCartAfterLogin()
@@ -151,19 +260,17 @@ const handleLogin = async () => {
     const redirectPath = ui.authRedirect
     ui.closeAuthModal()
     ui.addToast('success', `Welcome back${auth.user?.name ? `, ${auth.user.name}` : ''}! 🎉`)
-    
+
     const nuxtApp = useNuxtApp()
     if (nuxtApp.$registerPush) {
       nuxtApp.$registerPush().catch((err: any) => console.error('Push error:', err))
     }
-    
     if (redirectPath) {
-      // Use nextTick to let modal close animation complete before navigating
       await nextTick()
       navigateTo(redirectPath)
     }
   } catch (err: any) {
-    errorMsg.value = err.message || 'Login failed'
+    errorMsg.value = err.message || 'Invalid OTP. Please try again.'
   } finally {
     loading.value = false
   }
@@ -171,17 +278,22 @@ const handleLogin = async () => {
 
 const handleSignup = async () => {
   errorMsg.value = ''
-  if (!email.value || !password.value || !name.value) {
+  const trimmedEmail = signupEmail.value.trim()
+  if (!signupName.value.trim() || !trimmedEmail || !signupPassword.value) {
     errorMsg.value = 'All fields are required'
     return
   }
-  if (password.value.length < 6) {
+  if (!isValidEmail(trimmedEmail)) {
+    errorMsg.value = 'Enter a valid email address'
+    return
+  }
+  if (signupPassword.value.length < 6) {
     errorMsg.value = 'Password must be at least 6 characters'
     return
   }
   loading.value = true
   try {
-    await auth.signupWithPassword(name.value.trim(), email.value.trim(), password.value)
+    await auth.signupWithPassword(signupName.value.trim(), trimmedEmail, signupPassword.value)
     await Promise.all([
       wishlist.syncWishlistAfterLogin(),
       cart.syncCartAfterLogin()
@@ -189,14 +301,12 @@ const handleSignup = async () => {
     const redirectPath = ui.authRedirect
     ui.closeAuthModal()
     ui.addToast('success', `Welcome${auth.user?.name ? `, ${auth.user.name}` : ''}! 🎉`)
-    
+
     const nuxtApp = useNuxtApp()
     if (nuxtApp.$registerPush) {
       nuxtApp.$registerPush().catch((err: any) => console.error('Push error:', err))
     }
-    
     if (redirectPath) {
-      // Use nextTick to let modal close animation complete before navigating
       await nextTick()
       navigateTo(redirectPath)
     }
@@ -214,42 +324,28 @@ const handleGoogleLogin = () => {
     ui.addToast('error', 'Google login is not available right now')
     return
   }
-  
+
   const redirectUri = encodeURIComponent(`${window.location.origin}/auth/google/callback`)
   const nonce = Math.random().toString(36).substring(2)
   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=id_token&scope=email profile&nonce=${nonce}`
-  
+
   const redirectUrl = ui.authRedirect || (window.location.pathname + window.location.search)
   const safeRedirect = (redirectUrl.includes('/auth') || redirectUrl.includes('/login')) ? '/' : redirectUrl
   sessionStorage.setItem('ve_auth_redirect', safeRedirect)
-  
+
   window.location.href = authUrl
 }
 </script>
 
 <style scoped>
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-}
-
-.modal-slide-enter-active,
-.modal-slide-leave-active {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
-}
-.modal-slide-enter-from,
-.modal-slide-leave-to {
-  transform: translateY(40px);
-  opacity: 0;
-}
-@media (min-width: 640px) {
-  .modal-slide-enter-from,
-  .modal-slide-leave-to {
-    transform: scale(0.95) translateY(10px);
-  }
+.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.2s ease; }
+.modal-fade-enter-from, .modal-fade-leave-to { opacity: 0; }
+.modal-slide-enter-active { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease; }
+.modal-slide-leave-active { transition: transform 0.2s ease-in, opacity 0.2s ease-in; }
+.modal-slide-enter-from { transform: translateY(20px); opacity: 0; }
+.modal-slide-leave-to { transform: translateY(10px); opacity: 0; }
+@media (max-width: 639px) {
+  .modal-slide-enter-from { transform: translateY(100%); }
+  .modal-slide-leave-to { transform: translateY(100%); }
 }
 </style>

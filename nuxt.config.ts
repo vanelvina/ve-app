@@ -51,6 +51,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
     '@vite-pwa/nuxt',
+    '@vercel/analytics',
   ],
 
   pinia: {

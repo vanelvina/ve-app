@@ -345,18 +345,15 @@ const order = ref<any>(null)
 const loading = ref(true)
 const error = ref('')
 
-// ── Timeline steps config ──────────────────────────────────────────────────────
+// ── Timeline steps config (4 steps) ──────────────────────────────────────────
 const timelineSteps = computed(() => {
   const baseSteps = [
-    { id: 'placed', label: 'Placed' },
-    { id: 'accepted', label: 'Accepted' },
-    { id: 'label_created', label: 'Label Created' },
-    { id: 'ready_to_ship', label: 'Ready to Ship' },
-    { id: 'shipped', label: 'Shipped' },
-    { id: 'in_transit', label: 'In Transit' },
-    { id: 'delivered', label: 'Delivered' }
+    { id: 'received',         label: 'Order Received' },
+    { id: 'shipped',          label: 'Shipped' },
+    { id: 'out_for_delivery', label: 'Out for Delivery' },
+    { id: 'delivered',        label: 'Delivered' }
   ]
-  
+
   if (order.value?.orderStatus === 'cancelled') {
     const history = order.value.statusHistory || []
     const nonCancelHistory = history.filter((h: any) => h.status !== 'cancelled')
@@ -366,7 +363,7 @@ const timelineSteps = computed(() => {
     steps.push({ id: 'cancelled', label: 'Cancelled' })
     return steps
   }
-  
+
   return baseSteps
 })
 
@@ -409,11 +406,17 @@ const getStatusClass = (status: string) => {
   const s = status ? status.toLowerCase() : ''
   switch (s) {
     case 'placed':
-      return 'bg-amber-50 text-amber-800 border border-amber-200'
+    case 'accepted':
     case 'confirmed':
-      return 'bg-blue-50 text-blue-800 border border-blue-200'
+    case 'label_created':
+    case 'ready_to_ship':
+    case 'packed':
+      return 'bg-amber-50 text-amber-800 border border-amber-200'
     case 'shipped':
       return 'bg-indigo-50 text-indigo-800 border border-indigo-200'
+    case 'out_for_delivery':
+    case 'in_transit':
+      return 'bg-blue-50 text-blue-800 border border-blue-200'
     case 'delivered':
       return 'bg-emerald-50 text-emerald-800 border border-emerald-200'
     case 'cancelled':
@@ -423,27 +426,25 @@ const getStatusClass = (status: string) => {
   }
 }
 
-// Helper to map and normalize old/raw status names for levels matching
+// Helper to normalize any raw/internal status → 4-step timeline IDs
 const normalizeStatus = (status: string) => {
   const s = status ? status.toLowerCase() : 'placed'
-  if (s === 'packed') return 'ready_to_ship'
-  if (s === 'out_for_delivery') return 'in_transit'
-  if (s === 'confirmed') return 'accepted'
+  // All pre-ship stages collapse to 'received'
+  if (['placed', 'accepted', 'confirmed', 'label_created', 'ready_to_ship', 'packed'].includes(s)) return 'received'
+  // in_transit maps to out_for_delivery
+  if (s === 'in_transit') return 'out_for_delivery'
   return s
 }
 
 // ── Timeline calculations ──────────────────────────────────────────────────────
 const statusLevels = computed(() => {
   const base: Record<string, number> = {
-    'placed': 1,
-    'accepted': 2,
-    'label_created': 3,
-    'ready_to_ship': 4,
-    'shipped': 5,
-    'in_transit': 6,
-    'delivered': 7
+    'received':         1,
+    'shipped':          2,
+    'out_for_delivery': 3,
+    'delivered':        4
   }
-  
+
   if (order.value?.orderStatus === 'cancelled') {
     const steps = timelineSteps.value
     const levels: Record<string, number> = {}
@@ -452,7 +453,7 @@ const statusLevels = computed(() => {
     })
     return levels
   }
-  
+
   return base
 })
 

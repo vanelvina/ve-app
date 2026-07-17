@@ -1336,14 +1336,11 @@
         <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-rose-blush/10 select-none">
           <button
             v-for="stage in [
-              { id: 'placed', name: 'New Orders', icon: '📥', color: 'bg-amber-500' },
-              { id: 'accepted', name: 'Accepted', icon: 'check', iconText: '✓', color: 'bg-blue-500' },
-              { id: 'label_created', name: 'Label Created', icon: '🏷️', color: 'bg-teal-500' },
-              { id: 'ready_to_ship', name: 'Ready to Ship', icon: '📦', color: 'bg-orange-500' },
-              { id: 'shipped', name: 'Shipped', icon: '🚚', color: 'bg-indigo-500' },
-              { id: 'in_transit', name: 'In Transit', icon: 'transit', iconText: '⚡', color: 'bg-purple-500' },
-              { id: 'delivered', name: 'Delivered', icon: '✅', color: 'bg-green-500' },
-              { id: 'cancelled', name: 'Cancelled', icon: '❌', color: 'bg-red-500' }
+              { id: 'placed',           name: 'Order Received', icon: '📥', color: 'bg-amber-500' },
+              { id: 'shipped',          name: 'Shipped',         icon: '🚚', color: 'bg-indigo-500' },
+              { id: 'out_for_delivery', name: 'Out for Delivery',icon: '⚡', color: 'bg-blue-500' },
+              { id: 'delivered',        name: 'Delivered',       icon: '✅', color: 'bg-green-500' },
+              { id: 'cancelled',        name: 'Cancelled',       icon: '❌', color: 'bg-red-500' }
             ]"
             :key="stage.id"
             @click="activeOrderPipelineTab = stage.id"
@@ -1352,13 +1349,12 @@
               ? 'bg-deep-plum text-white border-deep-plum shadow-soft scale-105 font-bold'
               : 'bg-white text-charcoal/70 border-charcoal/10 hover:border-deep-plum/20'"
           >
-            <span>{{ stage.iconText || stage.icon }}</span>
+            <span>{{ stage.icon }}</span>
             <span>{{ stage.name }}</span>
             <span class="text-[10px] px-1.5 py-0.5 rounded bg-charcoal/10 font-bold" :class="activeOrderPipelineTab === stage.id ? '!bg-white/20' : ''">
               {{ orders.filter(o => {
-                if (stage.id === 'accepted') return ['accepted', 'confirmed'].includes(o.orderStatus);
-                if (stage.id === 'ready_to_ship') return ['packed', 'ready_to_ship'].includes(o.orderStatus);
-                if (stage.id === 'in_transit') return ['out_for_delivery', 'in_transit'].includes(o.orderStatus);
+                if (stage.id === 'placed') return ['placed','accepted','confirmed','label_created','ready_to_ship','packed'].includes(o.orderStatus);
+                if (stage.id === 'out_for_delivery') return ['out_for_delivery','in_transit'].includes(o.orderStatus);
                 return o.orderStatus === stage.id;
               }).length }}
             </span>
@@ -1461,49 +1457,32 @@
               <div class="flex items-center gap-2">
                 <!-- Cancel option (only available before shipped) -->
                 <button
-                  v-if="['placed', 'accepted', 'label_created', 'ready_to_ship'].includes(order.orderStatus)"
+                  v-if="['placed','accepted','confirmed','label_created','ready_to_ship','packed'].includes(order.orderStatus)"
                   @click="updateOrderStatus(order._id, 'cancelled')"
                   class="px-3.5 py-1.5 text-[11px] font-bold text-red-500 hover:bg-red-50 rounded-xl transition-all cursor-pointer"
                 >
                   Cancel Order
                 </button>
 
-                <!-- Transition Stage Button -->
+                <!-- Mark Shipped (from any pre-ship stage) -->
                 <button
-                  v-if="order.orderStatus === 'placed'"
-                  @click="updateOrderStatus(order._id, 'accepted')"
-                  class="px-4.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-bold shadow-soft transition-all cursor-pointer"
-                >
-                  Accept Order ✓
-                </button>
-                <button
-                  v-if="order.orderStatus === 'accepted' || order.orderStatus === 'confirmed'"
-                  @click="updateOrderStatus(order._id, 'label_created')"
-                  class="px-4.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-[11px] font-bold shadow-soft transition-all cursor-pointer"
-                >
-                  Create Shipping Label 🏷️
-                </button>
-                <button
-                  v-if="order.orderStatus === 'label_created'"
-                  @click="updateOrderStatus(order._id, 'ready_to_ship')"
-                  class="px-4.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-[11px] font-bold shadow-soft transition-all cursor-pointer"
-                >
-                  Mark Ready to Ship 📦
-                </button>
-                <button
-                  v-if="order.orderStatus === 'packed' || order.orderStatus === 'ready_to_ship'"
+                  v-if="['placed','accepted','confirmed','label_created','ready_to_ship','packed'].includes(order.orderStatus)"
                   @click="updateOrderStatus(order._id, 'shipped')"
                   class="px-4.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[11px] font-bold shadow-soft transition-all cursor-pointer"
                 >
-                  Ship Order 🚚
+                  Mark Shipped 🚚
                 </button>
+
+                <!-- Out for Delivery (from shipped) -->
                 <button
                   v-if="order.orderStatus === 'shipped'"
-                  @click="updateOrderStatus(order._id, 'in_transit')"
-                  class="px-4.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-[11px] font-bold shadow-soft transition-all cursor-pointer"
+                  @click="updateOrderStatus(order._id, 'out_for_delivery')"
+                  class="px-4.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-bold shadow-soft transition-all cursor-pointer"
                 >
-                  Mark In Transit ⚡
+                  Out for Delivery ⚡
                 </button>
+
+                <!-- Mark Delivered -->
                 <button
                   v-if="order.orderStatus === 'out_for_delivery' || order.orderStatus === 'in_transit'"
                   @click="updateOrderStatus(order._id, 'delivered')"
@@ -1546,9 +1525,7 @@
                     @change="updateOrderStatus(inspectedOrder._id, ($event.target as HTMLSelectElement).value); inspectedOrder.orderStatus = ($event.target as HTMLSelectElement).value"
                     class="w-full p-2 rounded-xl bg-white text-deep-plum border border-charcoal/20 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-deep-plum/20 cursor-pointer"
                   >
-                      <option value="placed">Placed</option>
-                      <option value="accepted">Accepted</option>
-                      <option value="packed">Packed</option>
+                      <option value="placed">Order Received</option>
                       <option value="shipped">Shipped</option>
                       <option value="out_for_delivery">Out for Delivery</option>
                       <option value="delivered">Delivered</option>
@@ -2165,22 +2142,12 @@
             <div class="bg-rose-blush/10 rounded-3xl p-6 border border-rose-blush/30 text-xs leading-relaxed space-y-3 text-charcoal/80">
               <h4 class="font-serif font-bold text-deep-plum text-sm">💡 Email Composer Guidance</h4>
               <p>When sending administrative announcements, promo gifts, or manual support notifications:</p>
-              <ul class="list-disc pl-4 space-y-1">
-                <li>Double check recipient email syntax prior to delivery.</li>
-                <li>Your customized body copy will be rendered inside our premium, responsive brand template.</li>
-                <li>Formatting line breaks (new lines) will be automatically preserved.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 12: COUPONS MANAGEMENT -->
-      <section v-if="activeTab === 'coupons'" class="space-y-6 animate-fade-in">
+             <section v-if="activeTab === 'coupons'" class="space-y-6 animate-fade-in">
         <header class="bg-white p-5 rounded-2xl border border-charcoal/20 shadow-soft">
           <h3 class="font-serif text-lg font-bold text-deep-plum">Coupons Management</h3>
           <p class="text-xs text-charcoal/60 mt-1">
-            Create, view, and delete dynamic discount coupons. All active coupons will apply to the single most expensive item in a customer's bag.
+            Create and manage discount coupons. <strong>Public</strong> coupons appear in customer's bag offer list. <strong>Private</strong> coupons work by code only.
+            Expiring a coupon immediately blocks it from being used without deleting it.
           </p>
         </header>
 
@@ -2189,45 +2156,65 @@
           <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-charcoal/20 shadow-soft relative overflow-hidden">
             <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
             <h4 class="font-serif font-bold text-deep-plum text-sm border-b border-rose-blush/10 pb-3 mb-4">Create New Coupon</h4>
-            
+
             <form @submit.prevent="handleCreateCoupon" class="space-y-4 text-xs font-ui relative z-10">
               <div class="space-y-1">
                 <label class="block font-semibold text-charcoal/70">Coupon Code *</label>
-                <input 
-                  v-model="newCoupon.code" 
-                  type="text" 
-                  required 
-                  placeholder="e.g., WELCOME20" 
-                  class="w-full p-2.5 border border-charcoal/20 rounded-xl focus:outline-none focus:ring-1 focus:ring-deep-plum/20 uppercase font-mono" 
+                <input
+                  v-model="newCoupon.code"
+                  type="text"
+                  required
+                  placeholder="e.g., SUMMER20"
+                  class="w-full p-2.5 border border-charcoal/20 rounded-xl focus:outline-none focus:ring-1 focus:ring-deep-plum/20 uppercase font-mono"
                 />
               </div>
 
               <div class="space-y-1">
-                <label class="block font-semibold text-charcoal/70">Percentage Discount * (1 to 99)</label>
-                <input 
-                  v-model="newCoupon.discount" 
-                  type="number" 
-                  required 
+                <label class="block font-semibold text-charcoal/70">Percentage Discount * (1–99)</label>
+                <input
+                  v-model="newCoupon.discount"
+                  type="number"
+                  required
                   min="1"
                   max="99"
-                  placeholder="e.g., 20" 
-                  class="w-full p-2.5 border border-charcoal/20 rounded-xl focus:outline-none focus:ring-1 focus:ring-deep-plum/20" 
+                  placeholder="e.g., 20"
+                  class="w-full p-2.5 border border-charcoal/20 rounded-xl focus:outline-none focus:ring-1 focus:ring-deep-plum/20"
                 />
               </div>
 
-              <div class="flex items-center gap-2 py-1 select-none">
-                <input 
-                  id="coupon-visible"
-                  v-model="newCoupon.visible" 
-                  type="checkbox" 
-                  class="w-4 h-4 text-deep-plum border-charcoal/20 rounded focus:ring-deep-plum/20" 
+              <div class="space-y-1">
+                <label class="block font-semibold text-charcoal/70">Expiry Date (optional)</label>
+                <input
+                  v-model="newCoupon.expiresAt"
+                  type="date"
+                  :min="todayStr"
+                  class="w-full p-2.5 border border-charcoal/20 rounded-xl focus:outline-none focus:ring-1 focus:ring-deep-plum/20"
                 />
-                <label for="coupon-visible" class="font-semibold text-charcoal/70 cursor-pointer">Show publicly in user bag offers list</label>
+                <p class="text-[10px] text-charcoal/40">Leave blank for no expiry. Coupon auto-expires at end of selected date.</p>
+              </div>
+
+              <!-- Visibility toggle -->
+              <div class="bg-warm-ivory/60 rounded-xl p-3 border border-rose-blush/15 space-y-2">
+                <p class="font-bold text-charcoal/60 text-[11px] uppercase tracking-wider">Visibility</p>
+                <div class="flex gap-4">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input v-model="newCoupon.visibility" type="radio" value="public" class="accent-deep-plum" />
+                    <span class="font-semibold text-charcoal/80">🌐 Public</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input v-model="newCoupon.visibility" type="radio" value="private" class="accent-deep-plum" />
+                    <span class="font-semibold text-charcoal/80">🔒 Private (code-only)</span>
+                  </label>
+                </div>
+                <p class="text-[10px] text-charcoal/40 leading-relaxed">
+                  Public = shown in bag's "Available Offers" list.<br/>
+                  Private = valid only when typed manually by customer.
+                </p>
               </div>
 
               <div class="flex justify-end pt-3 border-t border-rose-blush/10">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   :disabled="creatingCoupon"
                   class="px-6 py-3 bg-deep-plum hover:bg-deep-plum/95 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-premium flex items-center gap-2 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
                 >
@@ -2237,50 +2224,127 @@
             </form>
           </div>
 
-          <!-- Coupons List -->
-          <div class="lg:col-span-7 bg-white p-6 rounded-3xl border border-charcoal/20 shadow-soft relative overflow-hidden">
-            <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
-            <h4 class="font-serif font-bold text-deep-plum text-sm border-b border-rose-blush/10 pb-3 mb-4">Active Dynamic Coupons</h4>
+          <!-- Coupons List Column -->
+          <div class="lg:col-span-7 space-y-6">
 
-            <div v-if="adminCoupons.length === 0" class="py-12 text-center text-charcoal/40 text-xs font-ui relative z-10">
-              <span class="text-3xl block mb-2">🎫</span>
-              No dynamic coupons found. Create one to get started.
+            <!-- Active Coupons -->
+            <div class="bg-white p-6 rounded-3xl border border-charcoal/20 shadow-soft relative overflow-hidden">
+              <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-rose-blush pointer-events-none" />
+              <h4 class="font-serif font-bold text-deep-plum text-sm border-b border-rose-blush/10 pb-3 mb-4">
+                Active Coupons
+                <span class="ml-2 text-[10px] font-ui bg-green-100 text-green-700 px-1.5 py-0.5 rounded">{{ activeDynamicCoupons.length }}</span>
+              </h4>
+
+              <div v-if="activeDynamicCoupons.length === 0" class="py-10 text-center text-charcoal/40 text-xs font-ui relative z-10">
+                <span class="text-3xl block mb-2">🎫</span>
+                No active coupons. Create one to get started.
+              </div>
+
+              <div v-else class="overflow-x-auto relative z-10">
+                <table class="w-full text-left border-collapse text-xs font-ui">
+                  <thead>
+                    <tr class="border-b border-rose-blush/10 text-charcoal/60 uppercase font-semibold tracking-wider">
+                      <th class="py-2.5">Code</th>
+                      <th class="py-2.5">Discount</th>
+                      <th class="py-2.5">Expiry</th>
+                      <th class="py-2.5">Visibility</th>
+                      <th class="py-2.5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-rose-blush/5">
+                    <tr v-for="coupon in activeDynamicCoupons" :key="coupon._id" class="hover:bg-rose-blush/5 transition-colors">
+                      <td class="py-3 font-mono font-bold text-deep-plum">{{ coupon.title }}</td>
+                      <td class="py-3 font-semibold">{{ coupon.items }}% OFF</td>
+                      <td class="py-3">
+                        <span v-if="coupon.expiresAt" class="text-[10px] font-semibold" :class="isCouponDateExpired(coupon.expiresAt) ? 'text-red-500' : 'text-charcoal/50'">
+                          {{ formatCouponDate(coupon.expiresAt) }}
+                          <span v-if="isCouponDateExpired(coupon.expiresAt)" class="ml-1 bg-red-100 text-red-600 px-1 py-0.5 rounded text-[9px] font-bold">EXPIRED</span>
+                        </span>
+                        <span v-else class="text-[10px] text-charcoal/30">No expiry</span>
+                      </td>
+                      <td class="py-3">
+                        <button
+                          @click="handleToggleCouponVisibility(coupon)"
+                          class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all"
+                          :class="coupon.image !== 'hidden' ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-charcoal/10 text-charcoal/60 hover:bg-charcoal/20'"
+                          :title="coupon.image !== 'hidden' ? 'Click to make private' : 'Click to make public'"
+                        >
+                          {{ coupon.image !== 'hidden' ? '🌐 Public' : '🔒 Private' }}
+                        </button>
+                      </td>
+                      <td class="py-3 text-right">
+                        <div class="flex justify-end gap-1.5">
+                          <button
+                            @click="handleExpireCoupon(coupon._id, coupon.title)"
+                            class="px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all font-semibold font-ui cursor-pointer text-[10px]"
+                          >
+                            Expire
+                          </button>
+                          <button
+                            @click="handleDeleteCoupon(coupon._id)"
+                            class="px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-all font-semibold font-ui cursor-pointer text-[10px]"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <div v-else class="overflow-x-auto relative z-10">
-              <table class="w-full text-left border-collapse text-xs font-ui">
-                <thead>
-                  <tr class="border-b border-rose-blush/10 text-charcoal/60 uppercase font-semibold tracking-wider">
-                    <th class="py-2.5">Code</th>
-                    <th class="py-2.5">Discount</th>
-                    <th class="py-2.5">Visibility</th>
-                    <th class="py-2.5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-rose-blush/5">
-                  <tr v-for="coupon in adminCoupons" :key="coupon._id" class="hover:bg-rose-blush/5 transition-colors">
-                    <td class="py-3 font-mono font-bold text-deep-plum">{{ coupon.title }}</td>
-                    <td class="py-3 font-semibold">{{ coupon.items }}% OFF</td>
-                    <td class="py-3 font-semibold">
-                      <span 
-                        class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
-                        :class="coupon.image !== 'hidden' ? 'bg-green-100 text-green-800' : 'bg-charcoal/10 text-charcoal/60'"
-                      >
-                        {{ coupon.image !== 'hidden' ? 'Public' : 'Hidden/Private' }}
-                      </span>
-                    </td>
-                    <td class="py-3 text-right">
-                      <button 
-                        @click="handleDeleteCoupon(coupon._id)"
-                        class="px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-all font-semibold font-ui cursor-pointer"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <!-- Expired Coupons -->
+            <div v-if="expiredDynamicCoupons.length > 0" class="bg-white p-6 rounded-3xl border border-charcoal/10 shadow-soft relative overflow-hidden opacity-80">
+              <div class="absolute inset-0.5 rounded-[22px] border border-dashed border-charcoal/10 pointer-events-none" />
+              <h4 class="font-serif font-bold text-charcoal/50 text-sm border-b border-charcoal/8 pb-3 mb-4">
+                Expired / Disabled Coupons
+                <span class="ml-2 text-[10px] font-ui bg-red-100 text-red-600 px-1.5 py-0.5 rounded">{{ expiredDynamicCoupons.length }}</span>
+              </h4>
+              <div class="overflow-x-auto relative z-10">
+                <table class="w-full text-left border-collapse text-xs font-ui">
+                  <thead>
+                    <tr class="border-b border-charcoal/8 text-charcoal/40 uppercase font-semibold tracking-wider">
+                      <th class="py-2.5">Code</th>
+                      <th class="py-2.5">Discount</th>
+                      <th class="py-2.5">Visibility</th>
+                      <th class="py-2.5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-charcoal/5">
+                    <tr v-for="coupon in expiredDynamicCoupons" :key="coupon._id" class="opacity-70">
+                      <td class="py-3">
+                        <span class="font-mono font-bold text-charcoal/50 line-through">{{ coupon.title }}</span>
+                        <span class="ml-2 text-[9px] font-bold bg-red-100 text-red-600 px-1.5 py-0.5 rounded uppercase">Expired</span>
+                      </td>
+                      <td class="py-3 font-semibold text-charcoal/50">{{ coupon.items }}% OFF</td>
+                      <td class="py-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-charcoal/10 text-charcoal/40">
+                          {{ coupon.image !== 'hidden' ? '🌐 Public' : '🔒 Private' }}
+                        </span>
+                      </td>
+                      <td class="py-3 text-right">
+                        <div class="flex justify-end gap-1.5">
+                          <button
+                            @click="handleRestoreCoupon(coupon._id, coupon.title)"
+                            class="px-2.5 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-all font-semibold font-ui cursor-pointer text-[10px]"
+                          >
+                            Restore
+                          </button>
+                          <button
+                            @click="handleDeleteCoupon(coupon._id)"
+                            class="px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-all font-semibold font-ui cursor-pointer text-[10px]"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
+
           </div>
         </div>
       </section>
@@ -2714,11 +2778,7 @@
                         <input v-model.number="productModal.form.stockCount" type="number" placeholder="25"
                           class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
                       </div>
-                      <div class="space-y-1">
-                        <label class="block text-[11px] font-bold text-charcoal/60">Delivery Promise (Days)</label>
-                        <input v-model.number="productModal.form.deliveryDays" type="number" placeholder="3"
-                          class="w-full px-3.5 py-2.5 border border-charcoal/20 rounded-xl text-xs bg-white focus:outline-none focus:border-deep-plum focus:ring-2 focus:ring-deep-plum/10 transition" />
-                      </div>
+                      <!-- delivery days removed — now handled by Shiprocket serviceability API -->
                       <!-- inStock is now derived from stockPerSize per variant — no manual toggle needed -->
                     </div>
                   </div>
@@ -4197,21 +4257,15 @@ const unitsSoldList = computed(() => {
 const filteredPipelineOrders = computed(() => {
   const tab = activeOrderPipelineTab.value
   const q = searchQueries.value.orders.toLowerCase().trim()
-  
+
   let list = orders.value
-  
+
   if (tab === 'placed') {
-    list = orders.value.filter(o => o.orderStatus === 'placed')
-  } else if (tab === 'accepted') {
-    list = orders.value.filter(o => ['accepted', 'confirmed'].includes(o.orderStatus))
-  } else if (tab === 'label_created') {
-    list = orders.value.filter(o => o.orderStatus === 'label_created')
-  } else if (tab === 'ready_to_ship') {
-    list = orders.value.filter(o => ['packed', 'ready_to_ship'].includes(o.orderStatus))
+    list = orders.value.filter(o => ['placed','accepted','confirmed','label_created','ready_to_ship','packed'].includes(o.orderStatus))
   } else if (tab === 'shipped') {
     list = orders.value.filter(o => o.orderStatus === 'shipped')
-  } else if (tab === 'in_transit') {
-    list = orders.value.filter(o => ['out_for_delivery', 'in_transit'].includes(o.orderStatus))
+  } else if (tab === 'out_for_delivery') {
+    list = orders.value.filter(o => ['out_for_delivery','in_transit'].includes(o.orderStatus))
   } else if (tab === 'delivered') {
     list = orders.value.filter(o => o.orderStatus === 'delivered')
   } else if (tab === 'cancelled') {
@@ -4290,23 +4344,38 @@ const handleSendCustomEmail = async () => {
 }
 
 // Coupons Management
-const newCoupon = ref({ code: '', discount: 20, visible: true })
+const newCoupon = ref({ code: '', discount: 20, visibility: 'public', expiresAt: '' })
 const creatingCoupon = ref(false)
+const todayStr = new Date().toISOString().split('T')[0]
 
-const adminCoupons = computed(() => {
-  return (widgets.value || []).filter((w: any) => w.type === 'coupon')
-})
+const adminCoupons = computed(() =>
+  (widgets.value || []).filter((w: any) => w.type === 'coupon')
+)
+const activeDynamicCoupons = computed(() =>
+  adminCoupons.value.filter((c: any) => c.enabled !== false)
+)
+const expiredDynamicCoupons = computed(() =>
+  adminCoupons.value.filter((c: any) => c.enabled === false)
+)
+
+const formatCouponDate = (dateStr: string) => {
+  if (!dateStr) return ''
+  return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+const isCouponDateExpired = (dateStr: string) => {
+  if (!dateStr) return false
+  return new Date(dateStr) < new Date()
+}
 
 const handleCreateCoupon = async () => {
   const code = newCoupon.value.code.trim().toUpperCase()
   const discount = Number(newCoupon.value.discount)
-  
+
   if (!code || isNaN(discount) || discount < 1 || discount > 99) {
     uiStore.addToast('error', 'Please enter a valid coupon code and percentage discount.')
     return
   }
 
-  // Check if coupon already exists
   const exists = adminCoupons.value.some((c: any) => c.title.toUpperCase() === code)
   if (exists) {
     uiStore.addToast('error', 'A coupon with this code already exists.')
@@ -4315,7 +4384,7 @@ const handleCreateCoupon = async () => {
 
   creatingCoupon.value = true
   try {
-    const payload = {
+    const payload: any = {
       title: code,
       type: 'coupon',
       enabled: true,
@@ -4323,13 +4392,15 @@ const handleCreateCoupon = async () => {
       key: 'coupon',
       name: code,
       subtitle: discount.toString(),
-      image: newCoupon.value.visible ? 'visible' : 'hidden',
+      image: newCoupon.value.visibility === 'public' ? 'visible' : 'hidden',
       items: discount
     }
-    
+    if (newCoupon.value.expiresAt) {
+      payload.expiresAt = newCoupon.value.expiresAt
+    }
     await adminStore.createWidget(payload)
     uiStore.addToast('success', `Coupon ${code} created successfully!`)
-    newCoupon.value = { code: '', discount: 20, visible: true }
+    newCoupon.value = { code: '', discount: 20, visibility: 'public', expiresAt: '' }
     loadAllData()
   } catch (err: any) {
     console.error('Failed to create coupon:', err)
@@ -4339,17 +4410,51 @@ const handleCreateCoupon = async () => {
   }
 }
 
+const handleToggleCouponVisibility = async (coupon: any) => {
+  const isPublic = coupon.image !== 'hidden'
+  try {
+    await adminStore.updateWidget(coupon._id, { image: isPublic ? 'hidden' : 'visible' })
+    coupon.image = isPublic ? 'hidden' : 'visible'
+    uiStore.addToast('success', `${coupon.title} is now ${isPublic ? 'private (code-only)' : 'public'}.`)
+  } catch {
+    uiStore.addToast('error', 'Failed to update coupon visibility.')
+  }
+}
+
+const handleExpireCoupon = async (id: string, code: string) => {
+  if (!confirm(`Expire coupon "${code}"? Customers will no longer be able to use it. You can restore it later.`)) return
+  try {
+    await adminStore.updateWidget(id, { enabled: false })
+    uiStore.addToast('success', `Coupon ${code} has been expired.`)
+    loadAllData()
+  } catch {
+    uiStore.addToast('error', 'Failed to expire coupon.')
+  }
+}
+
+const handleRestoreCoupon = async (id: string, code: string) => {
+  try {
+    await adminStore.updateWidget(id, { enabled: true })
+    uiStore.addToast('success', `Coupon ${code} restored and is active again.`)
+    loadAllData()
+  } catch {
+    uiStore.addToast('error', 'Failed to restore coupon.')
+  }
+}
+
 const handleDeleteCoupon = async (id: string) => {
-  if (!confirm('Are you sure you want to delete this coupon? This action cannot be undone.')) return
+  if (!confirm('Permanently delete this coupon? This cannot be undone.')) return
   try {
     await adminStore.deleteWidget(id)
-    uiStore.addToast('success', 'Coupon deleted successfully!')
+    uiStore.addToast('success', 'Coupon deleted.')
     loadAllData()
   } catch (err: any) {
     console.error('Failed to delete coupon:', err)
     uiStore.addToast('error', err.message || 'Failed to delete coupon')
   }
 }
+
+
 
 // Search Queries & Filters
 const searchQueries = ref({

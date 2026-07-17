@@ -34,11 +34,12 @@
           <article
             v-for="item in cart.items"
             :key="`${item.productId}-${item.variantColor}-${item.size}`"
-            class="bg-white rounded-2xl shadow-soft border border-border-gray p-4 flex gap-4"
+            class="bg-white rounded-2xl shadow-soft border p-4 flex gap-4 transition-all"
+            :class="isItemOos(item) ? 'border-red-200 opacity-80' : 'border-border-gray'"
             :aria-label="item.product.name"
           >
             <!-- Image -->
-            <NuxtLink :to="`/products/${item.product.slug}`" class="shrink-0">
+            <NuxtLink :to="`/products/${item.product.slug}`" class="shrink-0 relative">
               <img
                 :src="item.product.variants.find(v => v.color === item.variantColor)?.images[0] ?? item.product.variants[0]?.images[0]"
                 :alt="item.product.name"
@@ -46,6 +47,10 @@
                 width="96" height="112"
                 loading="lazy"
               />
+              <!-- OOS overlay on image -->
+              <div v-if="isItemOos(item)" class="absolute inset-0 rounded-xl bg-white/60 flex items-center justify-center">
+                <span class="text-[9px] font-bold uppercase tracking-wider text-red-500 bg-white px-1.5 py-0.5 rounded shadow">Out of Stock</span>
+              </div>
             </NuxtLink>
 
             <!-- Details -->
@@ -57,6 +62,8 @@
                     <h3 class="font-sans font-medium text-charcoal text-sm leading-snug hover:text-deep-plum transition-colors">{{ item.product.name }}</h3>
                   </NuxtLink>
                   <p class="text-xs text-mid-gray font-ui mt-1">Color: {{ item.variantColor }} · Size: {{ item.size }}</p>
+                  <!-- OOS notice -->
+                  <p v-if="isItemOos(item)" class="mt-1 text-[10px] font-semibold text-red-500 font-ui">This size is currently out of stock — please remove it before checkout.</p>
                 </div>
                 <button
                   class="text-mid-gray hover:text-red-500 transition-colors shrink-0"
@@ -70,15 +77,15 @@
               </div>
 
               <div class="mt-3 flex items-center justify-between">
-                <!-- Quantity -->
+                <!-- Quantity (disabled when OOS) -->
                 <div class="flex items-center gap-2">
-                  <button class="qty-btn" :aria-label="`Decrease quantity of ${item.product.name}`" @click="cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity - 1)">−</button>
+                  <button class="qty-btn" :disabled="isItemOos(item)" :aria-label="`Decrease quantity of ${item.product.name}`" @click="cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity - 1)">−</button>
                   <span class="w-8 text-center font-ui font-semibold text-sm text-charcoal" aria-live="polite">{{ item.quantity }}</span>
-                  <button class="qty-btn" :aria-label="`Increase quantity of ${item.product.name}`" @click="cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity + 1)">+</button>
+                  <button class="qty-btn" :disabled="isItemOos(item)" :aria-label="`Increase quantity of ${item.product.name}`" @click="cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity + 1)">+</button>
                 </div>
                 <!-- Price -->
                 <div class="text-right">
-                  <p class="font-sans font-semibold text-charcoal">{{ formatPrice(item.product.price * item.quantity) }}</p>
+                  <p class="font-sans font-semibold" :class="isItemOos(item) ? 'text-mid-gray line-through' : 'text-charcoal'">{{ formatPrice(item.product.price * item.quantity) }}</p>
                   <p v-if="item.quantity > 1" class="text-xs text-mid-gray font-ui">{{ formatPrice(item.product.price) }} each</p>
                 </div>
               </div>
@@ -267,12 +274,27 @@ const applyCoupon = async () => {
 }
 
 const proceedToCheckout = () => {
+  // Check for OOS items before allowing checkout
+  const oosItems = cart.items.filter(item => isItemOos(item))
+  if (oosItems.length > 0) {
+    const names = oosItems.map(i => i.product.name).join(', ')
+    ui.addToast('error', `Some items are out of stock: ${names}. Please remove them before checkout.`)
+    return
+  }
   if (!auth.isLoggedIn) {
     ui.setAuthRedirect('/checkout')
     ui.openAuthModal('/checkout')
   } else {
     navigateTo('/checkout')
   }
+}
+
+// Check if a cart item's selected size is now out of stock
+const isItemOos = (item: any): boolean => {
+  const variant = item.product?.variants?.find((v: any) => v.color === item.variantColor)
+  if (!variant?.stockPerSize) return false
+  const stock = variant.stockPerSize[item.size]
+  return typeof stock === 'number' && stock === 0
 }
 
 useSeoMeta({

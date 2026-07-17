@@ -55,6 +55,17 @@ const wishlist = useWishlistStore()
 const cart = useCartStore()
 const ui = useUIStore()
 
+// ── Body scroll lock: prevent page scroll when any modal/drawer is open ──
+watchEffect(() => {
+  if (import.meta.client) {
+    const locked = ui.authModalOpen || ui.sizeGuideOpen || ui.filterDrawerOpen || ui.profileDrawerOpen || ui.searchOverlayOpen
+    document.body.style.overflow = locked ? 'hidden' : ''
+  }
+})
+onUnmounted(() => {
+  if (import.meta.client) document.body.style.overflow = ''
+})
+
 onMounted(async () => {
   auth.init()
 

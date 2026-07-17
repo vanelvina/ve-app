@@ -187,6 +187,18 @@ export const useProductsStore = defineStore('products', {
     async fetchProducts() {
       this.loading = true
       const config = useRuntimeConfig()
+
+      // Restore recently viewed from localStorage before products arrive
+      if (import.meta.client && this.recentlyViewed.length === 0) {
+        try {
+          const stored = localStorage.getItem('ve_recently_viewed')
+          if (stored) {
+            const parsed = JSON.parse(stored)
+            if (Array.isArray(parsed)) this.recentlyViewed = parsed
+          }
+        } catch { /* ignore */ }
+      }
+
       try {
         const data = await $fetch<Product[]>(`${config.public.apiBase}/products`, {
           silent: this.all.length > 0
@@ -221,11 +233,24 @@ export const useProductsStore = defineStore('products', {
       this.page = page
     },
     addRecentlyViewed(product: Product) {
+      // Normalize ID — API returns _id, client types expose id
+      const productId = (product as any)._id || product.id
+      if (!productId) return
+
       const current = Array.isArray(this.recentlyViewed) ? this.recentlyViewed : []
-      this.recentlyViewed = [
-        product,
-        ...current.filter((p) => p.id !== product.id),
-      ].slice(0, 8)
+      const deduped = current.filter((p) => {
+        const pid = (p as any)._id || p.id
+        return pid !== productId
+      })
+
+      this.recentlyViewed = [product, ...deduped].slice(0, 10)
+
+      // Persist to localStorage so it survives page refreshes
+      if (import.meta.client) {
+        try {
+          localStorage.setItem('ve_recently_viewed', JSON.stringify(this.recentlyViewed))
+        } catch { /* ignore quota errors */ }
+      }
     },
   },
 })

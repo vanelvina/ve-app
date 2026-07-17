@@ -55,15 +55,15 @@
               <div v-else class="space-y-4">
                 <button v-if="auth.user?.addresses && auth.user.addresses.length > 0" type="button" @click="showNewAddressForm = false" class="text-xs font-semibold text-charcoal/50 hover:text-deep-plum mb-2">← Back to saved addresses</button>
                 <div class="grid sm:grid-cols-2 gap-4">
-                  <AppInput v-model="form.fullName" label="Full Name" placeholder="Priya Sharma" required :error="errors.fullName" @blur="form.fullName = capitalizeWords(form.fullName)" />
-                  <AppInput v-model="form.phone" label="Phone Number" type="tel" placeholder="9876543210" required :error="errors.phone" />
+                  <AppInput v-model="form.fullName" label="Full Name" placeholder="Priya Sharma" required :error="errors.fullName" @blur="form.fullName = capitalizeWords(form.fullName)" @input="errors.fullName = ''" />
+                  <AppInput v-model="form.phone" label="Phone Number" type="tel" placeholder="9876543210" required :error="errors.phone" @input="errors.phone = ''" />
                 </div>
-                <AppInput v-model="form.email" label="Email Address" type="email" placeholder="priya@email.com" required :error="errors.email" />
-                <AppInput v-model="form.line1" label="Address Line 1" placeholder="House No, Building, Street" required :error="errors.line1" @blur="form.line1 = capitalizeWords(form.line1)" />
+                <AppInput v-model="form.email" label="Email Address" type="email" placeholder="priya@email.com" required :error="errors.email" @input="errors.email = ''" />
+                <AppInput v-model="form.line1" label="Address Line 1" placeholder="House No, Building, Street" required :error="errors.line1" @blur="form.line1 = capitalizeWords(form.line1)" @input="errors.line1 = ''" />
                 <AppInput v-model="form.line2" label="Address Line 2 (Optional)" placeholder="Landmark, Area" @blur="form.line2 = capitalizeWords(form.line2)" />
                 <div class="grid sm:grid-cols-3 gap-4">
-                  <AppInput v-model="form.pincode" label="PIN Code" placeholder="400001" maxlength="6" required :error="errors.pincode" />
-                  <AppInput v-model="form.city" label="City" placeholder="Mumbai" required :error="errors.city" @blur="form.city = capitalizeWords(form.city)" />
+                  <AppInput v-model="form.pincode" label="PIN Code" placeholder="400001" maxlength="6" required :error="errors.pincode" @input="errors.pincode = ''" />
+                  <AppInput v-model="form.city" label="City" placeholder="Mumbai" required :error="errors.city" @blur="form.city = capitalizeWords(form.city)" @input="errors.city = ''" />
                   <div>
                     <label class="block text-sm font-ui font-medium text-charcoal mb-1.5" for="state-select">State <span class="text-dusty-rose">*</span></label>
                     <select id="state-select" v-model="form.state" class="input-base" required aria-required="true">
@@ -279,6 +279,12 @@ const prefillForm = () => {
 onMounted(async () => {
   await cart.fetchCart()
   prefillForm()
+
+  // Fast-track: if user already has a saved address pre-selected, skip step 1 automatically
+  if (auth.isLoggedIn && auth.user?.addresses?.length && selectedAddressId.value) {
+    proceedWithSavedAddress()
+  }
+
   if (isBuyNow.value) {
     try {
       const stored = sessionStorage.getItem('ve_buy_now_item')

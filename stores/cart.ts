@@ -208,77 +208,137 @@ export const useCartStore = defineStore('cart', {
     },
 
     async applyCoupon(code: string): Promise<{ success: boolean; message: string }> {
-      const upper = code.toUpperCase()
-      
-      const loyaltyCoupons: Record<string, { discount: number, requiredDelivered: number }> = {
-        WELCOME10: { discount: 0.1, requiredDelivered: 0 },
-        ELVINAROYAL20: { discount: 0.2, requiredDelivered: 1 },
-        ELVINAROYAL30: { discount: 0.3, requiredDelivered: 2 },
-        ELVINAROYAL40: { discount: 0.4, requiredDelivered: 3 },
-        ELVINAROYAL50: { discount: 0.5, requiredDelivered: 4 },
-      }
+      const upper = code.toUpperCase().trim()
 
-      if (this.items.length === 0) return { success: false, message: 'Bag is empty' }
+      if (this.items.length === 0) return { success: false, message: 'Your bag is empty.' }
+
       const maxPrice = Math.max(...this.items.map(item => item.product?.price ?? 0))
+
+      // ── Loyalty coupon definitions ────────────────────────────────────────
+      const loyaltyCoupons: Record<string, { discount: number; requiredDelivered: number }> = {
+        WELCOME10:      { discount: 0.1, requiredDelivered: 0 },
+        ELVINAROYAL20:  { discount: 0.2, requiredDelivered: 1 },
+        ELVINAROYAL30:  { discount: 0.3, requiredDelivered: 2 },
+        ELVINAROYAL40:  { discount: 0.4, requiredDelivered: 3 },
+        ELVINAROYAL50:  { discount: 0.5, requiredDelivered: 4 },
+      }
 
       if (loyaltyCoupons[upper]) {
         const auth = useAuthStore()
         if (!auth.isLoggedIn) {
-          return { success: false, message: 'Please login to use loyalty coupons.' }
+          return { success: false, message: 'Please log in to use loyalty coupons.' }
         }
         try {
           const orders = await auth.fetchMyOrders()
-          const ordersList = orders || []
-          const nonCancelledOrders = ordersList.filter((o: any) => o.orderStatus !== 'cancelled' && o.status !== 'cancelled')
-          const deliveredCount = ordersList.filter((o: any) => o.orderStatus === 'delivered' || o.status === 'delivered').length
-          const required = loyaltyCoupons[upper].requiredDelivered
+          const ordersList: any[] = Array.isArray(orders) ? orders : []
 
-          // ── Single-use check: coupon already used in a prior order? ──────────
-          const alreadyUsed = nonCancelledOrders.some((o: any) =>
+          // Exclude cancelled orders from all checks
+          const nonCancelled = ordersList.filter((o: any) =>
+            o.orderStatus !== 'cancelled' && o.status !== 'cancelled'
+          )
+          const delivered = ordersList.filter((o: any) =>
+            o.orderStatus === 'delivered' || o.status === 'delivered'
+          )
+          const deliveredCount = delivered.length
+
+          // ── Single-use enforcement: find the specific order it was used in ──
+          const usedInOrder = nonCancelled.find((o: any) =>
             (o.couponCode || o.coupon_code || '').toUpperCase() === upper
           )
-          if (alreadyUsed) {
-            return { success: false, message: `Coupon ${upper} has already been used on a previous order.` }
+          if (usedInOrder) {
+            const orderId = usedInOrder.orderId || usedInOrder._id || 'a previous order'
+            return {
+              success: false,
+              message: `Coupon ${upper} was already used in Order #${orderId}. Each coupon can only be used once.`
+            }
           }
 
-          if (upper === 'WELCOME10' && nonCancelledOrders.length > 0) {
-            return { success: false, message: 'This coupon is only valid for your first order.' }
+          // ── WELCOME10: only for absolute first order ──────────────────────
+          if (upper === 'WELCOME10' && nonCancelled.length > 0) {
+            return { success: false, message: 'WELCOME10 is valid only for your very first order.' }
           }
-          
+
+          // ── Tier unlock check ─────────────────────────────────────────────
+          const required = loyaltyCoupons[upper].requiredDelivered
           if (deliveredCount < required) {
-            return { success: false, message: `This coupon is not valid for your current order history.` }
+            const needed = required - deliveredCount
+            const ordinal = (n: number) => ['1st','2nd','3rd','4th'][n - 1] || `${n}th`
+            return {
+              success: false,
+              message: `${upper} unlocks after your ${ordinal(required)} delivered order. You need ${needed} more delivered order${needed > 1 ? 's' : ''}.`
+            }
           }
-          
+
           this.couponCode = upper
           this.appliedDiscount = Math.round(maxPrice * loyaltyCoupons[upper].discount)
-          return { success: true, message: `Coupon applied to the highest priced item! You saved ₹${this.appliedDiscount}` }
-          
+          return {
+            success: true,
+            message: `${upper} applied! You saved ₹${this.appliedDiscount} on the highest-priced item.`
+          }
+
         } catch (err) {
-          return { success: false, message: 'Failed to validate coupon against your order history.' }
+          return { success: false, message: 'Could not validate coupon. Please try again.' }
         }
       }
 
-      // Fetch dynamic coupons from API/widgets
+      // ── Dynamic (admin-created) coupons ───────────────────────────────────
       const config = useRuntimeConfig()
+      const auth = useAuthStore()
       let dynamicDiscountRate = 0
+      let dynamicWidget: any = null
+
       try {
         const widgets = await $fetch<any[]>(`${config.public.apiBase}/widgets`)
-        const cw = (widgets || []).find((w: any) => w.type === 'coupon' && w.enabled && w.title.toUpperCase() === upper)
+        const cw = (widgets || []).find(
+          (w: any) => w.type === 'coupon' && w.enabled && w.title.toUpperCase() === upper
+        )
         if (cw) {
-          const discountVal = cw.items !== undefined && cw.items !== null ? Number(cw.items) : (cw.subtitle ? parseFloat(cw.subtitle) : 0)
+          // Check date-based expiry (expiresAt field set by admin)
+          if (cw.expiresAt && new Date(cw.expiresAt) < new Date()) {
+            const expiredDate = new Date(cw.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+            return { success: false, message: `Coupon ${upper} expired on ${expiredDate} and is no longer valid.` }
+          }
+          const discountVal = cw.items !== undefined && cw.items !== null
+            ? Number(cw.items)
+            : (cw.subtitle ? parseFloat(cw.subtitle) : 0)
           dynamicDiscountRate = discountVal > 1 ? discountVal / 100 : discountVal
+          dynamicWidget = cw
         }
       } catch (err) {
         console.error('Failed to load dynamic coupons:', err)
       }
 
       if (dynamicDiscountRate > 0) {
+        // Single-use check for dynamic coupons (if user is logged in)
+        if (auth.isLoggedIn) {
+          try {
+            const orders = await auth.fetchMyOrders()
+            const ordersList: any[] = Array.isArray(orders) ? orders : []
+            const nonCancelled = ordersList.filter((o: any) =>
+              o.orderStatus !== 'cancelled' && o.status !== 'cancelled'
+            )
+            const usedInOrder = nonCancelled.find((o: any) =>
+              (o.couponCode || o.coupon_code || '').toUpperCase() === upper
+            )
+            if (usedInOrder) {
+              const orderId = usedInOrder.orderId || usedInOrder._id || 'a previous order'
+              return {
+                success: false,
+                message: `Coupon ${upper} was already used in Order #${orderId}. Each coupon can only be used once.`
+              }
+            }
+          } catch (_) { /* proceed if order fetch fails */ }
+        }
+
         this.couponCode = upper
         this.appliedDiscount = Math.round(maxPrice * dynamicDiscountRate)
-        return { success: true, message: `Coupon applied to the highest priced item! You saved ₹${this.appliedDiscount}` }
+        return {
+          success: true,
+          message: `${upper} applied! You saved ₹${this.appliedDiscount} on the highest-priced item.`
+        }
       }
-      
-      return { success: false, message: 'Invalid coupon code.' }
+
+      return { success: false, message: `"${upper}" is not a valid coupon code.` }
     },
 
     removeCoupon() {

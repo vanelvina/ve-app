@@ -63,12 +63,28 @@
                 :key="'img-' + activeImage"
                 class="absolute inset-0"
               >
+                <!-- Skeleton placeholder while image loads -->
+                <div
+                  v-if="!isImageLoaded(activeImage)"
+                  class="absolute inset-0 bg-[#F0EDED] flex items-center justify-center overflow-hidden"
+                  aria-hidden="true"
+                >
+                  <div class="absolute inset-0 pdp-skeleton-shimmer" />
+                  <img
+                    src="/favicon2.png"
+                    alt=""
+                    class="w-16 h-16 opacity-[0.12] object-contain select-none pointer-events-none"
+                    aria-hidden="true"
+                  />
+                </div>
                 <img
                   :src="activeImage"
                   :alt="product.name"
-                  class="absolute inset-0 w-full h-full object-cover"
+                  class="absolute inset-0 w-full h-full object-cover transition-opacity duration-400"
+                  :class="isImageLoaded(activeImage) ? 'opacity-100' : 'opacity-0'"
                   width="600" height="800"
                   fetchpriority="high"
+                  @load="markImageLoaded(activeImage)"
                 />
               </div>
             </Transition>
@@ -98,7 +114,7 @@
             </div>
 
             <!-- Top Overlay Badges & Zoom Icon -->
-            <div class="absolute top-4 left-4 flex flex-col gap-2">
+            <div v-if="!isCurrentSlideVideo" class="absolute top-4 left-4 flex flex-col gap-2">
               <AppBadge v-if="product.badge" :variant="product.badge" :label="product.badge === 'bestseller' ? 'Best Seller' : product.badge" />
               <AppBadge v-if="product.discount" :label="`${product.discount}% OFF`" variant="sale" />
             </div>
@@ -137,13 +153,25 @@
                 </div>
               </div>
               <!-- Regular image thumbnail -->
-              <img
-                v-else
-                :src="img"
-                :alt="`Product view ${idx + 1}`"
-                class="w-full h-full object-cover"
-                width="64" height="64" loading="lazy"
-              />
+              <div v-else class="relative w-full h-full">
+                <!-- Skeleton while thumbnail loads -->
+                <div
+                  v-if="!isImageLoaded(img)"
+                  class="absolute inset-0 bg-[#F0EDED] flex items-center justify-center overflow-hidden"
+                  aria-hidden="true"
+                >
+                  <div class="absolute inset-0 pdp-skeleton-shimmer" />
+                  <img src="/favicon2.png" alt="" class="w-5 h-5 opacity-[0.12] object-contain select-none pointer-events-none" aria-hidden="true" />
+                </div>
+                <img
+                  :src="img"
+                  :alt="`Product view ${idx + 1}`"
+                  class="w-full h-full object-cover transition-opacity duration-300"
+                  :class="isImageLoaded(img) ? 'opacity-100' : 'opacity-0'"
+                  width="64" height="64" loading="lazy"
+                  @load="markImageLoaded(img)"
+                />
+              </div>
             </button>
           </div>
         </div>
@@ -305,9 +333,13 @@
                 v-for="(variant, idx) in product.variants"
                 :key="variant.color"
                 class="relative w-7 h-7 rounded-full border-2 transition-all duration-200 cursor-pointer"
-                :class="selectedVariant === idx ? 'border-deep-plum scale-110 shadow-md' : 'border-white shadow-sm hover:scale-105'"
+                :class="[
+                  selectedVariant === idx ? 'border-deep-plum scale-110 shadow-md' : 'border-white shadow-sm hover:scale-105',
+                  isVariantOos(variant) ? 'opacity-50' : ''
+                ]"
                 :style="{ backgroundColor: variant.colorHex }"
-                :aria-label="variant.color"
+                :aria-label="variant.color + (isVariantOos(variant) ? ' (Out of Stock)' : '')"
+                :title="isVariantOos(variant) ? variant.color + ' — Out of Stock' : variant.color"
                 :aria-pressed="selectedVariant === idx"
                 @click="selectedVariant = idx; selectedSize = ''; setActiveImageIdx(0); closeVideoPlayer()"
               >
@@ -387,7 +419,7 @@
               </div>
               <!-- Stock count is intentionally NOT shown to customers — urgency only shows when ≤2 left -->
               <div class="flex-1 flex items-center gap-2">
-              <AppButton size="md" :full="true" :loading="adding" @click="handleAddToCart" class="hidden md:inline-flex flex-1">
+              <AppButton size="md" :full="true" :loading="adding" :disabled="(!!selectedSize && selectedSizeStock === 0)" @click="handleAddToCart" class="hidden md:inline-flex flex-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
@@ -449,7 +481,7 @@
                 class="input-base flex-1 text-sm"
                 aria-label="Enter pincode to check delivery"
               />
-              <AppButton size="sm" variant="secondary" @click="checkDelivery">Check</AppButton>
+              <AppButton size="sm" variant="secondary" :loading="checkingDelivery" @click="checkDelivery">Check</AppButton>
             </div>
             <p v-if="deliveryMsg" class="mt-1.5 text-xs font-ui" :class="deliveryOk ? 'text-green-600' : 'text-red-500'" role="alert">{{ deliveryMsg }}</p>
           </div>
@@ -460,14 +492,12 @@
             <div class="flex items-start gap-3 px-3 py-2.5">
               <template v-if="product.isReturnable === false">
                 <!-- No-return icon -->
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-red-500 mt-0.5" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-charcoal mt-0.5" aria-hidden="true">
                   <circle cx="12" cy="12" r="10"/>
                   <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
                 </svg>
-                <span class="text-[12.5px] font-ui text-red-600 leading-snug">
-                  <strong class="block">No Return &amp; No Exchange</strong>
-                  This product is non-returnable and non-exchangeable.
-                  All sales are final as per our hygiene policy.
+                <span class="text-[12.5px] font-ui text-charcoal leading-snug">
+                  No return &amp; no exchange — all sales final (hygiene policy)
                 </span>
               </template>
               <template v-else>
@@ -522,8 +552,13 @@
         </div>
       </div>
 
+      <!-- Loyalty Programme Banner — standalone above the details card -->
+      <div class="mt-6">
+        <LoyaltyDiscountBanner />
+      </div>
+
       <!-- Product details tabs -->
-      <div class="mt-12 bg-white rounded-2xl shadow-soft border border-border-gray overflow-hidden">
+      <div class="mt-4 bg-white rounded-2xl shadow-soft border border-border-gray overflow-hidden">
         <!-- Tab headers -->
         <div class="flex border-b border-border-gray">
           <button
@@ -543,9 +578,6 @@
         <!-- Tab content -->
         <div class="p-6">
           <div v-if="activeTab === 'Description'" class="space-y-6">
-            <!-- Save Big Banner -->
-            <LoyaltyDiscountBanner />
-
             <p class="text-sm font-ui text-mid-gray leading-relaxed">{{ product.description }}</p>
 
             <!-- Key Features -->
@@ -698,6 +730,48 @@
         </div>
       </div>
 
+      <!-- ── Locked Action Bar — docked below the description card ──────── -->
+      <!-- Shares rounded-2xl bottom-radius with the card above, flat top -->
+      <div
+        v-if="product"
+        class="md:hidden bg-white border border-t-0 border-border-gray rounded-b-2xl shadow-soft overflow-hidden flex h-[58px]"
+      >
+        <!-- Wishlist -->
+        <button
+          @click="handleWishlistToggle"
+          class="w-[20%] flex items-center justify-center border-r border-border-gray/50 transition-colors"
+          :class="wishlist.isWishlisted(product.id || product._id) ? 'text-deep-plum bg-rose-50' : 'text-mid-gray bg-white hover:bg-rose-50 hover:text-deep-plum'"
+          aria-label="Wishlist"
+        >
+          <svg v-if="wishlist.isWishlisted(product.id || product._id)" class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+          <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+        </button>
+
+        <!-- Add to Bag -->
+        <button
+          @click="handleAddToCart"
+          :disabled="(selectedSize && selectedSizeStock === 0) || adding"
+          class="flex-1 bg-deep-plum text-white font-ui font-bold tracking-wider text-sm hover:bg-[#473021] transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          <span v-if="adding" class="flex items-center gap-2">
+            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            ADDING…
+          </span>
+          <span v-else class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            {{ isAlreadyInBag ? 'GO TO BAG' : 'ADD TO BAG' }}
+          </span>
+        </button>
+      </div>
 
       <!-- Sticky release sentinel: when this enters viewport, release the mobile sticky bar -->
       <div ref="stickyReleaseSentinel" aria-hidden="true"></div>
@@ -839,43 +913,7 @@
     </div>
   </Transition>
 
-  <!-- Mobile Sticky Bottom Bar -->
-  <div v-if="product && stickyBarActive" class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white flex shadow-[0_-4px_16px_rgba(0,0,0,0.1)] h-[60px]">
-    <button 
-      @click="handleWishlistToggle" 
-      class="w-[20%] flex items-center justify-center border-r border-border-gray/50 transition-colors bg-white"
-      :class="wishlist.isWishlisted(product.id || product._id) ? 'text-deep-plum' : 'text-mid-gray'"
-      aria-label="Wishlist"
-    >
-      <svg v-if="wishlist.isWishlisted(product.id || product._id)" class="w-6 h-6 fill-current" viewBox="0 0 24 24">
-        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-      </svg>
-      <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-      </svg>
-    </button>
-    
-    <button 
-      @click="handleAddToCart" 
-      :disabled="(selectedSize && selectedSizeStock === 0) || adding"
-      class="w-[80%] bg-deep-plum text-white font-ui font-bold tracking-wider text-sm hover:bg-[#473021] transition-colors rounded-none flex items-center justify-center gap-2 disabled:opacity-50"
-    >
-      <span v-if="adding" class="flex items-center gap-2">
-        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-        </svg>
-        ADDING...
-      </span>
-      <span v-else class="flex items-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-        </svg>
-        {{ isAlreadyInBag ? 'GO TO BAG' : 'ADD TO BAG' }}
-      </span>
-    </button>
-  </div>
-  
+
   <!-- Size Selection Modal -->
   <Transition name="fade">
     <div v-if="sizeModalOpen" class="overlay-backdrop" @click="sizeModalOpen = false" style="z-index: 60" />
@@ -893,11 +931,25 @@
         <button
           v-for="size in product.variants[selectedVariant].sizes"
           :key="size"
-          class="h-12 border rounded-xl flex items-center justify-center font-ui text-sm font-semibold transition-all duration-200"
-          :class="selectedSize === size ? 'border-deep-plum bg-deep-plum text-white shadow-md shadow-deep-plum/20' : 'border-[#E8DDD5] text-charcoal hover:border-dusty-rose bg-white'"
-          @click="selectSizeAndAdd(size)"
+          class="h-12 border rounded-xl flex items-center justify-center font-ui text-sm font-semibold transition-all duration-200 relative"
+          :class="[
+            (product.variants[selectedVariant].stockPerSize?.[size] === 0)
+              ? 'border-border-gray text-charcoal/30 bg-gray-50 cursor-not-allowed line-through'
+              : selectedSize === size
+                ? 'border-deep-plum bg-deep-plum text-white shadow-md shadow-deep-plum/20'
+                : 'border-[#E8DDD5] text-charcoal hover:border-dusty-rose bg-white'
+          ]"
+          :disabled="product.variants[selectedVariant].stockPerSize?.[size] === 0"
+          :aria-label="`Size ${size}${product.variants[selectedVariant].stockPerSize?.[size] === 0 ? ' - Out of Stock' : ''}`"
+          @click="product.variants[selectedVariant].stockPerSize?.[size] !== 0 && selectSizeAndAdd(size)"
         >
           {{ size }}
+          <!-- Low-stock amber dot -->
+          <span
+            v-if="product.variants[selectedVariant].stockPerSize?.[size] > 0 && product.variants[selectedVariant].stockPerSize?.[size] <= 2"
+            class="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full bg-amber-500 border border-white"
+            title="Only a few left!"
+          />
         </button>
       </div>
     </div>
@@ -935,6 +987,13 @@ const deliveryOk = ref(false)
 const activeImageIdx = ref(0)
 const activeTab = ref('Description')
 const openFaq = ref<number | null>(null)
+
+// ── Image skeleton tracking ───────────────────────────────────────────────
+const loadedImages = ref<Set<string>>(new Set())
+const isImageLoaded = (src: string) => loadedImages.value.has(src)
+const markImageLoaded = (src: string) => {
+  loadedImages.value = new Set([...loadedImages.value, src])
+}
 
 // Per-size stock: reads from variant.stockPerSize[selectedSize] — null means no tracking set
 const selectedSizeStock = computed(() => {
@@ -1261,10 +1320,13 @@ const similarProducts = computed(() => {
 // ── Recently Viewed ───────────────────────────────────────────────────────────
 const { recentlyViewed } = storeToRefs(useProducts())
 const recentlyViewedProducts = computed(() => {
-  const currentId = product.value?.id || (product.value as any)?._id
+  const currentId = (product.value as any)?._id || product.value?.id
   const list = Array.isArray(recentlyViewed.value) ? recentlyViewed.value : []
   return list
-    .filter((p: any) => (p.id || p._id) !== currentId)
+    .filter((p: any) => {
+      const pid = p._id || p.id
+      return pid !== currentId
+    })
     .slice(0, 6)
 })
 
@@ -1279,6 +1341,11 @@ const handleAddToCart = async () => {
     sizeError.value = true;
     sizeModalOpen.value = true;
     return 
+  }
+  // Guard: size is selected but out of stock
+  if (selectedSizeStock.value === 0) {
+    ui.addToast('error', 'This size is currently out of stock.')
+    return
   }
   sizeError.value = false
   
@@ -1317,14 +1384,38 @@ const selectSizeAndAdd = (size: string) => {
 
 
 
-const checkDelivery = () => {
+
+const checkingDelivery = ref(false)
+
+const checkDelivery = async () => {
   if (!isValidPincode(pincode.value)) {
     deliveryMsg.value = 'Please enter a valid 6-digit PIN code.'
     deliveryOk.value = false
     return
   }
-  deliveryOk.value = true
-  deliveryMsg.value = `✅ Delivery available! Estimated in ${product.value?.deliveryDays ?? 3}-${(product.value?.deliveryDays ?? 3) + 2} business days.`
+  checkingDelivery.value = true
+  deliveryMsg.value = ''
+  try {
+    const data = await $fetch<{ deliverable: boolean; estimatedDays: number | null; message?: string }>(
+      `${config.public.apiBase}/pincode-check?pincode=${pincode.value}`
+    )
+    if (data.deliverable) {
+      deliveryOk.value = true
+      const days = data.estimatedDays
+      deliveryMsg.value = days
+        ? `✅ Delivery available! Estimated in ${days}–${days + 2} business days.`
+        : '✅ Delivery available to this pincode.'
+    } else {
+      deliveryOk.value = false
+      deliveryMsg.value = data.message || '❌ Delivery not available at this pincode.'
+    }
+  } catch {
+    // Graceful fallback when serviceability API is unavailable
+    deliveryOk.value = true
+    deliveryMsg.value = '✅ Delivery available. Exact estimate will be shared after order.'
+  } finally {
+    checkingDelivery.value = false
+  }
 }
 
 watch(selectedSize, () => { if (selectedSize.value) sizeError.value = false })
@@ -1332,25 +1423,23 @@ watch(selectedSize, () => { if (selectedSize.value) sizeError.value = false })
 // Scroll restoration for seamless back-navigation from PDP → PLP
 const { saveScroll, restoreScroll } = useScrollRestore()
 
+// Watch product — fires once it resolves from async fetch (handles both
+// the already-cached case and the async-loaded case after mount)
+const _recentlyViewedTracked = ref(false)
+watch(
+  product,
+  (p) => {
+    if (!p || _recentlyViewedTracked.value) return
+    _recentlyViewedTracked.value = true
+    addRecentlyViewed(p)
+    trackProductView(p.id || (p as any)._id, p.name, p.category, p.price)
+    trackProductImpression(p.id || (p as any)._id, p.name, p.category, p.price)
+  },
+  { immediate: true }
+)
+
 onMounted(() => {
   restoreScroll()
-  if (product.value) {
-    addRecentlyViewed(product.value)
-    // Track deliberate PDP visit (high-intent view)
-    trackProductView(
-      product.value.id || product.value._id,
-      product.value.name,
-      product.value.category,
-      product.value.price
-    )
-    // Also track as impression for PLP-level aggregation
-    trackProductImpression(
-      product.value.id || product.value._id,
-      product.value.name,
-      product.value.category,
-      product.value.price
-    )
-  }
 })
 
 onBeforeUnmount(() => {
@@ -1441,6 +1530,13 @@ const deliveredOrdersCount = ref(0)
 const nonCancelledOrdersCount = ref(0)
 const loadingOrdersCount = ref(false)
 const showTcModal = ref(false)
+
+// Lock body scroll when local PDP modals are open
+watchEffect(() => {
+  if (import.meta.client) {
+    document.body.style.overflow = (showTcModal.value || sizeModalOpen.value) ? 'hidden' : ''
+  }
+})
 
 const loadOrderHistoryForOffers = async () => {
   if (!auth.isLoggedIn) {
@@ -1591,5 +1687,23 @@ const copyCouponCode = (code: string, status: string) => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* ── Image skeleton shimmer ────────────────────────────────────────────── */
+.pdp-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 40%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.45) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: pdpShimmer 1.6s ease-in-out infinite;
+}
+@keyframes pdpShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 </style>
