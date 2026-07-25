@@ -45,10 +45,33 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@vite-pwa/nuxt',
     '@vercel/analytics',
+    '@nuxtjs/sitemap',
   ],
 
   pinia: {
     storesDirs: ['./stores/**'],
+  },
+
+  // Sitemap Configuration
+  // Auto-generates /sitemap.xml with all static pages + dynamic product & blog URLs
+  sitemap: {
+    sitemapName: 'sitemap.xml',
+    // Fetch dynamic URLs from the Supabase API at build/request time
+    sources: [
+      '/api/__sitemap__/urls',
+    ],
+    // Exclude private/user-facing routes from Google indexing
+    exclude: [
+      '/admin/**',
+      '/account/**',
+      '/auth/**',
+      '/bag',
+      '/checkout',
+      '/thank-you',
+      '/myaccount',
+      '/myorders',
+      '/track-order',
+    ],
   },
 
   // CSS
@@ -140,8 +163,14 @@ export default defineNuxtConfig({
       orientation: 'portrait',
       start_url: '/',
       icons: [
+        // Transparent icon — used for browser tab, bookmarks, general display
         { src: '/favicon2.png', sizes: '500x500', type: 'image/png', purpose: 'any' },
-        { src: '/favicon2.png', sizes: '500x500', type: 'image/png', purpose: 'maskable' },
+        { src: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+        // Maskable icons with solid brand background — required for Android home screen / PWA install prompt
+        // (transparent icons fill with black otherwise)
+        { src: '/icons/icon-192x192-maskable.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+        { src: '/icons/icon-512x512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
       ],
       categories: ['shopping', 'lifestyle'],
     },

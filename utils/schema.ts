@@ -61,10 +61,21 @@ export const faqSchema = (faqs: Array<{ question: string; answer: string }>) => 
 export const organizationSchema = () => ({
   '@context': 'https://schema.org',
   '@type': 'Organization',
+  '@id': 'https://vanelvina.com/#organization',
   name: 'Van Elvina',
   description: "India's premium women's innerwear brand",
   url: 'https://vanelvina.com',
-  logo: 'https://vanelvina.com/icons/icon-512x512.png',
+  // Google requires logo as ImageObject (not plain string) to display it next to the site name in search results
+  logo: {
+    '@type': 'ImageObject',
+    '@id': 'https://vanelvina.com/#logo',
+    url: 'https://vanelvina.com/icons/icon-512x512.png',
+    contentUrl: 'https://vanelvina.com/icons/icon-512x512.png',
+    width: 512,
+    height: 512,
+    caption: 'Van Elvina',
+  },
+  image: { '@id': 'https://vanelvina.com/#logo' },
   sameAs: [
     'https://www.instagram.com/van_elvina_official?igsh=Nmp2OWc3Yjg0MDhy',
     'https://www.facebook.com/share/1CgGsR3nV2/',
@@ -72,7 +83,6 @@ export const organizationSchema = () => ({
   ],
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: '+91-1800-XXX-XXXX',
     contactType: 'customer service',
     availableLanguage: ['English', 'Hindi'],
   },

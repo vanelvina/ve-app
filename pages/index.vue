@@ -251,6 +251,29 @@ useHead({
       type: 'application/ld+json',
       children: JSON.stringify(organizationSchema()),
     },
+    {
+      // WebSite schema — tells Google to show "Van Elvina" as site name
+      // instead of "www.vanelvina.com" in search result snippets
+      type: 'application/ld+json',
+      children: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        '@id': 'https://vanelvina.com/#website',
+        name: 'Van Elvina',
+        alternateName: 'Van Elvina – Women Comfort First',
+        url: 'https://vanelvina.com',
+        // Link to the Organization entity so Google associates the brand name + logo with this site
+        publisher: { '@id': 'https://vanelvina.com/#organization' },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: 'https://vanelvina.com/?q={search_term_string}',
+          },
+          'query-input': 'required name=search_term_string',
+        },
+      }),
+    },
   ],
   link: [{ rel: 'canonical', href: 'https://vanelvina.com' }],
 })
