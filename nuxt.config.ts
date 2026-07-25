@@ -139,6 +139,9 @@ export default defineNuxtConfig({
 
   // Runtime config
   runtimeConfig: {
+    // Private — server-side only (never exposed to browser)
+    shiprocketEmail: process.env.SHIPROCKET_EMAIL || '',
+    shiprocketPassword: process.env.SHIPROCKET_PASSWORD || '',
     public: {
       appName: 'Van Elvina',
       appUrl: 'https://vanelvina.com',
@@ -228,10 +231,23 @@ export default defineNuxtConfig({
       routes: ['/'],
     },
     devProxy: {
-      '/api': {
-        target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api',
-        changeOrigin: true,
-      }
+      // Proxy all Supabase backend routes to the edge function
+      // Exclude /api/shiprocket — that's a local Nuxt server route (credentials must stay server-side)
+      '/api/user-auth': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/products': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/categories': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/orders': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/cart': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/wishlist': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/banners': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/blogs': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/reviews': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/about': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/inquiries': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/upload': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/widgets': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      '/api/auth': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      // NOTE: /api/shiprocket and /api/__sitemap__ are intentionally NOT proxied — handled locally by Nitro
     }
   },
 

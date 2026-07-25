@@ -165,6 +165,88 @@
           </div>
         </div>
 
+        <!-- Live Shiprocket Tracking -->
+        <div v-if="order.awbCode" class="bg-white rounded-3xl p-6 shadow-card border border-rose-blush/30">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="text-xs font-bold text-charcoal/40 font-ui tracking-wide uppercase">Live Shipment Tracking</h3>
+            <div class="flex items-center gap-2">
+              <span v-if="order.courierName" class="text-[10px] font-bold font-ui text-charcoal/50 uppercase bg-rose-blush/20 px-2 py-0.5 rounded-full">{{ order.courierName }}</span>
+              <span class="font-mono text-xs font-bold text-deep-plum">{{ order.awbCode }}</span>
+              <button @click="fetchTracking" :disabled="trackingLoading" class="p-1.5 rounded-lg hover:bg-rose-blush/20 text-charcoal/40 hover:text-deep-plum transition-all" title="Refresh tracking">
+                <svg :class="trackingLoading ? 'animate-spin' : ''" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Expected Delivery -->
+          <div v-if="tracking?.expectedDelivery" class="flex items-center gap-3 px-4 py-3 bg-emerald-50 rounded-2xl border border-emerald-200 mb-5">
+            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <div>
+              <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Expected Delivery</p>
+              <p class="text-sm font-bold text-emerald-800 font-ui mt-0.5">{{ tracking.expectedDelivery }}</p>
+            </div>
+          </div>
+
+          <!-- Delivered Banner -->
+          <div v-if="tracking?.deliveredDate" class="flex items-center gap-3 px-4 py-3 bg-emerald-50 rounded-2xl border border-emerald-200 mb-5">
+            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Delivered</p>
+              <p class="text-sm font-bold text-emerald-800 font-ui mt-0.5">{{ tracking.deliveredDate }}</p>
+            </div>
+          </div>
+
+          <!-- Tracking Loading -->
+          <div v-if="trackingLoading" class="py-8 text-center">
+            <svg class="animate-spin h-6 w-6 text-rose-blush mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            <p class="text-xs text-charcoal/40 font-ui">Fetching live updates…</p>
+          </div>
+
+          <!-- Tracking Events -->
+          <div v-else-if="tracking?.events?.length" class="space-y-0">
+            <div
+              v-for="(evt, i) in tracking.events"
+              :key="i"
+              class="relative flex gap-4 pb-5 last:pb-0"
+            >
+              <!-- Timeline dot and line -->
+              <div class="flex flex-col items-center">
+                <div :class="i === 0 ? 'bg-deep-plum ring-4 ring-rose-blush/40' : 'bg-charcoal/20'" class="w-2.5 h-2.5 rounded-full mt-1 shrink-0 transition-all"/>
+                <div v-if="i < tracking.events.length - 1" class="w-px flex-1 bg-rose-blush/30 mt-1"/>
+              </div>
+              <!-- Event info -->
+              <div class="pb-1 min-w-0">
+                <p class="text-sm font-bold font-ui text-deep-plum leading-tight">{{ evt.activity }}</p>
+                <p v-if="evt.location" class="text-xs text-charcoal/50 font-ui mt-0.5">📍 {{ evt.location }}</p>
+                <p class="text-[10px] text-charcoal/40 font-ui mt-1">{{ evt.date }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- No events yet -->
+          <div v-else-if="!trackingLoading" class="py-6 text-center">
+            <p class="text-xs text-charcoal/40 font-ui">No tracking events yet. Check back after pickup is scheduled.</p>
+          </div>
+        </div>
+
+        <!-- Tracking not yet available (no AWB) -->
+        <div v-else-if="['shipped', 'out_for_delivery', 'delivered'].includes(order.orderStatus) && !order.awbCode"
+          class="bg-amber-50 rounded-3xl p-5 border border-amber-200 flex items-center gap-4">
+          <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-xs font-ui text-amber-800">Tracking details will appear here once your shipment is handed to the courier.</p>
+        </div>
+
         <!-- Cancel Order (pre-ship only) -->
         <div
           v-if="isCancellable"
@@ -381,6 +463,8 @@ onMounted(async () => {
       headers: auth.getHeaders()
     })
     order.value = data
+    // Auto-fetch tracking if AWB is available
+    if (data?.awbCode) fetchTracking()
   } catch (err: any) {
     console.error('Fetch order error:', err)
     error.value = err.data?.message || 'Could not find the order details.'
@@ -388,6 +472,23 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+// ── Live Tracking ──────────────────────────────────────────────────────────────────
+const tracking = ref<any>(null)
+const trackingLoading = ref(false)
+
+const fetchTracking = async () => {
+  if (!order.value?.awbCode) return
+  trackingLoading.value = true
+  try {
+    const data = await $fetch<any>(`/api/shiprocket/track?awb=${order.value.awbCode}`)
+    if (data?.success) tracking.value = data
+  } catch (err) {
+    console.warn('Tracking fetch failed:', err)
+  } finally {
+    trackingLoading.value = false
+  }
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const formatDate = (dateStr: string) => {

@@ -412,10 +412,13 @@
             </div>
             <div class="flex items-center gap-3">
               <div class="flex items-center border border-border-gray rounded-lg overflow-hidden">
-                <button class="w-9 h-9 flex items-center justify-center text-charcoal hover:bg-light-gray transition-colors text-lg font-light" aria-label="Decrease quantity" @click="qty = Math.max(1, qty - 1)">−</button>
+                <button class="w-9 h-9 flex items-center justify-center text-charcoal hover:bg-light-gray transition-colors text-lg font-light" aria-label="Decrease quantity" @click="qty = Math.max(1, qty - 1)" :disabled="qty <= 1" :class="{ 'opacity-40 cursor-not-allowed': qty <= 1 }">−</button>
                 <span class="w-8 text-center text-sm font-semibold text-charcoal border-x border-border-gray h-9 flex items-center justify-center" aria-live="polite">{{ qty }}</span>
                 <button class="w-9 h-9 flex items-center justify-center text-charcoal hover:bg-light-gray transition-colors text-lg font-light" aria-label="Increase quantity"
-                  @click="qty = Math.min(selectedSizeStock !== null ? Math.min(selectedSizeStock, 10) : 10, qty + 1)">+</button>
+                  :disabled="qty >= maxQty"
+                  :class="{ 'opacity-40 cursor-not-allowed': qty >= maxQty }"
+                  :title="qty >= maxQty ? `Only ${maxQty} available in stock` : ''"
+                  @click="qty = Math.min(maxQty, qty + 1)">+</button>
               </div>
               <!-- Stock count is intentionally NOT shown to customers — urgency only shows when ≤2 left -->
               <div ref="inlineAtbRow" class="flex-1 flex items-center gap-2">
@@ -1032,6 +1035,17 @@ const selectedSizeStock = computed(() => {
   return typeof stock === 'number' ? stock : null
 })
 
+// Max qty allowed: capped at actual stock (if tracked), otherwise 10 as a safe default
+const maxQty = computed(() => {
+  if (selectedSizeStock.value !== null) return Math.max(0, selectedSizeStock.value)
+  return 10
+})
+
+// Reset qty to 1 whenever size or variant changes (stock may differ per size/color)
+watch([selectedSize, selectedVariant], () => {
+  qty.value = 1
+})
+
 // Lightbox and Swipe functionality states
 const showLightbox = ref(false)
 const lightboxRef = ref<HTMLElement | null>(null)
@@ -1427,23 +1441,32 @@ const checkDelivery = async () => {
   checkingDelivery.value = true
   deliveryMsg.value = ''
   try {
-    const data = await $fetch<{ deliverable: boolean; estimatedDays: number | null; message?: string }>(
-      `${config.public.apiBase}/pincode-check?pincode=${pincode.value}`
-    )
-    if (data.deliverable) {
+    const data = await $fetch<{
+      serviceable: boolean
+      courier: string | null
+      etd: string | null
+      message: string | null
+    }>(`/api/shiprocket/serviceability?pincode=${pincode.value}`)
+
+    if (data.serviceable) {
       deliveryOk.value = true
-      const days = data.estimatedDays
-      deliveryMsg.value = days
-        ? `✅ Delivery available! Estimated in ${days}–${days + 2} business days.`
-        : '✅ Delivery available to this pincode.'
+      if (data.etd && data.courier) {
+        deliveryMsg.value = `✅ Delivery in ${data.etd} via ${data.courier}`
+      } else if (data.etd) {
+        deliveryMsg.value = `✅ Estimated delivery in ${data.etd}`
+      } else if (data.message) {
+        deliveryMsg.value = `✅ ${data.message}`
+      } else {
+        deliveryMsg.value = '✅ Delivery available at this pincode.'
+      }
     } else {
       deliveryOk.value = false
-      deliveryMsg.value = data.message || '❌ Delivery not available at this pincode.'
+      deliveryMsg.value = `❌ ${data.message || 'Delivery not available at this pincode.'}`
     }
   } catch {
-    // Graceful fallback when serviceability API is unavailable
+    // Graceful fallback — never block the user from seeing the page
     deliveryOk.value = true
-    deliveryMsg.value = '✅ Delivery available. Exact estimate will be shared after order.'
+    deliveryMsg.value = '✅ Delivery available. Estimate will be confirmed after order.'
   } finally {
     checkingDelivery.value = false
   }

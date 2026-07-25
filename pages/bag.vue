@@ -79,9 +79,15 @@
               <div class="mt-3 flex items-center justify-between">
                 <!-- Quantity (disabled when OOS) -->
                 <div class="flex items-center gap-2">
-                  <button class="qty-btn" :disabled="isItemOos(item)" :aria-label="`Decrease quantity of ${item.product.name}`" @click="cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity - 1)">−</button>
+                  <button class="qty-btn" :disabled="isItemOos(item) || item.quantity <= 1" :aria-label="`Decrease quantity of ${item.product.name}`" @click="cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity - 1)">−</button>
                   <span class="w-8 text-center font-ui font-semibold text-sm text-charcoal" aria-live="polite">{{ item.quantity }}</span>
-                  <button class="qty-btn" :disabled="isItemOos(item)" :aria-label="`Increase quantity of ${item.product.name}`" @click="cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity + 1)">+</button>
+                  <button
+                    class="qty-btn"
+                    :disabled="isItemOos(item) || item.quantity >= getItemStock(item)"
+                    :title="item.quantity >= getItemStock(item) ? `Only ${getItemStock(item)} available in stock` : ''"
+                    :aria-label="`Increase quantity of ${item.product.name}`"
+                    @click="cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity + 1, getItemStock(item))"
+                  >+</button>
                 </div>
                 <!-- Price -->
                 <div class="text-right">
@@ -295,6 +301,14 @@ const isItemOos = (item: any): boolean => {
   if (!variant?.stockPerSize) return false
   const stock = variant.stockPerSize[item.size]
   return typeof stock === 'number' && stock === 0
+}
+
+// Get available stock for a cart item's selected size (10 as fallback if no tracking)
+const getItemStock = (item: any): number => {
+  const variant = item.product?.variants?.find((v: any) => v.color === item.variantColor)
+  if (!variant?.stockPerSize) return 10
+  const stock = variant.stockPerSize[item.size]
+  return typeof stock === 'number' ? Math.max(0, stock) : 10
 }
 
 useSeoMeta({

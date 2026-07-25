@@ -148,13 +148,15 @@ export const useCartStore = defineStore('cart', {
       await this.syncCart()
     },
 
-    async updateQuantity(productId: string, variantColor: string, size: string, quantity: number) {
+    async updateQuantity(productId: string, variantColor: string, size: string, quantity: number, stockLimit?: number) {
       const item = this.findItem(productId, variantColor, size)
       if (item) {
         if (quantity <= 0) {
           await this.removeItem(productId, variantColor, size)
         } else {
-          item.quantity = Math.min(quantity, 10)
+          // Cap at actual stock if provided, otherwise fall back to 10 as safe default
+          const cap = typeof stockLimit === 'number' ? stockLimit : 10
+          item.quantity = Math.min(quantity, cap)
           await this.syncCart()
         }
       }
