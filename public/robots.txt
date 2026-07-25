@@ -1,7 +1,19 @@
+# robots.txt for vanelvina.com
+# Controls which pages search engines are allowed to crawl
+
 User-agent: *
 Allow: /
+
+# Private / user-specific pages — no SEO value
+Disallow: /admin/
+Disallow: /account/
+Disallow: /auth/
+Disallow: /bag
 Disallow: /checkout
 Disallow: /thank-you
-Disallow: /account
+Disallow: /myaccount
+Disallow: /myorders
+Disallow: /track-order
 
+# Sitemap location — helps Google discover all your URLs
 Sitemap: https://vanelvina.com/sitemap.xml
