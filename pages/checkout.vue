@@ -186,7 +186,18 @@
             </div>
 
             <h3 class="text-sm font-ui font-semibold text-charcoal mb-3">Shipping Method</h3>
+
+            <!-- Free shipping threshold callout -->
+            <div v-if="amountNeededForFreeShipping > 0" class="p-3.5 bg-amber-50/90 border border-amber-200 rounded-xl text-xs font-ui text-amber-900 flex items-center justify-between gap-2 mb-4 shadow-xs">
+              <div class="flex items-center gap-2">
+                <span class="text-base">🚚</span>
+                <span>Add <strong class="font-bold text-amber-950">{{ formatPrice(amountNeededForFreeShipping) }}</strong> more to unlock <strong>FREE Shipping</strong></span>
+              </div>
+              <NuxtLink to="/products" class="text-deep-plum font-bold hover:underline shrink-0 text-xs">Add Items +</NuxtLink>
+            </div>
+
             <div class="space-y-3 mb-6" role="radiogroup" aria-label="Shipping options">
+
               <label
                 v-for="option in shippingOptions"
                 :key="option.id"
@@ -273,9 +284,16 @@
               </div>
               <div class="flex justify-between text-mid-gray">
                 <span>Shipping</span>
-                <span :class="shippingFee === 0 ? 'text-green-600' : ''">{{ shippingFee === 0 ? 'FREE' : formatPrice(shippingFee) }}</span>
+                <span :class="shippingFee === 0 ? 'text-green-600 font-semibold' : ''">{{ shippingFee === 0 ? 'FREE' : formatPrice(shippingFee) }}</span>
               </div>
+              <p v-if="amountNeededForFreeShipping > 0" class="text-xs text-amber-700 font-ui font-medium">
+                Add {{ formatPrice(amountNeededForFreeShipping) }} more for free shipping
+              </p>
+              <p v-else-if="checkoutSubtotal > 0" class="text-xs text-green-600 font-ui font-medium">
+                🎉 You unlocked FREE Shipping!
+              </p>
               <div v-if="cart.giftWrap" class="flex justify-between text-mid-gray">
+
                 <span>Gift Wrapper</span>
                 <span>{{ formatPrice(59) }}</span>
               </div>
@@ -521,7 +539,13 @@ const shippingOptions = computed(() => [
   },
 ])
 
+const amountNeededForFreeShipping = computed(() => {
+  if (hasTestProduct.value || checkoutSubtotal.value >= 499) return 0
+  return 499 - checkoutSubtotal.value
+})
+
 const shippingFee = computed(() => shippingOptions.value.find(o => o.id === selectedShipping.value)?.price ?? 0)
+
 const codHandlingFee = computed(() => selectedPayment.value === 'cod' ? 10 : 0)
 const orderTotal = computed(() => checkoutSubtotal.value - checkoutDiscount.value + shippingFee.value + cart.giftWrapCost + codHandlingFee.value)
 

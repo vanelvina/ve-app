@@ -169,7 +169,7 @@ export default defineNuxtConfig({
       ],
 
     },
-    pageTransition: { name: 'page' },
+    pageTransition: { name: 'page', mode: 'out-in' },
   },
 
   // Route Cache Control Rules (Bypass CDNs and browser cache for SW)

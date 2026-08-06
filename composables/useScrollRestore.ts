@@ -27,9 +27,13 @@ export function useScrollRestore() {
             window.scrollTo({ top: y, behavior: 'instant' })
           })
         }
+      } else {
+        // Ensure new route starts cleanly at top 0 before enter animation
+        window.scrollTo({ top: 0, behavior: 'instant' })
       }
     }
   }
+
 
   const clearScroll = () => {
     if (import.meta.client) {
