@@ -32,22 +32,84 @@
               <!-- Saved Addresses -->
               <div v-if="auth.user?.addresses && auth.user.addresses.length > 0 && !showNewAddressForm" class="space-y-4">
                 <div class="space-y-3">
-                  <label
+                  <div
                     v-for="addr in auth.user.addresses"
                     :key="addr._id"
-                    class="flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all"
-                    :class="selectedAddressId === addr._id ? 'border-deep-plum bg-rose-blush/40' : 'border-border-gray hover:border-dusty-rose'"
+                    class="rounded-xl border-2 transition-all overflow-hidden"
+                    :class="selectedAddressId === addr._id ? 'border-deep-plum' : 'border-border-gray'"
                   >
-                    <input type="radio" :value="addr._id" v-model="selectedAddressId" class="mt-1 text-deep-plum" />
-                    <div>
-                      <p class="text-sm font-ui font-semibold text-charcoal">{{ addr.fullName }}</p>
-                      <p class="text-xs text-mid-gray font-ui">{{ addr.line1 }}<span v-if="addr.line2">, {{ addr.line2 }}</span></p>
-                      <p class="text-xs text-mid-gray font-ui">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
-                      <p class="text-xs text-mid-gray font-ui mt-1">Phone: {{ addr.phone }}</p>
-                    </div>
-                  </label>
+                    <!-- Address row -->
+                    <label
+                      class="flex items-start gap-3 p-4 cursor-pointer"
+                      :class="selectedAddressId === addr._id ? 'bg-rose-blush/40' : 'hover:border-dusty-rose'"
+                    >
+                      <input type="radio" :value="addr._id" v-model="selectedAddressId" class="mt-1 text-deep-plum" @change="cancelEdit" />
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-ui font-semibold text-charcoal">{{ addr.fullName }}</p>
+                        <p class="text-xs text-mid-gray font-ui">{{ addr.line1 }}<span v-if="addr.line2">, {{ addr.line2 }}</span></p>
+                        <p class="text-xs text-mid-gray font-ui">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</p>
+                        <p class="text-xs text-mid-gray font-ui mt-1">Phone: {{ addr.phone }}</p>
+                      </div>
+                      <!-- Edit button -->
+                      <button
+                        type="button"
+                        class="shrink-0 text-[11px] font-ui font-bold text-deep-plum hover:text-dusty-rose transition-colors flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-rose-blush/30"
+                        :aria-label="`Edit address for ${addr.fullName}`"
+                        @click.prevent="startEditAddress(addr)"
+                      >
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Edit
+                      </button>
+                    </label>
+
+                    <!-- Inline Edit Form (expands under the address row) -->
+                    <Transition name="expand">
+                      <div v-if="editingAddressId === addr._id" class="border-t border-rose-blush/30 bg-warm-ivory/60 p-4 space-y-3">
+                        <p class="text-xs font-bold font-ui text-deep-plum uppercase tracking-wider mb-3">Edit Address</p>
+                        <div class="grid sm:grid-cols-2 gap-3">
+                          <AppInput v-model="editForm.fullName" label="Full Name" placeholder="Full name" required :error="editErrors.fullName" @input="editErrors.fullName = ''" />
+                          <AppInput v-model="editForm.phone" label="Phone" type="tel" placeholder="10-digit mobile" required :error="editErrors.phone" @input="editErrors.phone = ''" />
+                        </div>
+                        <AppInput v-model="editForm.line1" label="Address Line 1" placeholder="House No, Building, Street" required :error="editErrors.line1" @input="editErrors.line1 = ''" />
+                        <AppInput v-model="editForm.line2" label="Address Line 2 (Optional)" placeholder="Landmark, Area" />
+                        <div class="grid sm:grid-cols-3 gap-3">
+                          <AppInput
+                            v-model="editForm.pincode"
+                            label="PIN Code"
+                            placeholder="6-digit PIN"
+                            maxlength="6"
+                            required
+                            :error="editErrors.pincode"
+                            :hint="editPincodeLoading ? 'Auto-detecting City & State...' : ''"
+                            @input="editErrors.pincode = ''"
+                          />
+                          <AppInput
+                            v-model="editForm.city"
+                            label="City"
+                            placeholder="Auto-filled from PIN Code"
+                            required
+                            :disabled="true"
+                            :error="editErrors.city"
+                          />
+                          <AppInput
+                            v-model="editForm.state"
+                            label="State"
+                            placeholder="Auto-filled from PIN Code"
+                            required
+                            :disabled="true"
+                          />
+                        </div>
+                        <div class="flex gap-2 pt-1">
+                          <AppButton type="button" size="sm" :loading="savingEdit" @click="saveEditAddress(addr._id)">Save Changes</AppButton>
+                          <AppButton type="button" size="sm" variant="secondary" @click="cancelEdit">Cancel</AppButton>
+                        </div>
+                      </div>
+                    </Transition>
+                  </div>
                 </div>
-                <button type="button" @click="showNewAddressForm = true" class="text-sm font-semibold text-deep-plum hover:underline">+ Add a new address</button>
+                <button type="button" @click="showNewAddressForm = true; cancelEdit()" class="text-sm font-semibold text-deep-plum hover:underline">+ Add a new address</button>
                 <AppButton type="button" :full="true" @click="proceedWithSavedAddress" class="mt-4">Continue to Confirmation</AppButton>
               </div>
 
@@ -62,15 +124,31 @@
                 <AppInput v-model="form.line1" label="Address Line 1" placeholder="House No, Building, Street" required :error="errors.line1" @blur="form.line1 = capitalizeWords(form.line1)" @input="errors.line1 = ''" />
                 <AppInput v-model="form.line2" label="Address Line 2 (Optional)" placeholder="Landmark, Area" @blur="form.line2 = capitalizeWords(form.line2)" />
                 <div class="grid sm:grid-cols-3 gap-4">
-                  <AppInput v-model="form.pincode" label="PIN Code" placeholder="6-digit PIN code" maxlength="6" required :error="errors.pincode" @input="errors.pincode = ''" />
-                  <AppInput v-model="form.city" label="City" placeholder="Enter city" required :error="errors.city" @blur="form.city = capitalizeWords(form.city)" @input="errors.city = ''" />
-                  <div>
-                    <label class="block text-sm font-ui font-medium text-charcoal mb-1.5" for="state-select">State <span class="text-dusty-rose">*</span></label>
-                    <select id="state-select" v-model="form.state" class="input-base" required aria-required="true">
-                      <option value="">Select State</option>
-                      <option v-for="state in indianStates" :key="state" :value="state">{{ state }}</option>
-                    </select>
-                  </div>
+                  <AppInput
+                    v-model="form.pincode"
+                    label="PIN Code"
+                    placeholder="6-digit PIN code"
+                    maxlength="6"
+                    required
+                    :error="errors.pincode"
+                    :hint="pincodeLoading ? 'Auto-detecting City & State...' : ''"
+                    @input="errors.pincode = ''"
+                  />
+                  <AppInput
+                    v-model="form.city"
+                    label="City"
+                    placeholder="Auto-filled from PIN Code"
+                    required
+                    :disabled="true"
+                    :error="errors.city"
+                  />
+                  <AppInput
+                    v-model="form.state"
+                    label="State"
+                    placeholder="Auto-filled from PIN Code"
+                    required
+                    :disabled="true"
+                  />
                 </div>
                 <AppButton type="submit" :full="true" :loading="savingAddress">Save & Continue</AppButton>
               </div>
@@ -86,7 +164,21 @@
             </p>
 
             <div class="bg-warm-ivory/50 rounded-xl p-4 border border-rose-blush/20 mb-6">
-              <h3 class="text-xs font-bold text-deep-plum uppercase tracking-wider mb-2">Shipping To</h3>
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <h3 class="text-xs font-bold text-deep-plum uppercase tracking-wider">Shipping To</h3>
+                <!-- Change address button: takes user back to Step 1 -->
+                <button
+                  type="button"
+                  class="text-[11px] font-ui font-bold text-deep-plum hover:text-dusty-rose flex items-center gap-1 transition-colors"
+                  @click="currentStep = 0"
+                  aria-label="Change delivery address"
+                >
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Change
+                </button>
+              </div>
               <p class="text-sm font-ui text-charcoal">{{ form.fullName }}</p>
               <p class="text-xs text-mid-gray font-ui mt-1">{{ form.line1 }}<span v-if="form.line2">, {{ form.line2 }}</span></p>
               <p class="text-xs text-mid-gray font-ui">{{ form.city }}, {{ form.state }} - {{ form.pincode }}</p>
@@ -259,6 +351,105 @@ const savingAddress = ref(false)
 
 const form = reactive({ fullName: '', phone: '', email: '', line1: '', line2: '', pincode: '', city: '', state: '' })
 const errors = reactive({ fullName: '', phone: '', email: '', line1: '', pincode: '', city: '' })
+
+// ── Pincode Lookup Auto-Fill ──────────────────────────────────────────────────
+const { fetchPincodeDetails, loading: pincodeLoading } = usePincodeLookup()
+const { fetchPincodeDetails: fetchEditPincodeDetails, loading: editPincodeLoading } = usePincodeLookup()
+
+watch(() => form.pincode, async (newPin) => {
+  const clean = newPin ? newPin.trim() : ''
+  if (clean.length === 6) {
+    const res = await fetchPincodeDetails(clean)
+    if (res) {
+      form.city = res.city
+      form.state = res.state
+      errors.pincode = ''
+      errors.city = ''
+    } else {
+      errors.pincode = 'Invalid or unserviceable PIN code'
+    }
+  }
+})
+
+// ── Edit Address ─────────────────────────────────────────────────────────────
+const editingAddressId = ref<string | null>(null)
+const savingEdit = ref(false)
+const editForm = reactive({ fullName: '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' })
+const editErrors = reactive({ fullName: '', phone: '', line1: '', pincode: '', city: '' })
+
+watch(() => editForm.pincode, async (newPin) => {
+  const clean = newPin ? newPin.trim() : ''
+  if (clean.length === 6) {
+    const res = await fetchEditPincodeDetails(clean)
+    if (res) {
+      editForm.city = res.city
+      editForm.state = res.state
+      editErrors.pincode = ''
+      editErrors.city = ''
+    } else {
+      editErrors.pincode = 'Invalid or unserviceable PIN code'
+    }
+  }
+})
+
+const startEditAddress = (addr: any) => {
+  // Toggle: clicking Edit on the already-open one closes it
+  if (editingAddressId.value === addr._id) {
+    cancelEdit()
+    return
+  }
+  editingAddressId.value = addr._id
+  editForm.fullName = addr.fullName || ''
+  editForm.phone = addr.phone || ''
+  editForm.line1 = addr.line1 || ''
+  editForm.line2 = addr.line2 || ''
+  editForm.city = addr.city || ''
+  editForm.state = addr.state || ''
+  editForm.pincode = addr.pincode || ''
+  // Clear previous errors
+  Object.keys(editErrors).forEach(k => (editErrors as any)[k] = '')
+}
+
+const cancelEdit = () => {
+  editingAddressId.value = null
+}
+
+const saveEditAddress = async (addressId: string) => {
+  // Basic validation
+  editErrors.fullName = editForm.fullName.trim() ? '' : 'Required'
+  editErrors.phone = isValidPhone(editForm.phone) ? '' : 'Enter a valid 10-digit phone'
+  editErrors.line1 = editForm.line1.trim() ? '' : 'Required'
+  editErrors.pincode = isValidPincode(editForm.pincode) ? '' : 'Enter a valid PIN code'
+  editErrors.city = editForm.city.trim() ? '' : 'Required'
+
+  const hasErrors = Object.values(editErrors).some(v => v)
+  if (hasErrors) return
+
+  savingEdit.value = true
+  try {
+    await auth.updateAddress(addressId, {
+      fullName: capitalizeWords(editForm.fullName.trim()),
+      phone: editForm.phone.trim(),
+      line1: capitalizeWords(editForm.line1.trim()),
+      line2: capitalizeWords(editForm.line2.trim()),
+      city: capitalizeWords(editForm.city.trim()),
+      state: editForm.state,
+      pincode: editForm.pincode.trim(),
+    })
+    ui.addToast('success', 'Address updated!')
+    cancelEdit()
+    // If the edited address is currently selected, refresh the form data too
+    if (selectedAddressId.value === addressId) {
+      proceedWithSavedAddress()
+      currentStep.value = 0 // Stay on step 1 so they can review
+    }
+  } catch (err: any) {
+    ui.addToast('error', 'Failed to update address. Please try again.')
+  } finally {
+    savingEdit.value = false
+  }
+}
+
 
 const prefillForm = () => {
   if (auth.isLoggedIn && auth.user) {
@@ -661,3 +852,23 @@ const indianStates = ['Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chha
 
 useSeoMeta({ title: 'Checkout – Van Elvina', description: 'Secure checkout for Van Elvina innerwear. Multiple payment options available.' })
 </script>
+
+<style scoped>
+/* Expand / collapse transition for the inline edit address form */
+.expand-enter-active,
+.expand-leave-active {
+  transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.22s ease;
+  overflow: hidden;
+}
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.expand-enter-to,
+.expand-leave-from {
+  max-height: 600px;
+  opacity: 1;
+}
+</style>

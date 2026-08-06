@@ -382,7 +382,8 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import categoriesData from '~/data/categories.json'
 import type { SortOption } from '~/types'
 
-definePageMeta({ pageTransition: false })
+definePageMeta({})
+
 
 const store = useProductsStore()
 const ui = useUIStore()

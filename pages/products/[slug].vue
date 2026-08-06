@@ -990,7 +990,8 @@ import { useCartStore } from '~/stores/cart'
 import reviewsData from '~/data/reviews.json'
 import faqsData from '~/data/faqs.json'
 
-definePageMeta({ pageTransition: false })
+definePageMeta({})
+
 
 const route = useRoute()
 const ui = useUIStore()

@@ -202,9 +202,9 @@
                   <input
                     v-model="newAddress.city"
                     type="text"
-                    placeholder="City"
-                    class="w-full px-3 py-1.5 border border-charcoal/20 rounded-xl text-xs font-ui focus:outline-none focus:border-deep-plum bg-white"
-                    @blur="newAddress.city = capitalizeWords(newAddress.city)"
+                    placeholder="Auto-filled from PIN"
+                    disabled
+                    class="w-full px-3 py-1.5 border border-charcoal/20 rounded-xl text-xs font-ui bg-gray-100 text-charcoal/70 opacity-70 cursor-not-allowed"
                   />
                 </div>
                 <div class="space-y-1">
@@ -212,9 +212,9 @@
                   <input
                     v-model="newAddress.state"
                     type="text"
-                    placeholder="State"
-                    class="w-full px-3 py-1.5 border border-charcoal/20 rounded-xl text-xs font-ui focus:outline-none focus:border-deep-plum bg-white"
-                    @blur="newAddress.state = capitalizeWords(newAddress.state)"
+                    placeholder="Auto-filled from PIN"
+                    disabled
+                    class="w-full px-3 py-1.5 border border-charcoal/20 rounded-xl text-xs font-ui bg-gray-100 text-charcoal/70 opacity-70 cursor-not-allowed"
                   />
                 </div>
                 <div class="space-y-1">
@@ -222,9 +222,11 @@
                   <input
                     v-model="newAddress.pincode"
                     type="text"
+                    maxlength="6"
                     placeholder="6-digit pincode"
                     class="w-full px-3 py-1.5 border border-charcoal/20 rounded-xl text-xs font-ui focus:outline-none focus:border-deep-plum bg-white"
                   />
+                  <p v-if="accountPinLoading" class="text-[10px] text-deep-plum font-ui mt-0.5">Auto-detecting City & State...</p>
                 </div>
                 <div class="flex items-center gap-2 col-span-2 pt-1">
                   <input
@@ -503,7 +505,23 @@ const newAddress = ref({
   isDefault: false
 })
 
+const { fetchPincodeDetails: fetchAccountPinDetails, loading: accountPinLoading } = usePincodeLookup()
+
+watch(() => newAddress.value.pincode, async (newPin) => {
+  const clean = newPin ? newPin.trim() : ''
+  if (clean.length === 6) {
+    const res = await fetchAccountPinDetails(clean)
+    if (res) {
+      newAddress.value.city = res.city
+      newAddress.value.state = res.state
+    } else {
+      ui.addToast('error', 'Invalid PIN code')
+    }
+  }
+})
+
 const resetAddressForm = () => {
+
   newAddress.value = {
     fullName: '',
     phone: '',
