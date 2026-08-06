@@ -6,10 +6,11 @@ export const useCart = () => {
   const cart = useCartStore()
   const ui = useUIStore()
 
-  const addToCart = (product: Product, color: string, size: string, qty = 1) => {
-    cart.addItem(product, color, size, qty)
-    ui.addToast('success', `${product.name} added to cart!`)
+  const addToCart = (product: Product, color: string, size: string, qty = 1, stockLimit?: number) => {
+    cart.addItem(product, color, size, qty, stockLimit)
+    ui.addToast('success', `${product.name} added to bag!`)
   }
+
 
   const removeFromCart = (productId: string, color: string, size: string) => {
     cart.removeItem(productId, color, size)

@@ -279,11 +279,13 @@ const fetchUserOrders = async () => {
   const config = useRuntimeConfig()
   try {
     const res = await $fetch<any>(`${config.public.apiBase}/orders`, {
-      headers: { Authorization: `Bearer ${auth.token}` }
+      headers: { Authorization: `Bearer ${auth.token}` },
+      silent: true
     })
     userOrders.value = res.orders || []
   } catch (err) {}
 }
+
 
 const userNotifications = computed(() => {
   const list: any[] = []

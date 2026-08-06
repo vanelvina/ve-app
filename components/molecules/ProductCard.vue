@@ -1,5 +1,11 @@
 <template>
-  <article class="group relative card cursor-pointer flex flex-col h-full bg-white rounded-none overflow-hidden hover:shadow-premium transition-all duration-300 border border-charcoal/15 hover:border-charcoal/40" :aria-label="product.name">
+  <article
+    class="group relative card cursor-pointer flex flex-col h-full bg-white rounded-none overflow-hidden hover:shadow-premium transition-all duration-300 border border-charcoal/15"
+    :class="[
+      isProductOos ? 'opacity-60 grayscale-[25%]' : 'hover:border-charcoal/40',
+    ]"
+    :aria-label="product.name"
+  >
     <!-- Image Container -->
     <div 
       class="relative overflow-hidden aspect-product bg-warm-ivory shrink-0"
@@ -49,7 +55,7 @@
 
       <!-- Out of Stock overlay (Flipkart-style: still clickable, clearly marked) -->
       <div
-        v-if="product.inStock === false || product.stockCount === 0"
+        v-if="isProductOos"
         class="absolute inset-0 bg-white/60 flex items-center justify-center z-10 pointer-events-none"
         aria-hidden="true"
       >
@@ -61,7 +67,7 @@
       <!-- Status Badges Stack (Top-Left) -->
       <div class="absolute top-2 left-2 md:top-2.5 md:left-2.5 z-10 flex flex-col gap-1 items-start">
         <span
-          v-if="product.inStock === false || product.stockCount === 0"
+          v-if="isProductOos"
           class="px-1.5 py-0.5 md:px-2.5 md:py-0.5 rounded text-[8px] md:text-[9px] font-bold uppercase tracking-wider text-white bg-gray-500 shadow-soft"
         >
           Out of Stock
@@ -75,7 +81,7 @@
         </span>
         
         <span 
-          v-if="product.discount > 0 && product.inStock !== false && product.stockCount !== 0" 
+          v-if="product.discount > 0 && !isProductOos" 
           class="px-1.5 py-0.5 md:px-2 md:py-0.5 rounded text-[8px] md:text-[9px] font-ui font-bold uppercase tracking-wider text-white bg-red-500 shadow-soft"
         >
           {{ product.discount }}% OFF
@@ -232,6 +238,8 @@ const activeVariantImages = computed(() => {
 let hoverInterval: any = null
 
 const handleMouseEnter = () => {
+  // Skip hover slideshow for OOS products
+  if (isProductOos.value) return
   if (activeVariantImages.value.length > 1) {
     // Show the next image immediately on hover to make it feel responsive
     slideDirection.value = 'slide-left'
@@ -290,6 +298,31 @@ const onTouchEnd = () => {
 }
 
 const handleWishlist = () => toggle(props.product)
+
+// True when the entire product (all variants, all sizes) is out of stock.
+// ⚠️  We deliberately do NOT rely on the top-level `inStock` boolean because
+// it can be stale (e.g. admin forgot to update it after restocking).
+// Instead we derive truth from the granular `stockPerSize` data — the same
+// source the PDP uses — so both pages always agree.
+const isProductOos = computed(() => {
+  const variants = props.product.variants
+  if (!variants || variants.length === 0) {
+    // No variant data at all — fall back to the top-level flag
+    return props.product.inStock === false
+  }
+
+  // If ANY variant has ANY size with stock > 0, the product is in stock
+  const hasAvailableStock = variants.some(variant => {
+    // Case 1: granular stockPerSize exists — check each size
+    if (variant.stockPerSize && Object.keys(variant.stockPerSize).length > 0) {
+      return Object.values(variant.stockPerSize as Record<string, number>).some(qty => qty > 0)
+    }
+    // Case 2: no stockPerSize tracking for this variant — trust the top-level flag
+    return props.product.inStock !== false
+  })
+
+  return !hasAvailableStock
+})
 
 const handleQuickAdd = () => {
   trackProductClick(props.product.id || (props.product as any)._id, props.product.name, props.product.category, props.product.price)

@@ -29,13 +29,13 @@
 
       <!-- Cart with items -->
       <div v-else class="grid lg:grid-cols-3 gap-8">
-        <!-- Cart items -->
+        <!-- Cart items: in-stock first, OOS items sink to the bottom -->
         <div class="lg:col-span-2 space-y-4">
           <article
-            v-for="item in cart.items"
+            v-for="item in sortedCartItems"
             :key="`${item.productId}-${item.variantColor}-${item.size}`"
             class="bg-white rounded-2xl shadow-soft border p-4 flex gap-4 transition-all"
-            :class="isItemOos(item) ? 'border-red-200 opacity-80' : 'border-border-gray'"
+            :class="isItemOos(item) ? 'border-red-200 opacity-75' : 'border-border-gray'"
             :aria-label="item.product.name"
           >
             <!-- Image -->
@@ -44,6 +44,7 @@
                 :src="item.product.variants.find(v => v.color === item.variantColor)?.images[0] ?? item.product.variants[0]?.images[0]"
                 :alt="item.product.name"
                 class="w-24 h-28 object-cover rounded-xl"
+                :class="isItemOos(item) ? 'grayscale-[40%]' : ''"
                 width="96" height="112"
                 loading="lazy"
               />
@@ -64,6 +65,10 @@
                   <p class="text-xs text-mid-gray font-ui mt-1">Color: {{ item.variantColor }} · Size: {{ item.size }}</p>
                   <!-- OOS notice -->
                   <p v-if="isItemOos(item)" class="mt-1 text-[10px] font-semibold text-red-500 font-ui">This size is currently out of stock — please remove it before checkout.</p>
+                  <!-- Low stock notice (not OOS but ≤5) -->
+                  <p v-else-if="getItemStock(item) <= 5 && getItemStock(item) > 0" class="mt-1 text-[10px] font-semibold text-amber-600 font-ui">
+                    Only {{ getItemStock(item) }} left in stock!
+                  </p>
                 </div>
                 <button
                   class="text-mid-gray hover:text-red-500 transition-colors shrink-0"
@@ -77,17 +82,32 @@
               </div>
 
               <div class="mt-3 flex items-center justify-between">
-                <!-- Quantity (disabled when OOS) -->
+                <!-- Quantity controls (disabled when OOS) -->
                 <div class="flex items-center gap-2">
-                  <button class="qty-btn" :disabled="isItemOos(item) || item.quantity <= 1" :aria-label="`Decrease quantity of ${item.product.name}`" @click="cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity - 1)">−</button>
-                  <span class="w-8 text-center font-ui font-semibold text-sm text-charcoal" aria-live="polite">{{ item.quantity }}</span>
+                  <!-- Minus: disabled at qty=1 to prevent accidental removal -->
                   <button
                     class="qty-btn"
-                    :disabled="isItemOos(item) || item.quantity >= getItemStock(item)"
-                    :title="item.quantity >= getItemStock(item) ? `Only ${getItemStock(item)} available in stock` : ''"
-                    :aria-label="`Increase quantity of ${item.product.name}`"
-                    @click="cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity + 1, getItemStock(item))"
-                  >+</button>
+                    :disabled="isItemOos(item) || item.quantity <= 1"
+                    :aria-label="`Decrease quantity of ${item.product.name}`"
+                    @click="item.quantity > 1 && cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity - 1, getItemStock(item))"
+                  >−</button>
+                  <span class="w-8 text-center font-ui font-semibold text-sm text-charcoal" aria-live="polite">{{ item.quantity }}</span>
+                  <!-- Plus: disabled when OOS or at stock limit -->
+                  <div class="relative group/maxstock">
+                    <button
+                      class="qty-btn"
+                      :disabled="isItemOos(item) || item.quantity >= getItemStock(item)"
+                      :aria-label="`Increase quantity of ${item.product.name}`"
+                      @click="!isItemOos(item) && item.quantity < getItemStock(item) && cart.updateQuantity(item.productId, item.variantColor, item.size, item.quantity + 1, getItemStock(item))"
+                    >+</button>
+                    <!-- Stock limit tooltip -->
+                    <div
+                      v-if="!isItemOos(item) && item.quantity >= getItemStock(item)"
+                      class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 bg-charcoal text-white text-[10px] font-ui font-semibold rounded-lg whitespace-nowrap shadow-md pointer-events-none opacity-0 group-hover/maxstock:opacity-100 transition-opacity z-10"
+                    >
+                      Max stock reached
+                    </div>
+                  </div>
                 </div>
                 <!-- Price -->
                 <div class="text-right">
@@ -97,6 +117,13 @@
               </div>
             </div>
           </article>
+
+          <!-- OOS separator: shown when there are both in-stock and OOS items -->
+          <div v-if="hasOosItems && hasInStockItems" class="flex items-center gap-3 py-1">
+            <div class="flex-1 h-px bg-red-100" />
+            <span class="text-[10px] font-bold font-ui uppercase tracking-wider text-red-400 shrink-0">Out of stock items below</span>
+            <div class="flex-1 h-px bg-red-100" />
+          </div>
 
           <!-- Gift Wrap Offer Card -->
           <div
@@ -310,6 +337,16 @@ const getItemStock = (item: any): number => {
   const stock = variant.stockPerSize[item.size]
   return typeof stock === 'number' ? Math.max(0, stock) : 10
 }
+
+// Sort bag: in-stock items first, OOS items at the bottom
+const sortedCartItems = computed(() => {
+  const inStock = cart.items.filter(item => !isItemOos(item))
+  const oos = cart.items.filter(item => isItemOos(item))
+  return [...inStock, ...oos]
+})
+
+const hasOosItems = computed(() => cart.items.some(item => isItemOos(item)))
+const hasInStockItems = computed(() => cart.items.some(item => !isItemOos(item)))
 
 useSeoMeta({
   title: 'Shopping Bag – Van Elvina',

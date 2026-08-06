@@ -70,8 +70,9 @@ export const useCartStore = defineStore('cart', {
       try {
         const data = await $fetch<any[]>(`${config.public.apiBase}/cart`, {
           headers: { Authorization: `Bearer ${auth.token}` },
-          silent: this.items.length > 0
+          silent: true
         })
+
         
         this.items = data
           .filter(item => item.productId) // Ensure product exists
@@ -114,16 +115,18 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
-    async addItem(product: Product, variantColor: string, size: string, quantity = 1) {
+    async addItem(product: Product, variantColor: string, size: string, quantity = 1, stockLimit?: number) {
       const existing = this.findItem(product.id || (product as any)._id, variantColor, size)
+      // Resolve stock cap: use passed stockLimit, or fall back to 10
+      const cap = typeof stockLimit === 'number' && stockLimit > 0 ? stockLimit : 10
       if (existing) {
-        existing.quantity = Math.min(existing.quantity + quantity, 10)
+        existing.quantity = Math.min(existing.quantity + quantity, cap)
       } else {
         this.items.push({
           productId: product.id || (product as any)._id,
           variantColor,
           size,
-          quantity,
+          quantity: Math.min(quantity, cap),
           product,
         })
       }
@@ -140,6 +143,7 @@ export const useCartStore = defineStore('cart', {
 
       await this.syncCart()
     },
+
 
     async removeItem(productId: string, variantColor: string, size: string) {
       this.items = this.items.filter(

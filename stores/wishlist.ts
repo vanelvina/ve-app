@@ -36,8 +36,9 @@ export const useWishlistStore = defineStore('wishlist', {
       try {
         const data = await $fetch<any[]>(`${config.public.apiBase}/wishlist`, {
           headers: { Authorization: `Bearer ${auth.token}` },
-          silent: this.items.length > 0
+          silent: true
         })
+
         
         this.items = data.map(item => ({
           ...item,

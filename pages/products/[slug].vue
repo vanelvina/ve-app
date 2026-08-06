@@ -817,17 +817,12 @@
         </div>
       </div>
 
-      <!-- Recently Viewed -->
-      <div v-if="recentlyViewedProducts.length > 0" class="mt-10">
-        <h2 class="font-serif text-2xl text-deep-plum font-semibold mb-6">Recently Viewed</h2>
-        <div class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-          <div v-for="p in recentlyViewedProducts" :key="p.id || p._id" class="w-48 md:w-56 shrink-0">
-            <ProductCard :product="p" />
-          </div>
-        </div>
-      </div>
+
+      <!-- Recently Viewed — shown last, before the footer -->
+      <SectionRecentlyViewed :exclude-slug="product.slug" />
     </div>
   </div>
+
 
   <!-- 404 state -->
   <div v-else class="page-container py-20 text-center">
@@ -1362,18 +1357,7 @@ const similarProducts = computed(() => {
     .slice(0, 6)
 })
 
-// ── Recently Viewed ───────────────────────────────────────────────────────────
-const { recentlyViewed } = storeToRefs(useProducts())
-const recentlyViewedProducts = computed(() => {
-  const currentId = (product.value as any)?._id || product.value?.id
-  const list = Array.isArray(recentlyViewed.value) ? recentlyViewed.value : []
-  return list
-    .filter((p: any) => {
-      const pid = p._id || p.id
-      return pid !== currentId
-    })
-    .slice(0, 6)
-})
+
 
 const isAlreadyInBag = computed(() => {
   if (!product.value) return false
@@ -1405,11 +1389,20 @@ const handleAddToCart = async () => {
   if (!product.value) return
   const pId = product.value.id || (product.value as any)._id
   const color = product.value.variants[selectedVariant.value].color
-  trackAddToCart(pId, product.value.name, product.value.price, color, selectedSize.value, qty.value)
-  addToCart(product.value, color, selectedSize.value, qty.value)
+
+  // Cap qty to actual stock (defensive — maxQty should already prevent this)
+  const stockLimit = selectedSizeStock.value !== null ? selectedSizeStock.value : undefined
+  const finalQty = stockLimit !== undefined ? Math.min(qty.value, stockLimit) : qty.value
+  if (finalQty < qty.value) {
+    ui.addToast('info', `Only ${stockLimit} in stock — quantity adjusted to ${finalQty}`)
+  }
+
+  trackAddToCart(pId, product.value.name, product.value.price, color, selectedSize.value, finalQty)
+  addToCart(product.value, color, selectedSize.value, finalQty, stockLimit)
   // Fire navbar tooltip
   ui.showCartTooltip('Added to bag', `₹${product.value.price.toLocaleString('en-IN')}`)
 }
+
 
 const handleWishlistToggle = () => {
   if (!product.value) return

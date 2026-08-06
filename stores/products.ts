@@ -82,28 +82,56 @@ export const useProductsStore = defineStore('products', {
         )
       }
 
-      // Sort
-      switch (state.sort) {
-        case 'price-asc':
-          result.sort((a, b) => a.price - b.price)
-          break
-        case 'price-desc':
-          result.sort((a, b) => b.price - a.price)
-          break
-        case 'rating':
-          result.sort((a, b) => b.rating - a.rating)
-          break
-        case 'newest':
-          result = result.filter((p) => p.badge === 'new').concat(result.filter((p) => p.badge !== 'new'))
-          break
-        case 'discount':
-          result.sort((a, b) => b.discount - a.discount)
-          break
-        default:
-          result.sort((a, b) => b.reviewCount - a.reviewCount)
+      // ── Stock-aware partition: in-stock items always surface before OOS ──
+      // Uses the same stockPerSize-derived logic as ProductCard so PLP sort
+      // and PLP card OOS badge always agree with each other (and with PDP).
+      const isActuallyOos = (p: Product): boolean => {
+        const variants = p.variants
+        if (!variants || variants.length === 0) return p.inStock === false
+        const hasStock = variants.some(v => {
+          if (v.stockPerSize && Object.keys(v.stockPerSize).length > 0) {
+            return Object.values(v.stockPerSize as Record<string, number>).some(qty => qty > 0)
+          }
+          return p.inStock !== false
+        })
+        return !hasStock
       }
 
-      return result
+      const inStock = result.filter(p => !isActuallyOos(p))
+      const outOfStock = result.filter(p => isActuallyOos(p))
+
+
+      // Sort each group separately with the user's chosen sort
+      const applySortToGroup = (group: Product[]) => {
+        switch (state.sort) {
+          case 'price-asc':
+            group.sort((a, b) => a.price - b.price)
+            break
+          case 'price-desc':
+            group.sort((a, b) => b.price - a.price)
+            break
+          case 'rating':
+            group.sort((a, b) => b.rating - a.rating)
+            break
+          case 'newest':
+            group.sort((a, b) => {
+              const aNew = a.badge === 'new' ? 1 : 0
+              const bNew = b.badge === 'new' ? 1 : 0
+              return bNew - aNew
+            })
+            break
+          case 'discount':
+            group.sort((a, b) => b.discount - a.discount)
+            break
+          default: // popularity
+            group.sort((a, b) => b.reviewCount - a.reviewCount)
+        }
+        return group
+      }
+
+      // Return in-stock first (sorted), then OOS (sorted) at the end
+      return [...applySortToGroup(inStock), ...applySortToGroup(outOfStock)]
+
     },
 
     paginated(): Product[] {
@@ -197,8 +225,9 @@ export const useProductsStore = defineStore('products', {
 
       try {
         const data = await $fetch<Product[]>(`${config.public.apiBase}/products`, {
-          silent: this.all.length > 0
+          silent: true
         })
+
         this.all = data
       } catch (error) {
         console.error('Failed to fetch products from API:', error)

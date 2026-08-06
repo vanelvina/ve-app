@@ -254,6 +254,9 @@
           </div>
         </section>
 
+        <!-- ── RECENTLY VIEWED ──────────────────────────────────────── -->
+        <SectionRecentlyViewed />
+
       </main>
     </div>
 
@@ -700,7 +703,10 @@ onMounted(() => {
   restoreScroll()
   nextTick(setupObserver)
   window.addEventListener('scroll', onPlpScroll, { passive: true })
+  // Restore recently viewed from localStorage so the shelf shows immediately
+  store.restoreRecentlyViewed()
 })
+
 
 onUnmounted(() => {
   observer?.disconnect()
