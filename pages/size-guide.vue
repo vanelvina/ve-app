@@ -317,13 +317,23 @@
             </p>
           </div>
 
+          <!-- Loading state if products are fetching -->
+          <div v-if="productsStore.loading && availableColors.length === 0" class="py-12 text-center text-sm font-ui text-mid-gray">
+            Loading available colors...
+          </div>
+
+          <!-- Empty state if no colors in inventory -->
+          <div v-else-if="availableColors.length === 0" class="py-12 text-center text-sm font-ui text-mid-gray">
+            No colors currently available in inventory.
+          </div>
+
           <!-- Color Grid -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto pt-4">
+          <div v-else class="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl mx-auto pt-4">
             <button
-              v-for="color in colors"
+              v-for="color in availableColors"
               :key="color.name"
               @click="shopByColorRedirect(color.name)"
-              class="flex flex-col items-center gap-3 p-4 rounded-2xl border border-rose-blush/10 hover:border-deep-plum/40 hover:bg-warm-ivory/20 transition-all group text-center"
+              class="flex flex-col items-center gap-2 p-4 rounded-2xl border border-rose-blush/10 hover:border-deep-plum/40 hover:bg-warm-ivory/20 transition-all group text-center"
             >
               <!-- Swatch Circle -->
               <span
@@ -333,6 +343,9 @@
               ></span>
               <span class="block text-xs font-bold font-ui text-deep-plum group-hover:underline">
                 {{ color.displayName }}
+              </span>
+              <span class="text-[10px] text-mid-gray font-ui">
+                {{ color.count }} {{ color.count === 1 ? 'style' : 'styles' }}
               </span>
             </button>
           </div>
@@ -466,17 +479,39 @@ const shopBySizeRedirect = () => {
   }
 }
 
-// Colors swatches data
-const colors = [
-  { name: 'Black', displayName: 'Velvet Black', hex: '#121212' },
-  { name: 'White', displayName: 'Ivory White', hex: '#FAF9F6' },
-  { name: 'Red', displayName: 'Crimson Ruby', hex: '#991B1B' },
-  { name: 'Pink', displayName: 'Rose Blush', hex: '#FBCFE8' },
-  { name: 'Blue', displayName: 'Midnight Indigo', hex: '#1E3A8A' },
-  { name: 'Beige', displayName: 'Nude Sand', hex: '#E6C2A4' },
-  { name: 'Maroon', displayName: 'Wine Red', hex: '#581845' },
-  { name: 'Lavender', displayName: 'Lilac Haze', hex: '#DCD0FF' }
-]
+const productsStore = useProductsStore()
+
+// Dynamic colors calculated strictly from in-stock inventory items
+const availableColors = computed(() => {
+  const inStockProducts = productsStore.all.filter(
+    (p) => p.inStock !== false && (p.stockCount === undefined || p.stockCount > 0),
+  )
+
+  const colorMap = new Map<
+    string,
+    { name: string; displayName: string; hex: string; count: number }
+  >()
+
+  inStockProducts.forEach((p) => {
+    ;(p.variants || []).forEach((v) => {
+      if (!v.color) return
+      const colorName = v.color.trim()
+      const existing = colorMap.get(colorName)
+      if (existing) {
+        existing.count += 1
+      } else {
+        colorMap.set(colorName, {
+          name: colorName,
+          displayName: colorName,
+          hex: v.colorHex || '#E5E7EB',
+          count: 1,
+        })
+      }
+    })
+  })
+
+  return Array.from(colorMap.values()).filter((c) => c.count > 0)
+})
 
 const shopByColorRedirect = (colorName: string) => {
   router.push({ path: '/products', query: { color: colorName } })
@@ -490,16 +525,19 @@ const setActiveTab = (tabId: string) => {
 
 const syncTabFromHash = (rawHash: string) => {
   const hash = rawHash.replace('#', '')
-  if (hash && tabs.some(t => t.id === hash)) {
+  if (hash && tabs.some((t) => t.id === hash)) {
     activeTab.value = hash
   }
 }
 
-// Set active tab on mount based on hash
-onMounted(() => {
+// Set active tab on mount based on hash, and fetch products if store empty
+onMounted(async () => {
+  if (productsStore.all.length === 0) {
+    await productsStore.fetchProducts()
+  }
   if (route.hash) {
     syncTabFromHash(route.hash)
-  } else if (route.query.tab && tabs.some(t => t.id === route.query.tab)) {
+  } else if (route.query.tab && tabs.some((t) => t.id === route.query.tab)) {
     activeTab.value = String(route.query.tab)
   }
 })

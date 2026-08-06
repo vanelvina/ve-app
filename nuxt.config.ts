@@ -90,13 +90,19 @@ export default defineNuxtConfig({
       meta: [
         { name: 'description', content: 'Shop premium women\'s innerwear at Van Elvina. Discover unmatched comfort, elegant designs, and everyday essentials for the modern woman.' },
         { name: 'theme-color', content: '#2A1B18' },
+        // Open Graph — site name signals
         { property: 'og:site_name', content: 'Van Elvina' },
+        { property: 'og:title', content: 'Van Elvina – Women Comfort First | Premium Innerwear' },
         { property: 'og:type', content: 'website' },
         { property: 'og:image', content: 'https://vanelvina.com/icons/icon-512x512.png' },
         { property: 'og:image:width', content: '512' },
         { property: 'og:image:height', content: '512' },
+        // Twitter
         { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:site', content: '@van_elvina_official' },
         { name: 'twitter:image', content: 'https://vanelvina.com/icons/icon-512x512.png' },
+        // Application name (shown in browser UI and used by some crawlers)
+        { name: 'application-name', content: 'Van Elvina' },
       ],
       link: [
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon2.png?v=3' },
@@ -120,7 +126,48 @@ export default defineNuxtConfig({
       script: [
         { src: 'https://accounts.google.com/gsi/client', async: true, defer: true },
         { src: 'https://checkout.razorpay.com/v1/checkout.js' },
+        // ─── WebSite JSON-LD — tells Google the site name is "Van Elvina" ───
+        // This is the #1 signal Google uses to display a brand name instead of
+        // the raw domain (vanelvina.com) in search result breadcrumbs.
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'Van Elvina',
+            alternateName: 'Van Elvina – Women Comfort First',
+            url: 'https://vanelvina.com',
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: {
+                '@type': 'EntryPoint',
+                urlTemplate: 'https://vanelvina.com/products?q={search_term_string}',
+              },
+              'query-input': 'required name=search_term_string',
+            },
+          }),
+        },
+        // ─── Organization JSON-LD — reinforces brand identity ───────────────
+        {
+          type: 'application/ld+json',
+          children: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Van Elvina',
+            url: 'https://vanelvina.com',
+            logo: 'https://vanelvina.com/logo.png',
+            sameAs: [
+              'https://www.instagram.com/van_elvina_official',
+            ],
+            contactPoint: {
+              '@type': 'ContactPoint',
+              contactType: 'customer support',
+              email: 'support@vanelvina.com',
+            },
+          }),
+        },
       ],
+
     },
     pageTransition: { name: 'page' },
   },

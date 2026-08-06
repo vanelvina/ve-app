@@ -322,6 +322,24 @@
             </button>
           </div>
         </div>
+        <div v-if="inventoryColors.length > 0" class="mb-5">
+          <h3 class="text-xs font-ui font-semibold text-mid-gray uppercase tracking-wider mb-3">Color</h3>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="col in inventoryColors"
+              :key="col.name"
+              class="filter-chip flex items-center gap-1.5"
+              :class="{ active: selectedColors.includes(col.name) }"
+              @click="toggleColor(col.name)"
+            >
+              <span
+                class="w-3 h-3 rounded-full border border-black/20 shrink-0"
+                :style="{ backgroundColor: col.hex }"
+              />
+              {{ col.name }}
+            </button>
+          </div>
+        </div>
         <AppButton :full="true" @click="ui.closeFilterDrawer">Apply Filters</AppButton>
       </div>
     </Transition>
@@ -514,6 +532,11 @@ const selectedCategories = computed({
   set: val => store.setFilters({ categories: val })
 })
 
+const selectedColors = computed({
+  get: () => store.filters.colors,
+  set: val => store.setFilters({ colors: val })
+})
+
 const sortValue = ref<SortOption>('popularity')
 const sortDrawerOpen = ref(false)
 
@@ -536,6 +559,28 @@ const toggleCategory = (cat: string) => {
   if (idx === -1) current.push(cat); else current.splice(idx, 1)
   selectedCategories.value = current
 }
+
+const toggleColor = (color: string) => {
+  const current = [...selectedColors.value]
+  const idx = current.indexOf(color)
+  if (idx === -1) current.push(color); else current.splice(idx, 1)
+  selectedColors.value = current
+}
+
+const inventoryColors = computed(() => {
+  const inStockProducts = store.all.filter(
+    p => p.inStock !== false && (p.stockCount === undefined || p.stockCount > 0)
+  )
+  const colorMap = new Map<string, { name: string; hex: string }>()
+  inStockProducts.forEach(p => {
+    ;(p.variants || []).forEach(v => {
+      if (v.color && !colorMap.has(v.color.trim())) {
+        colorMap.set(v.color.trim(), { name: v.color.trim(), hex: v.colorHex || '#E5E7EB' })
+      }
+    })
+  })
+  return Array.from(colorMap.values())
+})
 
 // ── Mobile Quick Filter Chips ─────────────────────────────────────────────
 const MASTER_QUICK_FILTERS = [

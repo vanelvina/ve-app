@@ -42,8 +42,17 @@ export const useProductsStore = defineStore('products', {
 
       // Color filter
       if (state.filters.colors.length > 0) {
+        const filterColorsLower = state.filters.colors.map((c) => c.toLowerCase().trim())
         result = result.filter((p) =>
-          p.variants.some((v) => state.filters.colors.includes(v.color)),
+          p.variants.some((v) => {
+            const vColorLower = (v.color || '').toLowerCase().trim()
+            return filterColorsLower.some(
+              (fc) =>
+                vColorLower === fc ||
+                vColorLower.includes(fc) ||
+                fc.includes(vColorLower),
+            )
+          }),
         )
       }
 

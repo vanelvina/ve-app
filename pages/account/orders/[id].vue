@@ -280,7 +280,7 @@
         <div v-if="isEligibleForReturnOrExchange" class="bg-rose-blush/10 rounded-3xl p-6 shadow-card border border-rose-blush/30 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h3 class="font-bold text-deep-plum text-sm uppercase tracking-wide">Return & Exchange Window Open</h3>
-            <p class="text-xs text-charcoal/70 mt-1">You have 7 days from delivery to request a return or exchange for this order.</p>
+            <p class="text-xs text-charcoal/70 mt-1">You have <strong>3 days</strong> from delivery to request a return or exchange for this order.</p>
           </div>
           <div class="flex gap-3">
             <button @click="requestExchange" class="px-5 py-2.5 bg-white border border-rose-blush text-deep-plum font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-rose-blush/20 transition-all shadow-soft">
@@ -293,11 +293,28 @@
         </div>
         
         <div v-else-if="order.orderStatus === 'return_requested' || order.orderStatus === 'exchange_requested' || order.orderStatus === 'returned' || order.orderStatus === 'exchanged'" class="bg-blue-50 rounded-3xl p-6 shadow-card border border-blue-200">
-          <div class="flex gap-4 items-center text-blue-800">
-            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <div>
-              <p class="font-bold text-sm uppercase">{{ order.orderStatus.replace('_', ' ') }}</p>
-              <p class="text-xs mt-0.5 opacity-80">Your request has been received and is currently being processed by our team.</p>
+          <div class="flex gap-4 items-start text-blue-800">
+            <svg class="w-6 h-6 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div class="flex-1">
+              <p class="font-bold text-sm uppercase">{{ order.orderStatus.replace(/_/g, ' ') }}</p>
+              <p class="text-xs mt-0.5 opacity-80">Your request has been received. Our logistics partner will coordinate pickup within 2–3 business days.</p>
+              <!-- Return AWB Tracking -->
+              <div v-if="order.returnAwbCode" class="mt-3 flex flex-wrap items-center gap-2">
+                <div class="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-blue-200">
+                  <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                  </svg>
+                  <div>
+                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Return Pickup AWB</p>
+                    <p class="font-mono text-sm font-bold text-blue-800">{{ order.returnAwbCode }}</p>
+                  </div>
+                </div>
+                <span v-if="order.returnCourierName" class="text-xs font-bold text-blue-600/70 uppercase px-2 py-1 bg-blue-100 rounded-lg">{{ order.returnCourierName }}</span>
+                <span v-if="order.returnPickupDate" class="text-xs text-blue-700 font-ui">Pickup: {{ order.returnPickupDate }}</span>
+              </div>
+              <div v-else class="mt-2">
+                <p class="text-[11px] text-blue-700/70 font-ui italic">Return pickup AWB will be assigned shortly. You'll receive a notification once confirmed.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -610,8 +627,9 @@ const isEligibleForReturnOrExchange = computed(() => {
   if (allNonReturnable) return false
   const deliveredEntry = order.value.statusHistory?.slice().reverse().find((h: any) => h.status === 'delivered')
   const deliveredDate = deliveredEntry ? new Date(deliveredEntry.timestamp).getTime() : new Date(order.value.updatedAt).getTime()
-  const sevenDays = 7 * 24 * 60 * 60 * 1000
-  return (Date.now() - deliveredDate) <= sevenDays
+  // Return window: 3 days from delivery (must match backend)
+  const threeDays = 3 * 24 * 60 * 60 * 1000
+  return (Date.now() - deliveredDate) <= threeDays
 })
 
 // Cancellable only before shipped stage
