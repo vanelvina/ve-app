@@ -540,20 +540,38 @@
             </div>
           </div>
 
-          <!-- Highlights -->
-          <div>
-            <h2 class="text-xs font-ui font-semibold text-charcoal uppercase tracking-wider mb-2">Highlights</h2>
-            <ul class="space-y-1">
-              <li v-for="h in product.highlights" :key="h" class="flex items-start gap-2 text-xs font-ui text-mid-gray leading-relaxed">
-                <svg class="w-3.5 h-3.5 text-dusty-rose shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
-                {{ h }}
-              </li>
-            </ul>
+          <!-- Highlights & Key Features (2-Column Side-by-Side Grid) -->
+          <div v-if="displayHighlights.length || displayFeatures.length" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3.5 border-t border-border-gray/50">
+            <!-- Column 1: Highlights -->
+            <div v-if="displayHighlights.length">
+              <h2 class="text-xs font-ui font-semibold text-charcoal uppercase tracking-wider mb-2">Highlights</h2>
+              <ul class="space-y-1.5">
+                <li v-for="h in displayHighlights" :key="h" class="flex items-start gap-2 text-xs font-ui text-mid-gray leading-relaxed">
+                  <svg class="w-3.5 h-3.5 text-dusty-rose shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  <span>{{ h }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Column 2: Key Features -->
+            <div v-if="displayFeatures.length">
+              <h2 class="text-xs font-ui font-semibold text-charcoal uppercase tracking-wider mb-2">Key Features</h2>
+              <ul class="space-y-1.5">
+                <li v-for="feature in displayFeatures" :key="feature" class="flex items-start gap-2 text-xs font-ui text-mid-gray leading-relaxed">
+                  <svg class="w-3.5 h-3.5 text-deep-plum/80 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{{ feature }}</span>
+                </li>
+              </ul>
+            </div>
           </div>
+
         </div>
       </div>
+
 
       <!-- Loyalty Programme Banner — standalone above the details card -->
       <div class="mt-6">
@@ -581,20 +599,36 @@
         <!-- Tab content -->
         <div class="p-6">
           <div v-if="activeTab === 'Description'" class="space-y-6">
-            <p class="text-sm font-ui text-mid-gray leading-relaxed">{{ product.description }}</p>
-
-            <!-- Key Features -->
-            <div v-if="product.features && product.features.length" class="space-y-2 mt-4">
-              <h3 class="font-ui font-semibold text-charcoal text-sm">Key Product Features</h3>
-              <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <li v-for="feature in product.features" :key="feature" class="flex items-start gap-2 text-sm font-ui text-mid-gray">
-                  <span class="text-dusty-rose mt-0.5">•</span>
-                  <span>{{ feature }}</span>
-                </li>
-              </ul>
+            <div class="relative">
+              <p
+                class="text-sm font-ui text-mid-gray leading-relaxed transition-all duration-300"
+                :class="!isDescriptionExpanded && isLongDescription ? 'line-clamp-3' : ''"
+              >
+                {{ product.description }}
+              </p>
+              <button
+                v-if="isLongDescription"
+                @click="isDescriptionExpanded = !isDescriptionExpanded"
+                class="mt-2 inline-flex items-center gap-1 text-xs font-ui font-bold text-deep-plum hover:text-dusty-rose transition-colors cursor-pointer"
+                :aria-expanded="isDescriptionExpanded"
+              >
+                <span>{{ isDescriptionExpanded ? 'Read Less' : 'Read More' }}</span>
+                <svg
+                  class="w-3.5 h-3.5 transition-transform duration-200"
+                  :class="{ 'rotate-180': isDescriptionExpanded }"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
             </div>
 
+
             <!-- Additional Information -->
+
             <div v-if="product.additionalInfo" class="space-y-2 mt-4 border-t border-border-gray pt-4">
               <h3 class="font-ui font-semibold text-charcoal text-sm">Additional Product Information</h3>
               <p class="text-sm font-ui text-mid-gray leading-relaxed whitespace-pre-line">{{ product.additionalInfo }}</p>
@@ -749,9 +783,10 @@
         >
           <div
             v-if="product && stickyBarActive"
-            class="fixed bottom-0 inset-x-0 z-[60] pb-safe"
+            class="md:hidden fixed bottom-0 inset-x-0 z-[60] pb-safe"
             aria-label="Quick actions"
           >
+
             <!-- Frosted backdrop gradient -->
             <div class="absolute inset-0 bg-gradient-to-t from-white/95 via-white/90 to-transparent backdrop-blur-sm" />
 
@@ -807,19 +842,22 @@
         </Transition>
       </Teleport>
 
-      <!-- Similar Products -->
-      <div class="mt-10">
-        <h2 class="font-serif text-2xl text-deep-plum font-semibold mb-6">Similar Products</h2>
-        <div class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-          <div v-for="p in similarProducts" :key="p.id" class="w-48 md:w-56 shrink-0">
-            <ProductCard :product="p" />
+      <!-- Bottom Section: Similar Products & Recently Viewed -->
+      <div ref="bottomSectionRef">
+        <!-- Similar Products -->
+        <div class="mt-10">
+          <h2 class="font-serif text-2xl text-deep-plum font-semibold mb-6">Similar Products</h2>
+          <div class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div v-for="p in similarProducts" :key="p.id" class="w-48 md:w-56 shrink-0">
+              <ProductCard :product="p" />
+            </div>
           </div>
         </div>
+
+        <!-- Recently Viewed — shown last, before the footer -->
+        <SectionRecentlyViewed :exclude-slug="product.slug" />
       </div>
 
-
-      <!-- Recently Viewed — shown last, before the footer -->
-      <SectionRecentlyViewed :exclude-slug="product.slug" />
     </div>
   </div>
 
@@ -1003,6 +1041,30 @@ const auth = useAuthStore()
 
 const product = computed(() => getBySlug(route.params.slug as string))
 
+// ── Highlights & Key Features Side-by-Side ────────────────────────────────────
+const displayHighlights = computed(() => {
+  if (!product.value) return []
+  const h = product.value.highlights || []
+  const f = (product.value as any).features || []
+
+  if (h.length > 0 && f.length > 0) return h
+  if (h.length > 0) return h.slice(0, Math.ceil(h.length / 2))
+  if (f.length > 0) return f.slice(0, Math.ceil(f.length / 2))
+  return []
+})
+
+const displayFeatures = computed(() => {
+  if (!product.value) return []
+  const h = product.value.highlights || []
+  const f = (product.value as any).features || []
+
+  if (h.length > 0 && f.length > 0) return f
+  if (h.length > 0) return h.slice(Math.ceil(h.length / 2))
+  if (f.length > 0) return f.slice(Math.ceil(f.length / 2))
+  return []
+})
+
+
 const selectedVariant = ref(0)
 const selectedSize = ref('')
 const qty = ref(1)
@@ -1014,6 +1076,11 @@ const deliveryOk = ref(false)
 const activeImageIdx = ref(0)
 const activeTab = ref('Description')
 const openFaq = ref<number | null>(null)
+const isDescriptionExpanded = ref(false)
+const isLongDescription = computed(() => {
+  return (product.value?.description?.length || 0) > 180
+})
+
 
 // ── Image skeleton tracking ───────────────────────────────────────────────
 const loadedImages = ref<Set<string>>(new Set())
@@ -1046,23 +1113,33 @@ watch([selectedSize, selectedVariant], () => {
 const showLightbox = ref(false)
 const lightboxRef = ref<HTMLElement | null>(null)
 
-// ── Sticky bottom action bar — appears when inline ATB button scrolls out of view ───
-const stickyBarActive = ref(false)
-const inlineAtbRow = ref<HTMLElement | null>(null)
+// ── Sticky bottom action bar — shown on mobile all the time while browsing PDP,
+// automatically hides when user scrolls down to Similar Products & Recently Viewed (and below),
+// and reappears when scrolling back up above Similar Products. ───────────────────────────
+const stickyBarActive = ref(true)
+const bottomSectionRef = ref<HTMLElement | null>(null)
 
 onMounted(() => {
-  if (typeof IntersectionObserver !== 'undefined' && inlineAtbRow.value) {
-    const obs = new IntersectionObserver(
-      ([entry]) => { stickyBarActive.value = !entry.isIntersecting },
+  if (typeof IntersectionObserver !== 'undefined' && bottomSectionRef.value) {
+    const bottomObserver = new IntersectionObserver(
+      ([entry]) => {
+        // Hides when Similar Products / Recently Viewed section is in view,
+        // and reappears as soon as user scrolls back up above it.
+        stickyBarActive.value = !entry.isIntersecting
+      },
       { threshold: 0, rootMargin: '0px 0px 0px 0px' }
     )
-    obs.observe(inlineAtbRow.value)
-    onUnmounted(() => obs.disconnect())
+    bottomObserver.observe(bottomSectionRef.value)
+
+    onUnmounted(() => {
+      bottomObserver.disconnect()
+    })
   } else {
-    // Fallback: always show the bar if IntersectionObserver not supported
     stickyBarActive.value = true
   }
 })
+
+
 
 // ── OOS helper: is every size for this variant out of stock? ─────────────────
 const isVariantOos = (variant: any) => {

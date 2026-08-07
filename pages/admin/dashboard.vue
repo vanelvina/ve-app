@@ -5145,8 +5145,31 @@ const deleteCategoryItem = async (id: string) => {
   }
 }
 
+const ensureStringArray = (val: any): string[] => {
+  if (Array.isArray(val)) {
+    const cleaned = val.map(s => String(s || '').trim()).filter(Boolean)
+    return cleaned.length ? cleaned : ['']
+  }
+  if (typeof val === 'string' && val.trim()) {
+    const trimmed = val.trim()
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed)
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.map(s => String(s || '').trim()).filter(Boolean)
+          return cleaned.length ? cleaned : ['']
+        }
+      } catch (e) {}
+    }
+    const split = trimmed.split(',').map(s => s.trim()).filter(Boolean)
+    return split.length ? split : ['']
+  }
+  return ['']
+}
+
 // PRODUCTS CRUD
 const openProductModal = (prod: any | null) => {
+
   productFormTab.value = 'general'
   if (prod) {
     productModal.value.isEdit = true
@@ -5229,10 +5252,11 @@ const openProductModal = (prod: any | null) => {
       videoUrl: prod.videoUrl || '',
       commonLastImage: prod.commonLastImage || '',
       availableOffer: prod.availableOffer || '',
-      features: prod.features || [],
-      highlights: prod.highlights || [],
-      care: prod.care || [],
+      features: ensureStringArray(prod.features),
+      highlights: ensureStringArray(prod.highlights),
+      care: ensureStringArray(prod.care),
       additionalInfo: prod.additionalInfo || '',
+
       descriptiveImages: prod.descriptiveImages?.length ? prod.descriptiveImages : [''],
       faqs: prod.faqs ? JSON.parse(JSON.stringify(prod.faqs)) : [],
       isCodAvailable: prod.isCodAvailable !== undefined ? prod.isCodAvailable : true,
