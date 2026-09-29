@@ -663,7 +663,9 @@ const parseRouteQueries = () => {
   const colorsArray: string[] = queryColor
     ? (Array.isArray(queryColor) ? queryColor as string[] : String(queryColor).split(',').map(s => s.trim()))
     : []
-  store.setFilters({ categories: categoriesArray, sizes: sizesArray, colors: colorsArray })
+  // Badge filter — drives New Arrivals (?badge=new), Bestsellers (?badge=bestseller), Sale (?badge=sale)
+  const badgeValue = route.query.badge ? String(route.query.badge).toLowerCase().trim() : ''
+  store.setFilters({ categories: categoriesArray, sizes: sizesArray, colors: colorsArray, badge: badgeValue })
 }
 
 // Reset visible window when filters change

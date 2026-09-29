@@ -220,7 +220,7 @@
             <NuxtLink to="/products?badge=bestseller" :class="[route.query.badge === 'bestseller' ? 'opacity-80 scale-105' : 'hover:opacity-80', 'px-4 py-1.5 text-xs font-ui font-extrabold uppercase tracking-wider bg-gradient-to-r from-[#CBA39E] to-[#D4AF37] bg-clip-text text-transparent transition-all duration-200']">Bestsellers</NuxtLink>
             <NuxtLink v-for="cat in navCategories" :key="cat.slug" :to="`/products?category=${cat.slug}`" :class="[route.query.category === cat.slug ? 'bg-deep-plum text-white shadow-sm' : 'text-charcoal/80 hover:text-deep-plum hover:bg-rose-blush', 'px-4 py-1.5 text-xs font-ui font-semibold uppercase tracking-wider rounded-md transition-all duration-200']">{{ cat.name }}</NuxtLink>
             <NuxtLink to="/products?badge=sale" :class="[route.query.badge === 'sale' ? 'bg-red-500 text-white shadow-sm' : 'text-red-600 hover:bg-red-50', 'px-4 py-1.5 text-xs font-ui font-bold uppercase tracking-wider rounded-md transition-all duration-200']">Sale</NuxtLink>
-            <NuxtLink to="/products" :class="[route.path === '/products' && !route.query.category && !route.query.badge ? 'bg-dusty-rose text-white shadow-sm' : 'text-deep-plum bg-rose-blush hover:bg-dusty-rose hover:text-white', 'px-4 py-1.5 text-xs font-ui font-semibold uppercase tracking-wider rounded-md transition-all duration-200']">3 FOR ₹1099</NuxtLink>
+            <NuxtLink to="/products" :class="[route.path === '/products' && !route.query.category && !route.query.badge ? 'bg-dusty-rose text-white shadow-sm' : 'text-deep-plum bg-rose-blush hover:bg-dusty-rose hover:text-white', 'px-4 py-1.5 text-xs font-ui font-semibold uppercase tracking-wider rounded-md transition-all duration-200']">3 FOR ₹499</NuxtLink>
           </nav>
         </div>
       </div>
@@ -261,7 +261,7 @@ const mobileChips = [
   { label: 'Lingerie', href: '/products?category=sleepwear', highlight: false },
   { label: 'Activewear', href: '/products?category=activewear', highlight: false },
   { label: 'Shapewear', href: '/products?category=shapewear', highlight: false },
-  { label: '3 FOR ₹1099', href: '/products', highlight: true },
+  { label: '3 FOR ₹499', href: '/products', highlight: true },
 ]
 
 // Animated search placeholder words

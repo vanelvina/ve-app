@@ -3355,8 +3355,8 @@
             </select>
           </div>
 
-          <!-- Position Dial & Margins Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Position Dial & Margins & Device Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-rose-blush/20 border border-charcoal/20 rounded-2xl p-3 flex items-center justify-between">
               <div>
                 <label class="block font-bold text-deep-plum">Home Order Position</label>
@@ -3377,6 +3377,30 @@
                 <button type="button" @click="widgetModal.form.margins.bottom = !widgetModal.form.margins.bottom" class="p-1 border rounded text-[9px] font-bold" :class="widgetModal.form.margins.bottom ? 'bg-deep-plum text-white border-deep-plum':'bg-white text-charcoal/60 border-rose-blush/30'">Btm</button>
                 <button type="button" @click="widgetModal.form.margins.left = !widgetModal.form.margins.left" class="p-1 border rounded text-[9px] font-bold" :class="widgetModal.form.margins.left ? 'bg-deep-plum text-white border-deep-plum':'bg-white text-charcoal/60 border-rose-blush/30'">Lft</button>
                 <button type="button" @click="widgetModal.form.margins.right = !widgetModal.form.margins.right" class="p-1 border rounded text-[9px] font-bold" :class="widgetModal.form.margins.right ? 'bg-deep-plum text-white border-deep-plum':'bg-white text-charcoal/60 border-rose-blush/30'">Rgt</button>
+              </div>
+            </div>
+
+            <!-- Device Target Selector — controls which screen this widget appears on -->
+            <div class="bg-rose-blush/20 border border-charcoal/20 rounded-2xl p-3">
+              <label class="block font-bold text-deep-plum mb-1.5">Device Target</label>
+              <p class="text-[9px] text-charcoal/50 mb-2">Show this widget only on selected device</p>
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  @click="widgetModal.form.device = 'desktop'"
+                  class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all"
+                  :class="widgetModal.form.device === 'desktop' ? 'bg-deep-plum text-white border-deep-plum' : 'bg-white text-charcoal/60 border-rose-blush/30 hover:border-deep-plum/40'"
+                >
+                  🖥️ Desktop
+                </button>
+                <button
+                  type="button"
+                  @click="widgetModal.form.device = 'mobile'"
+                  class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all"
+                  :class="widgetModal.form.device === 'mobile' ? 'bg-deep-plum text-white border-deep-plum' : 'bg-white text-charcoal/60 border-rose-blush/30 hover:border-deep-plum/40'"
+                >
+                  📱 Mobile
+                </button>
               </div>
             </div>
           </div>

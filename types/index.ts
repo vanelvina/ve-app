@@ -111,6 +111,7 @@ export interface FilterState {
   rating: number | null
   inStock: boolean
   tags?: string[]
+  badge?: string
 }
 
 export type SortOption = 'popularity' | 'price-asc' | 'price-desc' | 'rating' | 'newest' | 'discount'

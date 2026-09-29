@@ -2,6 +2,7 @@
   <div>
     <!-- Render widgets dynamically based on active order and status -->
     <div>
+    <ClientOnly>
       <div 
         v-for="widget in activeWidgets" 
         :key="widget._id"
@@ -138,6 +139,7 @@
       <!-- Mobile Category List (circular images, mobile-only) -->
       <SectionMobileCategoryList v-else-if="widget.type === 'mobile-category-list'" :widget="widget" />
     </div>
+    </ClientOnly>
     </div>
   </div>
 </template>
@@ -156,33 +158,21 @@ const categories = useState<any[]>('homepage-categories', () => [])
 const reviews = useState<any[]>('homepage-reviews', () => [])
 const blogsList = useState<any[]>('homepage-blogs', () => [])
 
-// Non-blocking fetch: serve SSR-cached data instantly if available (getCachedData).
-// Only re-fetches when the cache is stale or missing.
+// Always fetch fresh data — no getCachedData cache — so admin widget/banner updates
+// are reflected immediately on the website without requiring a hard browser refresh.
 const { data: initData } = await useAsyncData('homepage-init', async () => {
-  // If widgets are already hydrated from SSR payload, run as silent background refresh
-  const alreadyHasWidgets = widgets.value.length > 0
-  const fetchOpts = alreadyHasWidgets ? { silent: true } : {}
-
   const [widgetsData, bannersData, categoriesData, reviewsData, blogsData, productsData] = await Promise.all([
-    $fetch<any[]>(`${config.public.apiBase}/widgets`, fetchOpts).catch(() => []),
-    $fetch<any[]>(`${config.public.apiBase}/banners`, fetchOpts).catch(() => []),
-    $fetch<any[]>(`${config.public.apiBase}/categories`, fetchOpts).catch(() => []),
-    $fetch<any[]>(`${config.public.apiBase}/reviews`, fetchOpts).catch(() => []),
-    $fetch<any[]>(`${config.public.apiBase}/blogs`, fetchOpts).catch(() => []),
-    // Skip products fetch entirely if already cached in store — avoids duplicate API call
+    $fetch<any[]>(`${config.public.apiBase}/widgets`).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/banners`).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/categories`).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/reviews`).catch(() => []),
+    $fetch<any[]>(`${config.public.apiBase}/blogs`).catch(() => []),
+    // Skip products fetch if already cached in store — avoids duplicate API call
     productsStore.all.length > 0
       ? Promise.resolve(productsStore.all)
-      : $fetch<any[]>(`${config.public.apiBase}/products`, fetchOpts).catch(() => [])
+      : $fetch<any[]>(`${config.public.apiBase}/products`).catch(() => [])
   ])
   return { widgetsData, bannersData, categoriesData, reviewsData, blogsData, productsData }
-}, {
-  // Return cached Nuxt state immediately on client if available; re-validates in background
-  getCachedData(key, nuxtApp) {
-    const cached = nuxtApp.payload.data[key] || nuxtApp.static.data[key]
-    // Only use cache if we already have widgets rendered — prevents stale first-paint
-    if (cached && widgets.value.length > 0) return cached
-    return undefined
-  }
 })
 
 // Populate Nuxt shared states and Pinia product store with fetched/refreshed data
@@ -201,7 +191,9 @@ if (initData.value) {
 // Only show loading state on the very first ever visit when widgets are empty.
 const loading = ref(false)
 
-const isMobileScreen = ref(false)
+// Initialise immediately on the client so there is no post-mount reactive flip
+// that causes the widget list to change mid-render and crash Vue's vnode differ in dev.
+const isMobileScreen = ref(import.meta.client ? window.innerWidth < 768 : false)
 
 const updateScreenSize = () => {
   isMobileScreen.value = window.innerWidth < 768
@@ -220,7 +212,7 @@ onUnmounted(() => {
 
 const activeWidgets = computed(() => {
   return [...widgets.value]
-    .filter(w => w.enabled)
+    .filter(w => w && w.enabled)
     .filter(w => {
       if (isMobileScreen.value) {
         return w.device === 'mobile'
@@ -232,7 +224,7 @@ const activeWidgets = computed(() => {
       ...w,
       cleanKey: w.key ? w.key.replace('-mobile', '').replace('-desktop', '') : ''
     }))
-    .sort((a, b) => a.order - b.order)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 })
 
 useSeoMeta({

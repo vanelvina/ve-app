@@ -15,6 +15,7 @@ export const useProductsStore = defineStore('products', {
       rating: null,
       inStock: false,
       tags: [],
+      badge: '',
     } as FilterState,
     sort: 'popularity' as SortOption,
     page: 1,
@@ -80,6 +81,12 @@ export const useProductsStore = defineStore('products', {
             return (p.tags || []).some(pt => pt.toLowerCase().trim() === t)
           })
         )
+      }
+
+      // Badge filter — match product.badge field (new, bestseller, sale, etc.)
+      if (state.filters.badge) {
+        const badgeLower = state.filters.badge.toLowerCase().trim()
+        result = result.filter((p) => (p.badge || '').toLowerCase().trim() === badgeLower)
       }
 
       // ── Stock-aware partition: in-stock items always surface before OOS ──
@@ -260,6 +267,8 @@ export const useProductsStore = defineStore('products', {
         priceRange: [0, 2000],
         rating: null,
         inStock: false,
+        tags: [],
+        badge: '',
       }
       this.page = 1
     },
