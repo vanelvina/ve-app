@@ -247,6 +247,13 @@ useHead({
       // WebSite schema — tells Google to show "Van Elvina" as site name
       // instead of "www.vanelvina.com" in search result snippets
       type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Van Elvina',
+        alternateName: 'VanElvina',
+        url: 'https://vanelvina.com/'
+      }),
       children: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'WebSite',
