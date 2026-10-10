@@ -19,12 +19,12 @@
     </div>
 
     <div class="page-container py-6 lg:py-10 pb-28">
-      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12">
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
 
         <!-- Gallery -->
-        <div class="space-y-3">
+        <div class="space-y-3 lg:sticky lg:top-24 self-start w-full">
           <div 
-            class="relative aspect-product bg-light-gray rounded-none overflow-hidden group/gallery"
+            class="relative w-full aspect-product bg-light-gray rounded-2xl overflow-hidden group/gallery"
             :class="isCurrentSlideVideo ? 'cursor-pointer' : 'cursor-zoom-in'"
             @touchstart="onTouchStart"
             @touchmove="onTouchMove"
@@ -363,7 +363,16 @@
               <p class="text-xs font-ui font-semibold text-charcoal">
                 Size: <span class="font-normal text-mid-gray">{{ selectedSize || 'Select a size' }}</span>
               </p>
-              <button class="text-xs text-dusty-rose font-ui hover:text-deep-plum underline" @click="ui.openSizeGuide">Size Guide</button>
+              <button
+                @click="ui.openSizeGuide"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-ui font-semibold text-deep-plum bg-rose-blush/30 hover:bg-rose-blush/60 border border-dusty-rose/30 rounded-lg transition-all duration-200 cursor-pointer shadow-2xs hover:scale-[1.03] active:scale-95"
+                aria-label="Open size chart"
+              >
+                <svg class="w-3.5 h-3.5 text-dusty-rose shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V3M5 21V3M12 21V3M12 8l-3 3m3-3l3 3M12 16l-3-3m3 3l3-3" />
+                </svg>
+                <span>Size Chart</span>
+              </button>
             </div>
             <div class="flex flex-wrap gap-1.5">
               <button
@@ -573,13 +582,15 @@
       </div>
 
 
-      <!-- Loyalty Programme Banner — standalone above the details card -->
-      <div class="mt-6">
-        <LoyaltyDiscountBanner />
-      </div>
+      <!-- Loyalty Banner & Product Details Tabs Grid (Side-by-side layout on Desktop) -->
+      <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <!-- Save Big Loyalty Program Banner -->
+        <div>
+          <LoyaltyDiscountBanner />
+        </div>
 
-      <!-- Product details tabs -->
-      <div class="mt-4 bg-white rounded-2xl shadow-soft border border-border-gray overflow-hidden">
+        <!-- Product details tabs -->
+        <div class="bg-white rounded-2xl shadow-soft border border-border-gray overflow-hidden">
         <!-- Tab headers -->
         <div class="flex border-b border-border-gray">
           <button
@@ -631,7 +642,32 @@
 
             <div v-if="product.additionalInfo" class="space-y-2 mt-4 border-t border-border-gray pt-4">
               <h3 class="font-ui font-semibold text-charcoal text-sm">Additional Product Information</h3>
-              <p class="text-sm font-ui text-mid-gray leading-relaxed whitespace-pre-line">{{ product.additionalInfo }}</p>
+              <div class="relative">
+                <p
+                  class="text-sm font-ui text-mid-gray leading-relaxed whitespace-pre-line transition-all duration-300"
+                  :class="!isAdditionalInfoExpanded && isLongAdditionalInfo ? 'line-clamp-3' : ''"
+                >
+                  {{ product.additionalInfo }}
+                </p>
+                <button
+                  v-if="isLongAdditionalInfo"
+                  @click="isAdditionalInfoExpanded = !isAdditionalInfoExpanded"
+                  class="mt-2 inline-flex items-center gap-1 text-xs font-ui font-bold text-deep-plum hover:text-dusty-rose transition-colors cursor-pointer"
+                  :aria-expanded="isAdditionalInfoExpanded"
+                >
+                  <span>{{ isAdditionalInfoExpanded ? 'Read Less' : 'Read More' }}</span>
+                  <svg
+                    class="w-3.5 h-3.5 transition-transform duration-200"
+                    :class="{ 'rotate-180': isAdditionalInfoExpanded }"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <!-- Descriptive/Lifestyle Images Grid -->
@@ -766,6 +802,7 @@
           </div>
         </div>
       </div>
+    </div>
 
 
       <!-- ─────────────────────────────────────────────────────────────── -->
@@ -1079,6 +1116,10 @@ const openFaq = ref<number | null>(null)
 const isDescriptionExpanded = ref(false)
 const isLongDescription = computed(() => {
   return (product.value?.description?.length || 0) > 180
+})
+const isAdditionalInfoExpanded = ref(false)
+const isLongAdditionalInfo = computed(() => {
+  return (product.value?.additionalInfo?.length || 0) > 180
 })
 
 
