@@ -553,18 +553,32 @@ const codEligible = computed(() => {
   return orderTotal.value >= 299 && checkoutItems.value.every((item: any) => item.product?.isCodAvailable !== false)
 })
 
+// ─── COD Master Toggle ────────────────────────────────────────────────────────
+// Set to `true` to re-enable Cash on Delivery once traffic normalises.
+// ─────────────────────────────────────────────────────────────────────────────
+const COD_ENABLED = false
+
 watch(codEligible, (eligible) => {
-  if (!eligible && selectedPayment.value === 'cod') {
+  if ((!eligible || !COD_ENABLED) && selectedPayment.value === 'cod') {
     selectedPayment.value = 'razorpay'
   }
 })
+
+// Auto-switch away from COD on mount if the toggle is off
+if (!COD_ENABLED && selectedPayment.value === 'cod') {
+  selectedPayment.value = 'razorpay'
+}
 
 const paymentOptions = computed(() => [
   {
     id: 'cod',
     name: 'Cash on Delivery (COD)',
-    desc: codEligible.value ? 'Pay in cash at delivery (+₹10 handling fee)' : 'COD available only for orders above ₹299',
-    disabled: !codEligible.value,
+    desc: !COD_ENABLED
+      ? '⚡ Temporarily unavailable — due to exceptionally high demand, COD is paused. Please pay online to complete your order.'
+      : codEligible.value
+        ? 'Pay in cash at delivery (+₹10 handling fee)'
+        : 'COD available only for orders above ₹299',
+    disabled: !COD_ENABLED || !codEligible.value,
   },
   {
     id: 'razorpay',
