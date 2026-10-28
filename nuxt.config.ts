@@ -298,7 +298,7 @@ export default defineNuxtConfig({
       '/api/widgets': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
       '/api/auth': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
       // Chatbot uses local Express (Ollama runs locally — not on Supabase edge)
-      '/api/chatbot': { target: 'http://localhost:5000/api', changeOrigin: true },
+      '/api/chatbot': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
       // NOTE: /api/shiprocket and /api/__sitemap__ are intentionally NOT proxied — handled locally by Nitro
     }
   },
