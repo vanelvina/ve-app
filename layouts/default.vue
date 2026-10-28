@@ -40,6 +40,9 @@
 
     <!-- Mobile Bottom Tab Bar -->
     <MobileBottomBar />
+
+    <!-- AI Shopping Assistant Widget -->
+    <AIChatWidget />
   </div>
 </template>
 

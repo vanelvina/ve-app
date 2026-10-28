@@ -193,6 +193,9 @@ export default defineNuxtConfig({
       appName: 'Van Elvina',
       appUrl: 'https://vanelvina.com',
       apiBase: getApiBase(),
+      // chatbotApiBase: in dev points to local Express (Ollama-backed).
+      // Leave empty in production — chat store falls back to apiBase.
+      chatbotApiBase: process.env.NUXT_PUBLIC_CHATBOT_API_BASE || '',
       vapidPublicKey: process.env.NUXT_PUBLIC_VAPID_PUBLIC_KEY || '',
       googleClientId: '1095271875819-6sh520q88vas8u7g3n4ukrh0o2aihgib.apps.googleusercontent.com',
       razorpayKeyId: process.env.NUXT_PUBLIC_RAZORPAY_KEY_ID || 'TEST_KEY_ID',
@@ -294,6 +297,8 @@ export default defineNuxtConfig({
       '/api/upload': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
       '/api/widgets': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
       '/api/auth': { target: 'https://klixyrdhwlloswsspmqk.supabase.co/functions/v1/api', changeOrigin: true },
+      // Chatbot uses local Express (Ollama runs locally — not on Supabase edge)
+      '/api/chatbot': { target: 'http://localhost:5000/api', changeOrigin: true },
       // NOTE: /api/shiprocket and /api/__sitemap__ are intentionally NOT proxied — handled locally by Nitro
     }
   },
